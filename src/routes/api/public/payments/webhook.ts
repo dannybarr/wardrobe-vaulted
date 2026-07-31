@@ -68,16 +68,40 @@ async function upsertSubscription(subscription: any, env: StripeEnv) {
     );
 }
 
+/**
+ * End of the paid period. Access is locked from here on, but the wardrobe and
+ * every image are kept intact so the member can pick up where they left off.
+ */
 async function markCanceled(subscription: any, env: StripeEnv) {
+  const userId = subscription.metadata?.userId;
+  if (userId && (await isFounder(userId))) return;
+
   await getSupabase()
     .from("subscriptions")
     .update({
       status: "canceled",
       plan: "none",
+      cancel_at_period_end: false,
       updated_at: new Date().toISOString(),
     })
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
+}
+
+/** Keeps an audit trail of every payment event, ignoring repeats from retries. */
+async function recordEvent(event: any) {
+  await getSupabase()
+    .from("billing_events")
+    .upsert(
+      {
+        stripe_event_id: event.id,
+        type: event.type,
+        owner_id: event.data?.object?.metadata?.userId ?? null,
+        payload: event as never,
+        processed_at: new Date().toISOString(),
+      },
+      { onConflict: "stripe_event_id", ignoreDuplicates: true },
+    );
 }
 
 async function handleWebhook(req: Request, env: StripeEnv) {
@@ -86,12 +110,15 @@ async function handleWebhook(req: Request, env: StripeEnv) {
   switch (event.type) {
     case "customer.subscription.created":
     case "customer.subscription.updated":
+      // Covers new memberships, plan changes and failed renewals alike: the
+      // status lands on the account and Stripe keeps retrying while past due.
       await upsertSubscription(event.data.object, env);
       break;
     case "customer.subscription.deleted":
       await markCanceled(event.data.object, env);
       break;
     case "invoice.paid":
+    case "invoice.payment_failed":
     case "checkout.session.completed":
     case "checkout.session.async_payment_succeeded":
       // Subscription state is kept current by the customer.subscription.* events.
@@ -99,7 +126,10 @@ async function handleWebhook(req: Request, env: StripeEnv) {
     default:
       console.log("Unhandled payment event:", event.type);
   }
+
+  await recordEvent(event);
 }
+
 
 export const Route = createFileRoute("/api/public/payments/webhook")({
   server: {
