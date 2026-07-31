@@ -1,0 +1,9 @@
+/* Wardrobe visual system — ported verbatim from the original app.
+   Order matters: base first, then feature layers. */
+@import "./styles.css";
+@import "./landing-page.css";
+@import "./import-flow.css";
+@import "./wishlist.css";
+@import "./add-piece.css";
+@import "./auth.css";
+

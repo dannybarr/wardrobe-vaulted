@@ -1,0 +1,727 @@
+[
+  {
+    "id": "import-95542a86-9fc6-4d53-b71d-6358027d8317",
+    "name": "Grey Ribbed Knit",
+    "part": "upperbody",
+    "color": "#a79d91",
+    "secondaryColor": null,
+    "palette": [
+      "#a79d91"
+    ],
+    "tags": [
+      "knit",
+      "ribbed",
+      "crew neck",
+      "long sleeve",
+      "grey"
+    ],
+    "image": "/api/import/library/import-95542a86-9fc6-4d53-b71d-6358027d8317-garment.png",
+    "thumbnail": "/api/import/library/import-95542a86-9fc6-4d53-b71d-6358027d8317-garment.png",
+    "modeledImage": "/api/import/library/import-95542a86-9fc6-4d53-b71d-6358027d8317-modeled.png",
+    "importJobId": "95542a86-9fc6-4d53-b71d-6358027d8317"
+  },
+  {
+    "id": "import-d50b0c02-c356-4327-9e96-055bcf5b254f",
+    "name": "Black & Pink Technical Top",
+    "part": "upperbody",
+    "color": "#111214",
+    "secondaryColor": "#f3a4bf",
+    "palette": [
+      "#111214",
+      "#f3a4bf"
+    ],
+    "tags": [
+      "technical",
+      "pink piping",
+      "mock neck",
+      "short sleeve",
+      "black"
+    ],
+    "image": "/api/import/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f-garment.png",
+    "thumbnail": "/api/import/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f-garment.png",
+    "modeledImage": "/api/import/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f-modeled.png",
+    "importJobId": "d50b0c02-c356-4327-9e96-055bcf5b254f"
+  },
+  {
+    "id": "import-0846af59-5ad3-45c7-af36-bbc1ec095dcb",
+    "name": "Blue Striped Shirt",
+    "part": "upperbody",
+    "color": "#a9bddb",
+    "secondaryColor": "#f7f8fa",
+    "palette": [
+      "#a9bddb",
+      "#f7f8fa"
+    ],
+    "tags": [
+      "shirt",
+      "striped",
+      "button-up",
+      "collar",
+      "long sleeve",
+      "blue"
+    ],
+    "image": "/api/import/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb-garment.png",
+    "thumbnail": "/api/import/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb-garment.png",
+    "modeledImage": "/api/import/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb-modeled.png",
+    "importJobId": "0846af59-5ad3-45c7-af36-bbc1ec095dcb"
+  },
+  {
+    "id": "import-1a2e565b-0cca-47df-886f-73bd4527b276",
+    "name": "Pale Blue Floral Overshirt",
+    "part": "upperbody",
+    "color": "#b7d3e3",
+    "secondaryColor": "#e5eef2",
+    "palette": [
+      "#b7d3e3",
+      "#e5eef2"
+    ],
+    "tags": [
+      "overshirt",
+      "floral",
+      "embroidered",
+      "button-up",
+      "short sleeve",
+      "blue"
+    ],
+    "image": "/api/import/library/import-1a2e565b-0cca-47df-886f-73bd4527b276-garment.png",
+    "thumbnail": "/api/import/library/import-1a2e565b-0cca-47df-886f-73bd4527b276-garment.png",
+    "modeledImage": "/api/import/library/import-1a2e565b-0cca-47df-886f-73bd4527b276-modeled.png",
+    "importJobId": "1a2e565b-0cca-47df-886f-73bd4527b276"
+  },
+  {
+    "id": "import-cbafc865-d89d-49b2-9230-00eecb1f3fba",
+    "name": "Brown & Cream Nike Sneakers",
+    "part": "shoes",
+    "color": "#b7843f",
+    "secondaryColor": "#f0e6c7",
+    "palette": [
+      "#b7843f",
+      "#f0e6c7"
+    ],
+    "tags": [
+      "nike",
+      "sneakers",
+      "low top",
+      "cream",
+      "brown",
+      "red laces"
+    ],
+    "image": "/api/import/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba-garment.png",
+    "thumbnail": "/api/import/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba-garment.png",
+    "modeledImage": "/api/import/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba-modeled.png",
+    "importJobId": "cbafc865-d89d-49b2-9230-00eecb1f3fba"
+  },
+  {
+    "id": "import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf",
+    "name": "Black Nike Sneakers",
+    "part": "shoes",
+    "color": "#171718",
+    "secondaryColor": "#6a5042",
+    "palette": [
+      "#171718",
+      "#6a5042"
+    ],
+    "tags": [
+      "nike",
+      "sneakers",
+      "low top",
+      "black",
+      "suede",
+      "brown laces"
+    ],
+    "image": "/api/import/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf-garment.png",
+    "thumbnail": "/api/import/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf-garment.png",
+    "modeledImage": "/api/import/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf-modeled.png",
+    "importJobId": "d35c2d8f-e38b-4957-9bbe-cab0da0068bf"
+  },
+  {
+    "id": "import-2a517855-af58-4d4f-9753-6fa6ae0dd2a6",
+    "name": "White Moss Dress Shirt",
+    "part": "upperbody",
+    "color": "#f7f6f1",
+    "secondaryColor": null,
+    "palette": [
+      "#f7f6f1"
+    ],
+    "tags": [
+      "white",
+      "dress shirt",
+      "cotton",
+      "long sleeve",
+      "collar"
+    ],
+    "image": "/api/import/library/import-2a517855-af58-4d4f-9753-6fa6ae0dd2a6-garment.png",
+    "thumbnail": "/api/import/library/import-2a517855-af58-4d4f-9753-6fa6ae0dd2a6-garment.png",
+    "modeledImage": null,
+    "importJobId": "2a517855-af58-4d4f-9753-6fa6ae0dd2a6"
+  },
+  {
+    "id": "import-09ddf49a-4d66-4c4b-8120-5bed453b3d5e",
+    "name": "Pink Microdot Dress Shirt",
+    "part": "upperbody",
+    "color": "#e9b3c5",
+    "secondaryColor": "#fffaf7",
+    "palette": [
+      "#e9b3c5",
+      "#fffaf7"
+    ],
+    "tags": [
+      "pink",
+      "dress shirt",
+      "microdot",
+      "cotton",
+      "long sleeve",
+      "collar"
+    ],
+    "image": "/api/import/library/import-09ddf49a-4d66-4c4b-8120-5bed453b3d5e-garment.png",
+    "thumbnail": "/api/import/library/import-09ddf49a-4d66-4c4b-8120-5bed453b3d5e-garment.png",
+    "modeledImage": null,
+    "importJobId": "09ddf49a-4d66-4c4b-8120-5bed453b3d5e"
+  },
+  {
+    "id": "import-d151d2ea-b687-4ff3-9588-4192385090ba",
+    "name": "White Ribbed Panel Tank",
+    "part": "upperbody",
+    "color": "#f7f7f4",
+    "secondaryColor": null,
+    "palette": [
+      "#f7f7f4"
+    ],
+    "tags": [
+      "white",
+      "tank",
+      "ribbed",
+      "sleeveless",
+      "panelled"
+    ],
+    "image": "/api/import/library/import-d151d2ea-b687-4ff3-9588-4192385090ba-garment.png",
+    "thumbnail": "/api/import/library/import-d151d2ea-b687-4ff3-9588-4192385090ba-garment.png",
+    "modeledImage": null,
+    "importJobId": "d151d2ea-b687-4ff3-9588-4192385090ba"
+  },
+  {
+    "id": "import-96040c8b-44d9-46f3-8c8e-b0d6fceef7c3",
+    "name": "Navy Cream Breton Button-Shoulder Knit",
+    "part": "upperbody",
+    "color": "#10192d",
+    "secondaryColor": "#f2f0e7",
+    "palette": [
+      "#10192d",
+      "#f2f0e7"
+    ],
+    "tags": [
+      "navy",
+      "cream",
+      "knit",
+      "breton",
+      "striped",
+      "crewneck",
+      "button shoulder"
+    ],
+    "image": "/api/import/library/import-96040c8b-44d9-46f3-8c8e-b0d6fceef7c3-garment.png",
+    "thumbnail": "/api/import/library/import-96040c8b-44d9-46f3-8c8e-b0d6fceef7c3-garment.png",
+    "modeledImage": null,
+    "importJobId": "96040c8b-44d9-46f3-8c8e-b0d6fceef7c3"
+  },
+  {
+    "id": "import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932",
+    "name": "Navy Knit Zip Gilet",
+    "part": "wholebody_up",
+    "color": "#101a35",
+    "secondaryColor": "#a8adb8",
+    "palette": [
+      "#101a35",
+      "#a8adb8"
+    ],
+    "tags": [
+      "navy",
+      "gilet",
+      "knit",
+      "padded",
+      "zip",
+      "stand collar",
+      "pockets"
+    ],
+    "image": "/api/import/library/import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932-garment.png",
+    "thumbnail": "/api/import/library/import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932-garment.png",
+    "modeledImage": null,
+    "importJobId": "f05bbb20-d276-4ca6-b8d1-b3bffca0c932"
+  },
+  {
+    "id": "import-82157e04-a2d7-4064-9f44-7479fd632b5c",
+    "name": "Navy Kith Adidas Track Knit",
+    "part": "wholebody_up",
+    "color": "#111827",
+    "secondaryColor": "#008a75",
+    "palette": [
+      "#111827",
+      "#008a75"
+    ],
+    "tags": [
+      "navy",
+      "kith",
+      "adidas",
+      "knit",
+      "track jacket",
+      "zip",
+      "striped"
+    ],
+    "image": "/api/import/library/import-82157e04-a2d7-4064-9f44-7479fd632b5c-garment.png",
+    "thumbnail": "/api/import/library/import-82157e04-a2d7-4064-9f44-7479fd632b5c-garment.png",
+    "modeledImage": null,
+    "importJobId": "82157e04-a2d7-4064-9f44-7479fd632b5c"
+  },
+  {
+    "id": "import-aacba142-35c4-4864-84d6-e23f5ceb4009",
+    "name": "Black White Striped Cocktail Trousers",
+    "part": "lowerbody",
+    "color": "#f4f2eb",
+    "secondaryColor": "#1d1f22",
+    "palette": [
+      "#f4f2eb",
+      "#1d1f22"
+    ],
+    "tags": [
+      "black",
+      "white",
+      "trousers",
+      "striped",
+      "cocktail motif",
+      "straight leg"
+    ],
+    "image": "/api/import/library/import-aacba142-35c4-4864-84d6-e23f5ceb4009-garment.png",
+    "thumbnail": "/api/import/library/import-aacba142-35c4-4864-84d6-e23f5ceb4009-garment.png",
+    "modeledImage": null,
+    "importJobId": "aacba142-35c4-4864-84d6-e23f5ceb4009"
+  },
+  {
+    "id": "import-12112246-ee62-4f4c-ac22-f5e6a19de51d",
+    "name": "Light Wash Straight Jeans",
+    "part": "lowerbody",
+    "color": "#8baec1",
+    "secondaryColor": "#a46b44",
+    "palette": [
+      "#8baec1",
+      "#a46b44"
+    ],
+    "tags": [
+      "blue",
+      "jeans",
+      "denim",
+      "light wash",
+      "straight leg",
+      "five pocket"
+    ],
+    "image": "/api/import/library/import-12112246-ee62-4f4c-ac22-f5e6a19de51d-garment.png",
+    "thumbnail": "/api/import/library/import-12112246-ee62-4f4c-ac22-f5e6a19de51d-garment.png",
+    "modeledImage": null,
+    "importJobId": "12112246-ee62-4f4c-ac22-f5e6a19de51d"
+  },
+  {
+    "id": "import-62fa7f1f-6a9e-457f-bc6f-96b528579fc8",
+    "name": "Black Washed Straight Jeans",
+    "part": "lowerbody",
+    "color": "#252a31",
+    "secondaryColor": "#b76b49",
+    "palette": [
+      "#252a31",
+      "#b76b49"
+    ],
+    "tags": [
+      "denim",
+      "jeans",
+      "black",
+      "washed",
+      "straight-leg",
+      "five-pocket"
+    ],
+    "image": "/api/import/library/import-62fa7f1f-6a9e-457f-bc6f-96b528579fc8-garment.png",
+    "thumbnail": "/api/import/library/import-62fa7f1f-6a9e-457f-bc6f-96b528579fc8-garment.png",
+    "modeledImage": null,
+    "importJobId": "62fa7f1f-6a9e-457f-bc6f-96b528579fc8"
+  },
+  {
+    "id": "import-4de4243b-d528-40f8-9745-1da3547e49a9",
+    "name": "Dark Indigo Straight Jeans",
+    "part": "lowerbody",
+    "color": "#173d66",
+    "secondaryColor": "#b06d40",
+    "palette": [
+      "#173d66",
+      "#b06d40"
+    ],
+    "tags": [
+      "denim",
+      "jeans",
+      "indigo",
+      "straight-leg",
+      "five-pocket"
+    ],
+    "image": "/api/import/library/import-4de4243b-d528-40f8-9745-1da3547e49a9-garment.png",
+    "thumbnail": "/api/import/library/import-4de4243b-d528-40f8-9745-1da3547e49a9-garment.png",
+    "modeledImage": null,
+    "importJobId": "4de4243b-d528-40f8-9745-1da3547e49a9"
+  },
+  {
+    "id": "import-4a068179-ca23-4444-922d-84b236eb764b",
+    "name": "Cream Five-Pocket Jeans",
+    "part": "lowerbody",
+    "color": "#eee8da",
+    "secondaryColor": "#403c36",
+    "palette": [
+      "#eee8da",
+      "#403c36"
+    ],
+    "tags": [
+      "denim",
+      "jeans",
+      "cream",
+      "straight-leg",
+      "five-pocket"
+    ],
+    "image": "/api/import/library/import-4a068179-ca23-4444-922d-84b236eb764b-garment.png",
+    "thumbnail": "/api/import/library/import-4a068179-ca23-4444-922d-84b236eb764b-garment.png",
+    "modeledImage": null,
+    "importJobId": "4a068179-ca23-4444-922d-84b236eb764b"
+  },
+  {
+    "id": "import-fc17e362-e053-4c9e-ac08-49abf8817421",
+    "name": "Black Raglan Crewneck Sweatshirt",
+    "part": "upperbody",
+    "color": "#17161d",
+    "secondaryColor": null,
+    "palette": [
+      "#17161d"
+    ],
+    "tags": [
+      "sweatshirt",
+      "black",
+      "crewneck",
+      "raglan",
+      "long-sleeve",
+      "plain"
+    ],
+    "image": "/api/import/library/import-fc17e362-e053-4c9e-ac08-49abf8817421-garment.png",
+    "thumbnail": "/api/import/library/import-fc17e362-e053-4c9e-ac08-49abf8817421-garment.png",
+    "modeledImage": null,
+    "importJobId": "fc17e362-e053-4c9e-ac08-49abf8817421"
+  },
+  {
+    "id": "import-d3dc01b5-1c01-4e7b-9057-535e706279bc",
+    "name": "Light Grey Knit Sweater",
+    "part": "upperbody",
+    "color": "#b7b7b2",
+    "secondaryColor": null,
+    "palette": [
+      "#b7b7b2"
+    ],
+    "tags": [
+      "knit",
+      "sweater",
+      "grey",
+      "crewneck",
+      "long-sleeve",
+      "heathered"
+    ],
+    "image": "/api/import/library/import-d3dc01b5-1c01-4e7b-9057-535e706279bc-garment.png",
+    "thumbnail": "/api/import/library/import-d3dc01b5-1c01-4e7b-9057-535e706279bc-garment.png",
+    "modeledImage": null,
+    "importJobId": "d3dc01b5-1c01-4e7b-9057-535e706279bc"
+  },
+  {
+    "id": "import-200953a9-828b-4ce7-8086-42fdcad5143a",
+    "name": "White Central Cee Baby Milo Graphic T-Shirt",
+    "part": "upperbody",
+    "color": "#f7f7f4",
+    "secondaryColor": "#e73826",
+    "palette": [
+      "#f7f7f4",
+      "#e73826"
+    ],
+    "tags": [
+      "t-shirt",
+      "white",
+      "graphic",
+      "short-sleeve",
+      "central-cee",
+      "baby-milo"
+    ],
+    "image": "/api/import/library/import-200953a9-828b-4ce7-8086-42fdcad5143a-garment.png",
+    "thumbnail": "/api/import/library/import-200953a9-828b-4ce7-8086-42fdcad5143a-garment.png",
+    "modeledImage": null,
+    "importJobId": "200953a9-828b-4ce7-8086-42fdcad5143a"
+  },
+  {
+    "id": "import-a0fa5832-8c41-470b-87ba-1416779f878a",
+    "name": "Brown Funnel-Neck Zip Cardigan",
+    "part": "wholebody_up",
+    "color": "#5e4641",
+    "secondaryColor": "#44403f",
+    "palette": [
+      "#5e4641",
+      "#44403f"
+    ],
+    "tags": [
+      "knit",
+      "cardigan",
+      "brown",
+      "zip",
+      "funnel-neck",
+      "long-sleeve",
+      "pockets"
+    ],
+    "image": "/api/import/library/import-a0fa5832-8c41-470b-87ba-1416779f878a-garment.png",
+    "thumbnail": "/api/import/library/import-a0fa5832-8c41-470b-87ba-1416779f878a-garment.png",
+    "modeledImage": null,
+    "importJobId": "a0fa5832-8c41-470b-87ba-1416779f878a"
+  },
+  {
+    "id": "import-80b1c477-2c01-4f81-882f-00f01d263f3d",
+    "name": "Cream Loewe Ribbed Long-Sleeve Top",
+    "part": "upperbody",
+    "color": "#f1eee5",
+    "secondaryColor": "#1d1d1d",
+    "palette": [
+      "#f1eee5",
+      "#1d1d1d"
+    ],
+    "tags": [
+      "long-sleeve",
+      "cream",
+      "ribbed",
+      "crewneck",
+      "loewe",
+      "logo"
+    ],
+    "image": "/api/import/library/import-80b1c477-2c01-4f81-882f-00f01d263f3d-garment.png",
+    "thumbnail": "/api/import/library/import-80b1c477-2c01-4f81-882f-00f01d263f3d-garment.png",
+    "modeledImage": null,
+    "importJobId": "80b1c477-2c01-4f81-882f-00f01d263f3d"
+  },
+  {
+    "id": "import-e2480a17-94a8-42db-ac33-a6829e6e6631",
+    "name": "Forest Green AP Monogram T-Shirt",
+    "part": "upperbody",
+    "color": "#00624e",
+    "secondaryColor": "#f4f4ef",
+    "palette": [
+      "#00624e",
+      "#f4f4ef"
+    ],
+    "tags": [
+      "t-shirt",
+      "green",
+      "short-sleeve",
+      "monogram",
+      "ap",
+      "logo"
+    ],
+    "image": "/api/import/library/import-e2480a17-94a8-42db-ac33-a6829e6e6631-garment.png",
+    "thumbnail": "/api/import/library/import-e2480a17-94a8-42db-ac33-a6829e6e6631-garment.png",
+    "modeledImage": null,
+    "importJobId": "e2480a17-94a8-42db-ac33-a6829e6e6631"
+  },
+  {
+    "id": "import-ff2c43c3-6056-4a79-b127-4a16573e751b",
+    "name": "Two-Tone Air Jordan T-Shirt",
+    "part": "upperbody",
+    "color": "#b49773",
+    "secondaryColor": "#f0bf96",
+    "palette": [
+      "#b49773",
+      "#f0bf96"
+    ],
+    "tags": [
+      "short sleeve",
+      "crewneck",
+      "cotton",
+      "color block",
+      "air jordan",
+      "graphic"
+    ],
+    "image": "/api/import/library/import-ff2c43c3-6056-4a79-b127-4a16573e751b-garment.png",
+    "thumbnail": "/api/import/library/import-ff2c43c3-6056-4a79-b127-4a16573e751b-garment.png",
+    "modeledImage": null,
+    "importJobId": "ff2c43c3-6056-4a79-b127-4a16573e751b"
+  },
+  {
+    "id": "import-db7d1ff0-a12d-4cad-9ed8-b974d3270eba",
+    "name": "Navy Palace London Hoodie",
+    "part": "upperbody",
+    "color": "#303544",
+    "secondaryColor": "#edc62e",
+    "palette": [
+      "#303544",
+      "#edc62e"
+    ],
+    "tags": [
+      "hoodie",
+      "fleece",
+      "pullover",
+      "kangaroo pocket",
+      "palace",
+      "embroidered"
+    ],
+    "image": "/api/import/library/import-db7d1ff0-a12d-4cad-9ed8-b974d3270eba-garment.png",
+    "thumbnail": "/api/import/library/import-db7d1ff0-a12d-4cad-9ed8-b974d3270eba-garment.png",
+    "modeledImage": null,
+    "importJobId": "db7d1ff0-a12d-4cad-9ed8-b974d3270eba"
+  },
+  {
+    "id": "import-0940e8cf-f9e1-46c7-85a7-3f8eff6769f5",
+    "name": "Light Gray Ribbed Quarter-Zip Knit",
+    "part": "upperbody",
+    "color": "#d8d8d5",
+    "secondaryColor": "#202020",
+    "palette": [
+      "#d8d8d5",
+      "#202020"
+    ],
+    "tags": [
+      "knit",
+      "ribbed",
+      "quarter zip",
+      "mock neck",
+      "raglan"
+    ],
+    "image": "/api/import/library/import-0940e8cf-f9e1-46c7-85a7-3f8eff6769f5-garment.png",
+    "thumbnail": "/api/import/library/import-0940e8cf-f9e1-46c7-85a7-3f8eff6769f5-garment.png",
+    "modeledImage": null,
+    "importJobId": "0940e8cf-f9e1-46c7-85a7-3f8eff6769f5"
+  },
+  {
+    "id": "import-0ed9d113-ec9d-4c16-88e5-877f5835bc50",
+    "name": "Black Fred Perry Zip-Through Knit",
+    "part": "wholebody_up",
+    "color": "#101216",
+    "secondaryColor": "#f5f5f2",
+    "palette": [
+      "#101216",
+      "#f5f5f2"
+    ],
+    "tags": [
+      "knit",
+      "zip through",
+      "funnel neck",
+      "fred perry",
+      "laurel wreath",
+      "pockets"
+    ],
+    "image": "/api/import/library/import-0ed9d113-ec9d-4c16-88e5-877f5835bc50-garment.png",
+    "thumbnail": "/api/import/library/import-0ed9d113-ec9d-4c16-88e5-877f5835bc50-garment.png",
+    "modeledImage": null,
+    "importJobId": "0ed9d113-ec9d-4c16-88e5-877f5835bc50"
+  },
+  {
+    "id": "import-39000255-7405-42d4-8a3b-76024ba0b159",
+    "name": "Cream Raglan Crewneck Knit",
+    "part": "upperbody",
+    "color": "#eee8d9",
+    "secondaryColor": null,
+    "palette": [
+      "#eee8d9"
+    ],
+    "tags": [
+      "knit",
+      "crewneck",
+      "raglan",
+      "cream",
+      "long sleeve"
+    ],
+    "image": "/api/import/library/import-39000255-7405-42d4-8a3b-76024ba0b159-garment.png",
+    "thumbnail": "/api/import/library/import-39000255-7405-42d4-8a3b-76024ba0b159-garment.png",
+    "modeledImage": null,
+    "importJobId": "39000255-7405-42d4-8a3b-76024ba0b159"
+  },
+  {
+    "id": "import-c91a6938-14f3-47dc-b410-994abc1de490",
+    "name": "Black GAP Fleece Shorts",
+    "part": "lowerbody",
+    "color": "#14161a",
+    "secondaryColor": null,
+    "palette": [
+      "#14161a"
+    ],
+    "tags": [
+      "shorts",
+      "fleece",
+      "drawstring",
+      "elastic waist",
+      "gap",
+      "pockets"
+    ],
+    "image": "/api/import/library/import-c91a6938-14f3-47dc-b410-994abc1de490-garment.png",
+    "thumbnail": "/api/import/library/import-c91a6938-14f3-47dc-b410-994abc1de490-garment.png",
+    "modeledImage": null,
+    "importJobId": "c91a6938-14f3-47dc-b410-994abc1de490"
+  },
+  {
+    "id": "import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f",
+    "name": "Aqua Floral Embroidered Denim Shorts",
+    "part": "lowerbody",
+    "color": "#b9d8dc",
+    "secondaryColor": "#f2f0e8",
+    "palette": [
+      "#b9d8dc",
+      "#f2f0e8"
+    ],
+    "tags": [
+      "denim",
+      "shorts",
+      "floral",
+      "embroidered",
+      "light wash",
+      "five pocket"
+    ],
+    "image": "/api/import/library/import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f-garment.png",
+    "thumbnail": "/api/import/library/import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f-garment.png",
+    "modeledImage": null,
+    "importJobId": "6d0e2e80-5aa4-469a-928d-6e7646a92e7f"
+  },
+  {
+    "id": "import-7619a9a4-2b2d-4a76-9491-ccf014cfc45f",
+    "name": "Stone Polo Herringbone Drawstring Shorts",
+    "part": "lowerbody",
+    "color": "#c5c1b5",
+    "secondaryColor": "#74543c",
+    "palette": [
+      "#c5c1b5",
+      "#74543c"
+    ],
+    "tags": [
+      "shorts",
+      "herringbone",
+      "drawstring",
+      "polo",
+      "woven",
+      "pockets"
+    ],
+    "image": "/api/import/library/import-7619a9a4-2b2d-4a76-9491-ccf014cfc45f-garment.png",
+    "thumbnail": "/api/import/library/import-7619a9a4-2b2d-4a76-9491-ccf014cfc45f-garment.png",
+    "modeledImage": null,
+    "importJobId": "7619a9a4-2b2d-4a76-9491-ccf014cfc45f"
+  },
+  {
+    "id": "import-33a752bc-d229-4fae-9b18-14bcf11c5611",
+    "name": "Black Shark Graphic Derby Boots",
+    "part": "shoes",
+    "color": "#111214",
+    "secondaryColor": "#d7a821",
+    "palette": [
+      "#111214",
+      "#d7a821"
+    ],
+    "tags": [
+      "derby",
+      "boots",
+      "leather",
+      "shark graphic",
+      "lace up",
+      "yellow welt stitch"
+    ],
+    "image": "/api/import/library/import-33a752bc-d229-4fae-9b18-14bcf11c5611-garment.png",
+    "thumbnail": "/api/import/library/import-33a752bc-d229-4fae-9b18-14bcf11c5611-garment.png",
+    "modeledImage": null,
+    "importJobId": "33a752bc-d229-4fae-9b18-14bcf11c5611"
+  }
+]

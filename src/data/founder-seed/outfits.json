@@ -1,0 +1,43 @@
+[
+  {
+    "id": "outfit-f175a5b3-f9e5-4d72-8a1a-2bbd34f2fdb5",
+    "name": "Light Wash Straight Jeans + Black & Pink Technical Top",
+    "garmentIds": [
+      "import-12112246-ee62-4f4c-ac22-f5e6a19de51d",
+      "import-d50b0c02-c356-4327-9e96-055bcf5b254f",
+      "import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932",
+      "import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf"
+    ],
+    "colors": [
+      "#8baec1",
+      "#a46b44",
+      "#111214",
+      "#f3a4bf",
+      "#101a35",
+      "#a8adb8"
+    ],
+    "createdAt": "2026-07-20T17:44:03.847Z",
+    "modeledImage": null,
+    "generation": null
+  },
+  {
+    "id": "outfit-f771bae6-a5b5-456a-9b26-041880f7473e",
+    "name": "Black Shark Graphic Derby Boots + Aqua Floral Embroidered Denim Shorts",
+    "garmentIds": [
+      "import-33a752bc-d229-4fae-9b18-14bcf11c5611",
+      "import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f",
+      "import-1a2e565b-0cca-47df-886f-73bd4527b276"
+    ],
+    "colors": [
+      "#111214",
+      "#d7a821",
+      "#b9d8dc",
+      "#f2f0e8",
+      "#b7d3e3",
+      "#e5eef2"
+    ],
+    "createdAt": "2026-07-20T20:23:18.928Z",
+    "modeledImage": null,
+    "generation": null
+  }
+]
