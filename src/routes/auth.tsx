@@ -11,6 +11,7 @@ const SearchSchema = z.object({
 });
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   validateSearch: SearchSchema,
   head: () => ({
     meta: [

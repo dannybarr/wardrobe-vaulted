@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TryRouteImport } from './routes/try'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedWardrobeRouteImport } from './routes/_authenticated/wardrobe'
 import { Route as ApiImportAnalyzeRouteImport } from './routes/api/import/analyze'
@@ -57,6 +58,11 @@ const SupportRoute = SupportRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TryRoute = TryRouteImport.update({
+  id: '/try',
+  path: '/try',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/try': typeof TryRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/try': typeof TryRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/try': typeof TryRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/support'
     | '/terms'
+    | '/try'
     | '/billing'
     | '/wardrobe'
     | '/api/import/analyze'
@@ -226,6 +236,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/support'
     | '/terms'
+    | '/try'
     | '/billing'
     | '/wardrobe'
     | '/api/import/analyze'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/support'
     | '/terms'
+    | '/try'
     | '/_authenticated/billing'
     | '/_authenticated/wardrobe'
     | '/api/import/analyze'
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  TryRoute: typeof TryRoute
   ApiImportAnalyzeRoute: typeof ApiImportAnalyzeRoute
   ApiImportConfigRoute: typeof ApiImportConfigRoute
   ApiImportCutoutRoute: typeof ApiImportCutoutRoute
@@ -325,6 +338,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/try': {
+      id: '/try'
+      path: '/try'
+      fullPath: '/try'
+      preLoaderRoute: typeof TryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/billing': {
@@ -470,6 +490,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  TryRoute: TryRoute,
   ApiImportAnalyzeRoute: ApiImportAnalyzeRoute,
   ApiImportConfigRoute: ApiImportConfigRoute,
   ApiImportCutoutRoute: ApiImportCutoutRoute,
