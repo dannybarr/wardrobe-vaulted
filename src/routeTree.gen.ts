@@ -18,6 +18,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedWardrobeRouteImport } from './routes/_authenticated/wardrobe'
 import { Route as ApiImportConfigRouteImport } from './routes/api/import/config'
+import { Route as ApiImportGateRouteImport } from './routes/api/import/gate'
 import { Route as ApiImportWardrobeRouteImport } from './routes/api/import/wardrobe'
 import { Route as ApiImportWardrobeIdRouteImport } from './routes/api/import/wardrobe.$id'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -66,6 +67,11 @@ const ApiImportConfigRoute = ApiImportConfigRouteImport.update({
   path: '/api/import/config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiImportGateRoute = ApiImportGateRouteImport.update({
+  id: '/api/import/gate',
+  path: '/api/import/gate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiImportWardrobeRoute = ApiImportWardrobeRouteImport.update({
   id: '/api/import/wardrobe',
   path: '/api/import/wardrobe',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
+  '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
+  '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
+  '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/wardrobe'
     | '/api/import/config'
+    | '/api/import/gate'
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/wardrobe'
     | '/api/import/config'
+    | '/api/import/gate'
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/_authenticated/billing'
     | '/_authenticated/wardrobe'
     | '/api/import/config'
+    | '/api/import/gate'
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   ApiImportConfigRoute: typeof ApiImportConfigRoute
+  ApiImportGateRoute: typeof ApiImportGateRoute
   ApiImportWardrobeRoute: typeof ApiImportWardrobeRouteWithChildren
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiImportConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/import/gate': {
+      id: '/api/import/gate'
+      path: '/api/import/gate'
+      fullPath: '/api/import/gate'
+      preLoaderRoute: typeof ApiImportGateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/import/wardrobe': {
       id: '/api/import/wardrobe'
       path: '/api/import/wardrobe'
@@ -300,6 +320,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   ApiImportConfigRoute: ApiImportConfigRoute,
+  ApiImportGateRoute: ApiImportGateRoute,
   ApiImportWardrobeRoute: ApiImportWardrobeRouteWithChildren,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
