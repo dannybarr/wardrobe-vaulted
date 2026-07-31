@@ -48,10 +48,17 @@ async function resolveOrCreateCustomer(
  */
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { priceId: string; returnUrl: string; environment: StripeEnv }) => {
-    if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
-    return data;
-  })
+  .inputValidator(
+    (data: {
+      priceId: string;
+      returnUrl: string;
+      environment: StripeEnv;
+      purpose?: "vault" | "ai_credits";
+    }) => {
+      if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
+      return data;
+    },
+  )
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     try {
       const { supabase, userId } = context;
@@ -89,7 +96,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         ...(isRecurring
           ? {}
           : { payment_intent_data: { description: productDescription } }),
-        metadata: { userId, managed_payments: "true" },
+        metadata: { userId, managed_payments: "true", purpose: data.purpose ?? "vault" },
         ...(isRecurring ? { subscription_data: { metadata: { userId } } } : {}),
       } as never);
 

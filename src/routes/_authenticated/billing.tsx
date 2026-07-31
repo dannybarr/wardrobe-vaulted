@@ -6,6 +6,7 @@ import { getStripeEnvironment, VAULT_PRICE_ID } from "@/lib/stripe";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { createPortalSession, getVaultAccess } from "@/utils/payments.functions";
+import { AiCreditsPanel } from "@/components/billing/AiCreditsPanel";
 
 export const Route = createFileRoute("/_authenticated/billing")({
   head: () => ({
@@ -123,6 +124,8 @@ function Billing() {
           )}
 
           {error ? <p className="auth-message auth-message--error">{error}</p> : null}
+
+          <AiCreditsPanel />
 
           <p className="auth-alt">
             <Link to="/wardrobe">Back to your wardrobe</Link> · <Link to="/support">Support</Link> ·{" "}
