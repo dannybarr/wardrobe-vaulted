@@ -17,7 +17,7 @@ export const Route = createFileRoute("/auth")({
       { title: "Sign in — Wardrobe" },
       {
         name: "description",
-        content: "Sign in to your private Wardrobe, or redeem an invitation to the alpha.",
+        content: "Sign in to your Wardrobe, or create an account to start your vault.",
       },
       { property: "og:title", content: "Sign in — Wardrobe" },
       { property: "og:description", content: "Access your private Wardrobe." },
@@ -40,7 +40,6 @@ function AuthPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -81,7 +80,6 @@ function AuthPage() {
       if (mode === "signup") {
         const result = await acceptInvite({
           data: {
-            code: code.trim(),
             email: email.trim(),
             password,
             ...(displayName.trim() ? { displayName: displayName.trim() } : {}),
@@ -158,7 +156,7 @@ function AuthPage() {
           </div>
         )}
         <p className="auth-kicker">
-          {mode === "signup" ? "Invitation only" : mode === "forgot" ? "Password reset" : "Private alpha"}
+          {mode === "signup" ? "Create an account" : mode === "forgot" ? "Password reset" : "Welcome"}
         </p>
         <h1>
           {mode === "signup"
@@ -169,7 +167,7 @@ function AuthPage() {
         </h1>
         <p className="auth-lede">
           {mode === "signup"
-            ? "Wardrobe is in a small private alpha. Enter the invitation code you were sent, and we'll set up your account."
+            ? "Create your account and we'll set up your wardrobe. Your first piece is on us."
             : mode === "forgot"
               ? "We'll email you a link to choose a new password."
               : "Sign in to your wardrobe. Everything in it stays private to you."}
