@@ -5,15 +5,21 @@ import { createCheckoutSession } from "@/utils/payments.functions";
 interface StripeEmbeddedCheckoutProps {
   priceId: string;
   returnUrl?: string;
+  purpose?: "vault" | "ai_credits";
 }
 
-export function StripeEmbeddedCheckout({ priceId, returnUrl }: StripeEmbeddedCheckoutProps) {
+export function StripeEmbeddedCheckout({
+  priceId,
+  returnUrl,
+  purpose = "vault",
+}: StripeEmbeddedCheckoutProps) {
   const fetchClientSecret = async (): Promise<string> => {
     const result = await createCheckoutSession({
       data: {
         priceId,
         returnUrl: returnUrl || window.location.href,
         environment: getStripeEnvironment(),
+        purpose,
       },
     });
     if ("error" in result) throw new Error(result.error);

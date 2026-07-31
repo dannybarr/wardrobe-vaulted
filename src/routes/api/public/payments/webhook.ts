@@ -104,6 +104,30 @@ async function recordEvent(event: any) {
     );
 }
 
+/**
+ * A prepaid AI credit pack has been paid for. The amount paid becomes balance at
+ * face value — the 20% markup is applied when AI actually runs, not here. The
+ * database routine records the session id, so a repeated notification from a
+ * retry can never credit the same purchase twice.
+ */
+async function creditAiPack(session: any, env: StripeEnv) {
+  const userId = session.metadata?.userId;
+  const pence = session.amount_total;
+  if (!userId || !pence || pence <= 0) {
+    console.error("AI credit pack without userId or amount", session.id);
+    return;
+  }
+
+  const { error } = await getSupabase().rpc("credit_ai_wallet", {
+    _user_id: userId,
+    _pence: pence,
+    _session_id: session.id,
+    _price_id: session.metadata?.priceId ?? null,
+    _environment: env,
+  });
+  if (error) console.error("AI credit pack could not be applied", session.id, error.message);
+}
+
 async function handleWebhook(req: Request, env: StripeEnv) {
   const event = await verifyWebhook(req, env);
 
@@ -117,10 +141,18 @@ async function handleWebhook(req: Request, env: StripeEnv) {
     case "customer.subscription.deleted":
       await markCanceled(event.data.object, env);
       break;
+    case "checkout.session.completed":
+    case "checkout.session.async_payment_succeeded": {
+      // Subscription state is kept current by the customer.subscription.* events;
+      // one-off AI credit packs are settled here.
+      const session = event.data.object;
+      if (session.metadata?.purpose === "ai_credits" && session.payment_status !== "unpaid") {
+        await creditAiPack(session, env);
+      }
+      break;
+    }
     case "invoice.paid":
     case "invoice.payment_failed":
-    case "checkout.session.completed":
-    case "checkout.session.async_payment_succeeded":
       // Subscription state is kept current by the customer.subscription.* events.
       break;
     default:
