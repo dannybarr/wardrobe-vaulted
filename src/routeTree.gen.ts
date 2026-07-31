@@ -17,6 +17,7 @@ import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedWardrobeRouteImport } from './routes/_authenticated/wardrobe'
 import { Route as ApiImportConfigRouteImport } from './routes/api/import/config'
+import { Route as ApiImportWardrobeRouteImport } from './routes/api/import/wardrobe'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -57,6 +58,11 @@ const ApiImportConfigRoute = ApiImportConfigRouteImport.update({
   path: '/api/import/config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiImportWardrobeRoute = ApiImportWardrobeRouteImport.update({
+  id: '/api/import/wardrobe',
+  path: '/api/import/wardrobe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
+  '/api/import/wardrobe': typeof ApiImportWardrobeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
+  '/api/import/wardrobe': typeof ApiImportWardrobeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
+  '/api/import/wardrobe': typeof ApiImportWardrobeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/wardrobe'
     | '/api/import/config'
+    | '/api/import/wardrobe'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/wardrobe'
     | '/api/import/config'
+    | '/api/import/wardrobe'
   id:
     | '__root__'
     | '/'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/_authenticated/wardrobe'
     | '/api/import/config'
+    | '/api/import/wardrobe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -126,6 +138,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   ApiImportConfigRoute: typeof ApiImportConfigRoute
+  ApiImportWardrobeRoute: typeof ApiImportWardrobeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiImportConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/import/wardrobe': {
+      id: '/api/import/wardrobe'
+      path: '/api/import/wardrobe'
+      fullPath: '/api/import/wardrobe'
+      preLoaderRoute: typeof ApiImportWardrobeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -208,6 +228,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   ApiImportConfigRoute: ApiImportConfigRoute,
+  ApiImportWardrobeRoute: ApiImportWardrobeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
