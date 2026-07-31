@@ -372,6 +372,45 @@ export type Database = {
           },
         ]
       }
+      invites: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          max_uses: number
+          note: string | null
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_uses?: number
+          note?: string | null
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_uses?: number
+          note?: string | null
+          used_count?: number
+        }
+        Relationships: []
+      }
       model_profiles: {
         Row: {
           bucket: string
