@@ -13,6 +13,7 @@
 import {
   ANALYZE_INSTRUCTION,
   ANALYZE_SCHEMA,
+  dedupeDetected,
   normalizeDetected,
   type DetectedPiece,
 } from "@/lib/ai/prompts";
