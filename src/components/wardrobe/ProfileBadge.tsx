@@ -26,13 +26,15 @@ function formatDate(value: string | null) {
 }
 
 /** Small identity chip for the top-left of the wardrobe: initials, then the details on tap. */
-export function ProfileBadge({ netWorth = 0 }: { netWorth?: number }) {
+export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; pieces?: number }) {
   const [open, setOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement | null>(null);
   const queryClient = useQueryClient();
+  const guest = isGuestMode();
   const fetchAccess = useServerFn(getVaultAccess);
   const fetchCredits = useServerFn(getAiCreditState);
   const cancelMembership = useServerFn(cancelVaultMembership);
+
 
   const { data: profile } = useQuery({
     queryKey: ["profile-badge"],
