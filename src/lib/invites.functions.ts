@@ -61,10 +61,13 @@ export const acceptInvite = createServerFn({ method: "POST" })
       return { ok: false as const, reason: message };
     }
 
-    await supabaseAdmin
-      .from("invites")
-      .update({ used_count: invite.used_count + 1, last_used_at: new Date().toISOString() })
-      .eq("id", invite.id);
+    if (invite) {
+      await supabaseAdmin
+        .from("invites")
+        .update({ used_count: invite.used_count + 1, last_used_at: new Date().toISOString() })
+        .eq("id", invite.id);
+    }
+
 
     return { ok: true as const };
   });
