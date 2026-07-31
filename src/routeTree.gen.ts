@@ -18,6 +18,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedWardrobeRouteImport } from './routes/_authenticated/wardrobe'
 import { Route as ApiImportConfigRouteImport } from './routes/api/import/config'
 import { Route as ApiImportWardrobeRouteImport } from './routes/api/import/wardrobe'
+import { Route as ApiImportWardrobeIdRouteImport } from './routes/api/import/wardrobe.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -63,6 +64,11 @@ const ApiImportWardrobeRoute = ApiImportWardrobeRouteImport.update({
   path: '/api/import/wardrobe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiImportWardrobeIdRoute = ApiImportWardrobeIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiImportWardrobeRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,7 +78,8 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
-  '/api/import/wardrobe': typeof ApiImportWardrobeRoute
+  '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
+  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,7 +89,8 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
-  '/api/import/wardrobe': typeof ApiImportWardrobeRoute
+  '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
+  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,7 +102,8 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
-  '/api/import/wardrobe': typeof ApiImportWardrobeRoute
+  '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
+  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/wardrobe'
     | '/api/import/config'
     | '/api/import/wardrobe'
+    | '/api/import/wardrobe/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/wardrobe'
     | '/api/import/config'
     | '/api/import/wardrobe'
+    | '/api/import/wardrobe/$id'
   id:
     | '__root__'
     | '/'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/_authenticated/wardrobe'
     | '/api/import/config'
     | '/api/import/wardrobe'
+    | '/api/import/wardrobe/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -138,7 +150,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   ApiImportConfigRoute: typeof ApiImportConfigRoute
-  ApiImportWardrobeRoute: typeof ApiImportWardrobeRoute
+  ApiImportWardrobeRoute: typeof ApiImportWardrobeRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -206,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiImportWardrobeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/import/wardrobe/$id': {
+      id: '/api/import/wardrobe/$id'
+      path: '/$id'
+      fullPath: '/api/import/wardrobe/$id'
+      preLoaderRoute: typeof ApiImportWardrobeIdRouteImport
+      parentRoute: typeof ApiImportWardrobeRoute
+    }
   }
 }
 
@@ -220,6 +239,17 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ApiImportWardrobeRouteChildren {
+  ApiImportWardrobeIdRoute: typeof ApiImportWardrobeIdRoute
+}
+
+const ApiImportWardrobeRouteChildren: ApiImportWardrobeRouteChildren = {
+  ApiImportWardrobeIdRoute: ApiImportWardrobeIdRoute,
+}
+
+const ApiImportWardrobeRouteWithChildren =
+  ApiImportWardrobeRoute._addFileChildren(ApiImportWardrobeRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -228,7 +258,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   ApiImportConfigRoute: ApiImportConfigRoute,
-  ApiImportWardrobeRoute: ApiImportWardrobeRoute,
+  ApiImportWardrobeRoute: ApiImportWardrobeRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
