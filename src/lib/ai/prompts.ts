@@ -106,26 +106,26 @@ export type DetectedPiece = Required<Pick<PieceMetadata, "name" | "part">> & {
 /** The original's normaliser, so a stray model answer can never reach the UI. */
 export function normalizeDetected(value: unknown): DetectedPiece {
   const item = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
-  const box = (item.boundingBox && typeof item.boundingBox === "object" ? item.boundingBox : {}) as Record<
-    string,
-    unknown
-  >;
+  const rawBox = item["boundingBox"];
+  const box = (rawBox && typeof rawBox === "object" ? rawBox : {}) as Record<string, unknown>;
   const number = (key: string, fallback: number) =>
     Number.isFinite(Number(box[key])) ? Math.round(Number(box[key])) : fallback;
   const x = Math.max(0, Math.min(999, number("x", 0)));
   const y = Math.max(0, Math.min(999, number("y", 0)));
-  const color = typeof item.color === "string" && HEX_COLOR.test(item.color) ? item.color.toLowerCase() : "#d8d0c2";
+  const rawColor = item["color"];
+  const rawSecondary = item["secondaryColor"];
+  const rawName = item["name"];
+  const rawPart = item["part"];
+  const rawTags = item["tags"];
 
   return {
-    name: typeof item.name === "string" && item.name.trim() ? item.name.trim().slice(0, 120) : "New piece",
-    part: typeof item.part === "string" && PARTS.has(item.part) ? item.part : "upperbody",
-    color,
+    name: typeof rawName === "string" && rawName.trim() ? rawName.trim().slice(0, 120) : "New piece",
+    part: typeof rawPart === "string" && PARTS.has(rawPart) ? rawPart : "upperbody",
+    color: typeof rawColor === "string" && HEX_COLOR.test(rawColor) ? rawColor.toLowerCase() : "#d8d0c2",
     secondaryColor:
-      typeof item.secondaryColor === "string" && HEX_COLOR.test(item.secondaryColor)
-        ? item.secondaryColor.toLowerCase()
-        : null,
-    tags: Array.isArray(item.tags)
-      ? item.tags
+      typeof rawSecondary === "string" && HEX_COLOR.test(rawSecondary) ? rawSecondary.toLowerCase() : null,
+    tags: Array.isArray(rawTags)
+      ? rawTags
           .filter((tag): tag is string => typeof tag === "string")
           .map((tag) => tag.trim().toLowerCase().slice(0, 40))
           .filter(Boolean)
@@ -138,4 +138,5 @@ export function normalizeDetected(value: unknown): DetectedPiece {
       height: Math.max(1, Math.min(1000 - y, number("height", 1000 - y))),
     },
   };
+
 }
