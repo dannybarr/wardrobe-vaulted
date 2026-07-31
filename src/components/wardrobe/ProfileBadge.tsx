@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { cancelVaultMembership, getVaultAccess } from "@/utils/payments.functions";
 import { getAiCreditState } from "@/lib/ai-credits.functions";
+import { isGuestMode } from "@/lib/trial/mode";
 
 function initialsFrom(name: string | null, email: string | null) {
   const source = (name ?? "").trim();
@@ -52,16 +53,19 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
       };
     },
     staleTime: 5 * 60 * 1000,
+    enabled: !guest,
   });
 
   const { data: access } = useQuery({
     queryKey: ["vault-access"],
     queryFn: () => fetchAccess({ data: { environment: getStripeEnvironment() } }),
+    enabled: !guest,
   });
 
   const { data: credits } = useQuery({
     queryKey: ["ai-credit-state"],
     queryFn: () => fetchCredits(),
+    enabled: !guest,
   });
 
   const cancel = useMutation({
@@ -92,7 +96,9 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
   const renewal = formatDate(access?.currentPeriodEnd ?? null);
   const founder = access?.plan === "founder" || credits?.founder;
 
-  const membership = founder
+  const membership = guest
+    ? "Guest trial — your first piece is free"
+    : founder
     ? "Founder — free for life"
     : access?.subscribed
       ? access.cancelAtPeriodEnd
@@ -110,14 +116,16 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen((value) => !value)}
-        title={profile?.name ?? profile?.email ?? "Your profile"}
+        title={guest ? "Guest wardrobe" : (profile?.name ?? profile?.email ?? "Your profile")}
       >
-        {initialsFrom(profile?.name ?? null, profile?.email ?? null)}
+        {guest ? "GT" : initialsFrom(profile?.name ?? null, profile?.email ?? null)}
       </button>
 
       {open && (
         <div className="profile-panel" role="dialog" aria-label="Your profile">
-          <p className="profile-panel__name">{profile?.name ?? profile?.email ?? "Your wardrobe"}</p>
+          <p className="profile-panel__name">
+            {guest ? "Guest wardrobe" : (profile?.name ?? profile?.email ?? "Your wardrobe")}
+          </p>
           {profile?.name && profile?.email ? (
             <p className="profile-panel__email">{profile.email}</p>
           ) : null}
@@ -135,12 +143,14 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
             </div>
             <div>
               <dt>Pieces</dt>
-              <dd>{access?.pieces ?? 0}</dd>
+              <dd>{pieces ?? access?.pieces ?? 0}</dd>
             </div>
             <div>
               <dt>AI credit</dt>
               <dd>
-                {credits?.founder
+                {guest
+                  ? "Free for your first piece"
+                  : credits?.founder
                   ? "Unlimited"
                   : credits?.mode === "byok"
                     ? "Your own key"
@@ -153,7 +163,7 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
             </div>
           </dl>
 
-          {!founder && access?.subscribed && !access.cancelAtPeriodEnd ? (
+          {!guest && !founder && access?.subscribed && !access.cancelAtPeriodEnd ? (
             <button
               type="button"
               className="profile-panel__cancel"
@@ -171,10 +181,18 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
           ) : null}
 
           <p className="profile-panel__links">
-            <Link to="/billing">Billing & credits</Link>
-            <button type="button" onClick={() => supabase.auth.signOut()}>
-              Sign out
-            </button>
+            {guest ? (
+              <Link to="/auth" search={{ mode: "signup", redirect: "/wardrobe" }}>
+                Create your account
+              </Link>
+            ) : (
+              <>
+                <Link to="/billing">Billing &amp; credits</Link>
+                <button type="button" onClick={() => supabase.auth.signOut()}>
+                  Sign out
+                </button>
+              </>
+            )}
           </p>
         </div>
       )}
