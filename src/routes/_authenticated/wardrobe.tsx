@@ -1,8 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { WardrobeApp } from "@/components/wardrobe/App.jsx";
 import { ensureAccountReady } from "@/lib/account.functions";
+import { getVaultAccess } from "@/utils/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/_authenticated/wardrobe")({
   head: () => ({
@@ -17,14 +20,21 @@ export const Route = createFileRoute("/_authenticated/wardrobe")({
 
 function WardrobeRoute() {
   const prepareAccount = useServerFn(ensureAccountReady);
+  const fetchAccess = useServerFn(getVaultAccess);
 
   // First visit after signing up: make sure the account has its wardrobe,
   // allowances and plan before the gallery asks for them.
-  const { isPending, error } = useQuery({
+  const { isPending, error, isSuccess } = useQuery({
     queryKey: ["account-ready"],
     queryFn: () => prepareAccount(),
     staleTime: Infinity,
     retry: 1,
+  });
+
+  const { data: access } = useQuery({
+    queryKey: ["vault-access"],
+    queryFn: () => fetchAccess({ data: { environment: getStripeEnvironment() } }),
+    enabled: isSuccess,
   });
 
   if (isPending) {
@@ -46,6 +56,16 @@ function WardrobeRoute() {
     );
   }
 
-  return <WardrobeApp />;
+  return (
+    <>
+      <PaymentTestModeBanner />
+      {access && !access.canAddPieces ? (
+        <div className="vault-notice">
+          Your free piece is used. <Link to="/billing">Subscribe for £4.99 a month</Link> to keep
+          adding pieces and storing your wardrobe.
+        </div>
+      ) : null}
+      <WardrobeApp />
+    </>
+  );
 }
-
