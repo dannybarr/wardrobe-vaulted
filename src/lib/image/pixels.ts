@@ -18,7 +18,7 @@ const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 /** Same clamp as the original: the model reports boxes on a 0–1000 grid. */
 export type BoundingBox = { x: number; y: number; width: number; height: number };
 
-export type Raster = { data: Uint8ClampedArray; width: number; height: number };
+export type Raster = { data: Uint8ClampedArray<ArrayBuffer>; width: number; height: number };
 
 function canvasOf(width: number, height: number) {
   const canvas = document.createElement("canvas");
@@ -134,14 +134,14 @@ function keyChannels(key: string) {
   };
 }
 
-function average(data: Uint8ClampedArray, index: number, channels: number[]): number {
+function average(data: Uint8ClampedArray<ArrayBuffer>, index: number, channels: number[]): number {
   if (!channels.length) return 0;
   return channels.reduce((total, channel) => total + data[index + channel]!, 0) / channels.length;
 }
 
 /** Drain the keyed channels back down to the neutral level, as the original did. */
 function removeKeyedSpill(
-  data: Uint8ClampedArray,
+  data: Uint8ClampedArray<ArrayBuffer>,
   index: number,
   keyed: number[],
   neutralLevel: number,
