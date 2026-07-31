@@ -5,7 +5,7 @@ import { WishlistPane } from "./wishlist.jsx";
 import { OutfitsPane } from "./outfits.jsx";
 import { AddPieceModal } from "./add-piece.jsx";
 import { OptimizedImage } from "./OptimizedImage.jsx";
-import { LandingPage } from "./landing-page.jsx";
+import { apiFetch } from "../../lib/api-fetch";
 
 const STORAGE_KEY = "open-wardrobe-edits-v1";
 const DELETED_STORAGE_KEY = "open-wardrobe-deleted-v1";
@@ -25,30 +25,6 @@ const TYPE_ORDER = Object.fromEntries(TYPES.slice(1).map((type, index) => [type.
 const OCCASIONS = ["Work", "Casual", "Formal", "Night Out"];
 
 
-function readEdits() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-  } catch {
-    return {};
-  }
-}
-
-
-function persistEdit(item) {
-  const edits = readEdits();
-  edits[item.id] = {
-    name: item.name || "",
-    brand: item.brand || "",
-    occasion: item.occasion || "",
-    part: item.part,
-    color: item.color || null,
-    secondaryColor: item.secondaryColor || null,
-    tags: item.tags || [],
-    value: Number.isFinite(item.value) ? item.value : null,
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(edits));
-}
-
 function parseDraftValue(input) {
   const numeric = Number((input || "").replace(/[^0-9.]/g, ""));
   return Number.isFinite(numeric) && numeric > 0 ? Math.round(numeric * 100) / 100 : null;
@@ -62,25 +38,22 @@ function normalizeOccasion(value) {
   return typeof value === "string" ? value.trim().replace(/\s+/g, " ").slice(0, 80) : "";
 }
 
-function removePersistedEdit(id) {
-  const edits = readEdits();
-  delete edits[id];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(edits));
-}
-
-function readDeletedItems() {
-  try {
-    const value = JSON.parse(localStorage.getItem(DELETED_STORAGE_KEY) || "[]");
-    return new Set(Array.isArray(value) ? value : []);
-  } catch {
-    return new Set();
-  }
-}
-
-function persistDeletedItem(id) {
-  const deleted = readDeletedItems();
-  deleted.add(id);
-  localStorage.setItem(DELETED_STORAGE_KEY, JSON.stringify([...deleted]));
+async function saveItemToAccount(item) {
+  const response = await apiFetch(`/api/import/wardrobe/${item.id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: item.name || "",
+      brand: item.brand || "",
+      occasion: item.occasion || "",
+      part: item.part,
+      color: item.color || null,
+      secondaryColor: item.secondaryColor || null,
+      tags: item.tags || [],
+      value: Number.isFinite(item.value) ? item.value : null,
+    }),
+  });
+  if (!response.ok) throw new Error("Those changes could not be saved.");
 }
 
 function rgbToHex(red, green, blue) {
@@ -626,12 +599,7 @@ function ViewToggle({ view, onChange }) {
   );
 }
 
-export function App() {
-  const [landingOpen, setLandingOpen] = useState(true);
-  return landingOpen ? <LandingPage onEnter={() => setLandingOpen(false)} /> : <WardrobeApp />;
-}
-
-function WardrobeApp() {
+export function WardrobeApp() {
   const [items, setItems] = useState([]);
   const [activeType, setActiveType] = useState("all");
   const [activeBrand, setActiveBrand] = useState("");
@@ -644,24 +612,19 @@ function WardrobeApp() {
   const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
-    fetch("/api/import/config", { cache: "no-store" })
+    apiFetch("/api/import/config", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((config) => setSetupReady(Boolean(config?.ready)))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    fetch("/api/import/wardrobe", { cache: "no-store" })
+    apiFetch("/api/import/wardrobe", { cache: "no-store" })
       .then((response) => {
         if (!response.ok) throw new Error("Could not load the wardrobe.");
         return response.json();
       })
-      .then((loadedItems) => {
-        const edits = readEdits();
-        const deleted = readDeletedItems();
-        const visibleItems = loadedItems.filter((item) => !deleted.has(item.id));
-        setItems(visibleItems.map((item) => ({ ...item, ...(edits[item.id] || {}) })));
-      })
+      .then((loadedItems) => setItems(loadedItems))
       .catch((requestError) => setError(requestError.message))
       .finally(() => setLoading(false));
   }, []);
@@ -716,22 +679,18 @@ function WardrobeApp() {
 
   const saveItem = (updatedItem) => {
     setItems((current) => current.map((item) => item.id === updatedItem.id ? updatedItem : item));
-    persistEdit(updatedItem);
+    saveItemToAccount(updatedItem).catch((saveError) => setError(saveError.message));
   };
 
   const deleteItem = async (id) => {
-    if (id.startsWith("import-")) {
-      try {
-        const response = await fetch(`/api/import/wardrobe/${id}`, { method: "DELETE" });
-        if (!response.ok && response.status !== 404) throw new Error("Could not delete the imported item.");
-      } catch (requestError) {
-        setError(requestError.message);
-        return;
-      }
+    try {
+      const response = await apiFetch(`/api/import/wardrobe/${id}`, { method: "DELETE" });
+      if (!response.ok && response.status !== 404) throw new Error("Could not delete that piece.");
+    } catch (requestError) {
+      setError(requestError.message);
+      return;
     }
     setItems((current) => current.filter((item) => item.id !== id));
-    removePersistedEdit(id);
-    persistDeletedItem(id);
     setSelectedId(null);
   };
 
@@ -745,20 +704,20 @@ function WardrobeApp() {
   }, []);
 
   const generateOnModel = useCallback(async (item) => {
-    const start = await fetch(`/api/import/wardrobe/${item.id}/modeled`, { method: "POST" });
+    const start = await apiFetch(`/api/import/wardrobe/${item.id}/modeled`, { method: "POST" });
     const result = await start.json().catch(() => ({}));
     if (!start.ok) throw new Error(result.error || "The on-model image could not be started.");
 
     for (let attempt = 0; attempt < 90; attempt += 1) {
       await new Promise((resolve) => window.setTimeout(resolve, 1000));
-      const response = await fetch("/api/import/wardrobe", { cache: "no-store" });
+      const response = await apiFetch("/api/import/wardrobe", { cache: "no-store" });
       const library = response.ok ? await response.json() : [];
       const updated = library.find((entry) => entry.id === item.id);
       if (updated?.modeledImage) {
         setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, ...updated } : entry));
         return;
       }
-      const jobResponse = await fetch(`/api/import/jobs/${item.importJobId}`, { cache: "no-store" });
+      const jobResponse = await apiFetch(`/api/import/jobs/${item.importJobId}`, { cache: "no-store" });
       if (jobResponse.ok) {
         const job = await jobResponse.json();
         if (job.stages?.modeled?.status === "failed") throw new Error(job.stages.modeled.error || "The on-model image could not be generated.");

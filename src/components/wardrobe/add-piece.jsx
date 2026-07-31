@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, UploadSimple, X } from "@phosphor-icons/react";
-import "./add-piece.css";
+import { apiFetch } from "../../lib/api-fetch";
 
 const PARTS = [
   ["upperbody", "Tops"],
@@ -85,7 +85,7 @@ export function AddPieceModal({ open, setupReady, onClose, onDirectAdded }) {
         onClose();
       } else {
         const imageDataUrl = await fileToDataUrl(file);
-        const response = await fetch("/api/wardrobe/direct-add", {
+        const response = await apiFetch("/api/wardrobe/direct-add", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ imageDataUrl, metadata }),

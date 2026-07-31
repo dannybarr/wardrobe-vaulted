@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, Plus, Sparkle, Trash, X } from "@phosphor-icons/react";
 import { OptimizedImage } from "./OptimizedImage.jsx";
+import { apiFetch } from "../../lib/api-fetch";
 
 const LABELS = {
   upperbody: "Top",
@@ -117,7 +118,7 @@ function OutfitBuilder({ items, initialIds, onClose, onCreated }) {
     if (selected.length < 2) { setError("Choose at least two pieces for this outfit."); return; }
     setSaving(true); setError("");
     try {
-      const response = await fetch("/api/outfits", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, garmentIds: selected }) });
+      const response = await apiFetch("/api/outfits", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, garmentIds: selected }) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || "Could not save the outfit.");
       onCreated(result);
@@ -165,7 +166,7 @@ export function OutfitsPane({ items, setupReady, toggle, navigation, onReturnToW
     document.querySelector(".outfits-pane > .category-nav button.active")?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, []);
   const refresh = async () => {
-    const response = await fetch("/api/outfits", { cache: "no-store" });
+    const response = await apiFetch("/api/outfits", { cache: "no-store" });
     if (!response.ok) throw new Error("Could not load outfits.");
     setOutfits(await response.json());
     setError("");
@@ -186,7 +187,7 @@ export function OutfitsPane({ items, setupReady, toggle, navigation, onReturnToW
   const generate = async (id) => {
     setError("");
     try {
-      const response = await fetch(`/api/outfits/${id}/modeled`, { method: "POST" });
+      const response = await apiFetch(`/api/outfits/${id}/modeled`, { method: "POST" });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || "Could not start the on-model image.");
       setOutfits((current) => current.map((outfit) => outfit.id === id ? result : outfit));
@@ -195,7 +196,7 @@ export function OutfitsPane({ items, setupReady, toggle, navigation, onReturnToW
   const remove = async (id) => {
     setError("");
     try {
-      const response = await fetch(`/api/outfits/${id}`, { method: "DELETE" });
+      const response = await apiFetch(`/api/outfits/${id}`, { method: "DELETE" });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || "Could not delete the outfit.");
       setOutfits((current) => current.filter((outfit) => outfit.id !== id));

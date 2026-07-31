@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowSquareOut, Check, LinkSimple, Plus, ShoppingBagOpen, Sparkle, SpinnerGap, Trash, UploadSimple, X } from "@phosphor-icons/react";
-import "./wishlist.css";
+import { apiFetch } from "../../lib/api-fetch";
 
 const API = "/api/wishlist";
 const TYPES = [
@@ -12,7 +12,7 @@ const TYPES = [
 ];
 
 async function api(path, options) {
-  const response = await fetch(path, {
+  const response = await apiFetch(path, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
   });
