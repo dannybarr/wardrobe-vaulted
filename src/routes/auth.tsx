@@ -254,7 +254,7 @@ function AuthPage() {
 
         {mode === "signin" && (
           <p className="auth-alt">
-            Have an invitation? <button type="button" onClick={() => setMode("signup")}>Redeem it</button>
+            New here? <button type="button" onClick={() => setMode("signup")}>Create an account</button>
             {" · "}
             <button type="button" onClick={() => setMode("forgot")}>Forgot password</button>
           </p>
@@ -264,6 +264,7 @@ function AuthPage() {
             Already have an account? <button type="button" onClick={() => setMode("signin")}>Sign in</button>
           </p>
         )}
+
         {mode === "forgot" && (
           <p className="auth-alt">
             <button type="button" onClick={() => setMode("signin")}>Back to sign in</button>
