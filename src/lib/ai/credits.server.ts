@@ -79,7 +79,7 @@ export async function chargeForAiRun(options: {
     _kind: options.kinds.join("+"),
     _model: estimate.stages.map((stage) => stage.model).join(", "),
     _markup_bps: estimate.markupBps,
-    _note: options.note ?? null,
+    ...(options.note ? { _note: options.note } : {}),
   });
 
   if (balance === null || balance === undefined || balance < 0) {
