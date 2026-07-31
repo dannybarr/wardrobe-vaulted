@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedWardrobeRouteImport } from './routes/_authenticated/wardrobe'
 import { Route as ApiImportConfigRouteImport } from './routes/api/import/config'
 import { Route as ApiImportWardrobeRouteImport } from './routes/api/import/wardrobe'
@@ -50,6 +51,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedWardrobeRoute = AuthenticatedWardrobeRouteImport.update({
   id: '/wardrobe',
   path: '/wardrobe',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/wardrobe': typeof AuthenticatedWardrobeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/support'
     | '/terms'
+    | '/billing'
     | '/wardrobe'
     | '/api/import/config'
     | '/api/import/wardrobe'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/support'
     | '/terms'
+    | '/billing'
     | '/wardrobe'
     | '/api/import/config'
     | '/api/import/wardrobe'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/support'
     | '/terms'
+    | '/_authenticated/billing'
     | '/_authenticated/wardrobe'
     | '/api/import/config'
     | '/api/import/wardrobe'
@@ -211,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/billing': {
+      id: '/_authenticated/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AuthenticatedBillingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/wardrobe': {
       id: '/_authenticated/wardrobe'
       path: '/wardrobe'
@@ -250,10 +269,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedWardrobeRoute: typeof AuthenticatedWardrobeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedWardrobeRoute: AuthenticatedWardrobeRoute,
 }
 
