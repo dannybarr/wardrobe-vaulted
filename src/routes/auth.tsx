@@ -178,28 +178,17 @@ function AuthPage() {
 
         <form className="auth-form" onSubmit={onSubmit}>
           {mode === "signup" && (
-            <>
-              <div className="auth-field">
-                <label htmlFor="auth-code">Invitation code</label>
-                <input
-                  id="auth-code"
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  autoComplete="off"
-                  required
-                />
-              </div>
-              <div className="auth-field">
-                <label htmlFor="auth-name">Your name</label>
-                <input
-                  id="auth-name"
-                  value={displayName}
-                  onChange={(event) => setDisplayName(event.target.value)}
-                  autoComplete="name"
-                />
-              </div>
-            </>
+            <div className="auth-field">
+              <label htmlFor="auth-name">Your name</label>
+              <input
+                id="auth-name"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                autoComplete="name"
+              />
+            </div>
           )}
+
 
           <div className="auth-field">
             <label htmlFor="auth-email">Email</label>
