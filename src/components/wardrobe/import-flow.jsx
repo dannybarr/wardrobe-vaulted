@@ -73,13 +73,16 @@ function parseDraftValue(input) {
   return Number.isFinite(numeric) && numeric > 0 ? Math.round(numeric * 100) / 100 : null;
 }
 
-function persistValueEdit(id, value) {
+async function persistValueEdit(id, value) {
   try {
-    const edits = JSON.parse(localStorage.getItem("open-wardrobe-edits-v1") || "{}");
-    edits[id] = { ...(edits[id] || {}), value };
-    localStorage.setItem("open-wardrobe-edits-v1", JSON.stringify(edits));
+    await apiFetch(`/api/import/wardrobe/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
   } catch {}
 }
+
 
 function ReviewEditor({ job, stage, draft, setDraft, regenPrompt, setRegenPrompt, busy, onAction }) {
   const asset = job.stages[stage]?.assetUrl;
