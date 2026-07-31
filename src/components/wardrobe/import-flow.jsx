@@ -186,10 +186,8 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
     setDragging(false); setError(""); setNotice(null);
     for (const file of images) {
       try {
-        const imageDataUrl = await fileToDataUrl(file);
-        const result = await api(API, { method: "POST", body: JSON.stringify({ imageDataUrl, metadata: { name: extra?.name || file.name.replace(/\.[^.]+$/, "") } }) });
-        const createdJobs = result.jobs || [result];
-        if (!createdJobs.length && result.noClothingDetected) {
+        const { jobs: createdJobs, noClothingDetected } = await startImport(file, { name: extra?.name });
+        if (noClothingDetected) {
           setNotice({ tone: "complete", text: "No clothing detected", detail: `We couldn’t find a distinct wearable item in ${file.name}. Try a clearer or more tightly framed image.` });
           setOpen(true);
           continue;
@@ -211,6 +209,7 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
       } catch (requestError) { setError(requestError.message); }
     }
   }, [setup]);
+
 
   useEffect(() => {
     const onAddPiece = (event) => {
