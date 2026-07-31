@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { AiCostEstimator } from "@/components/billing/AiCostEstimator";
 import {
   getAiCreditState,
   removeOwnAiKey,
@@ -79,6 +80,8 @@ export function AiCreditsPanel() {
             <strong>{formatPence(perPiece.chargedPence)}</strong> — the AI's own cost plus a 20%
             service charge. You'll see the exact figure and confirm it before anything runs.
           </p>
+
+          <AiCostEstimator />
 
           <div className="ai-credits__balance">
             <span>Balance</span>
