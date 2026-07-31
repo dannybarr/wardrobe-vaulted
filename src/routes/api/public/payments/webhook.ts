@@ -18,12 +18,24 @@ function planFromPrice(price: any): string {
   return price?.lookup_key || price?.metadata?.lovable_external_id || price?.id || "vault_monthly";
 }
 
+/** Founder accounts are free for life and must never be downgraded by Stripe. */
+async function isFounder(userId: string): Promise<boolean> {
+  const { data } = await getSupabase()
+    .from("profiles")
+    .select("is_founder")
+    .eq("id", userId)
+    .maybeSingle();
+  return data?.is_founder === true;
+}
+
 async function upsertSubscription(subscription: any, env: StripeEnv) {
   const userId = subscription.metadata?.userId;
   if (!userId) {
     console.error("Subscription webhook without userId metadata", subscription.id);
     return;
   }
+  if (await isFounder(userId)) return;
+
 
   const item = subscription.items?.data?.[0];
   const priceId = planFromPrice(item?.price);
