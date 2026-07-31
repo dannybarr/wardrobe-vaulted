@@ -9,14 +9,14 @@ export const ensureAccountReady = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const email = (context.claims as { email?: string }).email ?? null;
+    const email = (context.claims as { email?: string }).email ?? "";
 
     const { error } = await supabaseAdmin.rpc("provision_account", {
       _user_id: context.userId,
       _email: email,
-      _display_name: null,
     });
     if (error) throw new Error("We couldn't finish setting up your account.");
+
 
     const { data: profile } = await context.supabase
       .from("profiles")
