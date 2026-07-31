@@ -161,28 +161,23 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
 
   useEffect(() => {
     api(CONFIG_API).then(setSetup).catch((requestError) => setSetup({ ready: false, error: requestError.message }));
-    api(API)
-      .then((storedJobs) => {
-        const visibleJobs = storedJobs.filter((job) => job.status !== "complete" && job.stages?.crop?.status !== "rejected" && job.stages?.garment?.status !== "rejected" && job.stages?.modeled?.status !== "rejected");
-        setJobs(visibleJobs);
-        setDrafts(Object.fromEntries(visibleJobs.map((job) => [job.id, defaultDraft(job)])));
-      })
-      .catch(() => {});
   }, []);
 
-  const refresh = useCallback(async (id) => {
-    try {
-      const next = await api(`${API}/${id}`);
-      setJobs((current) => current.map((job) => job.id === id ? next : job));
-      setDrafts((current) => current[id] ? current : { ...current, [id]: defaultDraft(next) });
-    } catch (requestError) { setError(requestError.message); }
+  const setJob = useCallback((next) => {
+    setJobs((current) => current.map((job) => job.id === next.id ? next : job));
   }, []);
 
-  useEffect(() => {
-    if (!jobs.some((job) => job.stages?.crop?.status === "approved" && ["processing", "pending", "queued"].includes(job.stages?.garment?.status))) return undefined;
-    const timer = setInterval(() => jobs.forEach((job) => refresh(job.id)), 900);
-    return () => clearInterval(timer);
-  }, [jobs, refresh]);
+  const dropJob = useCallback((id) => {
+    releaseJob(id);
+    setDrafts((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== id)));
+    setSelectedReviewId((current) => current === id ? null : current);
+    setJobs((current) => {
+      const remaining = current.filter((job) => job.id !== id);
+      if (!remaining.length) setOpen(false);
+      return remaining;
+    });
+  }, []);
+
 
   const submitFiles = useCallback(async (files, extra) => {
     if (!setup?.ready) { setOpen(true); return; }
