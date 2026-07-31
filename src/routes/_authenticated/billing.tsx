@@ -122,7 +122,7 @@ function Billing() {
             </>
           )}
 
-          {error ? <p className="auth-error">{error}</p> : null}
+          {error ? <p className="auth-message auth-message--error">{error}</p> : null}
 
           <p className="auth-alt">
             <Link to="/wardrobe">Back to your wardrobe</Link> · <Link to="/support">Support</Link> ·{" "}
