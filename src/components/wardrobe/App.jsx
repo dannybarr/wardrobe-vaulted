@@ -747,7 +747,7 @@ export function WardrobeApp() {
         <header className="gallery-header">
           <div className="gallery-meta-row">
             <div className="gallery-identity">
-              <ProfileBadge netWorth={netWorth} />
+              <ProfileBadge netWorth={netWorth} pieces={items.length} />
               <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"}</p>
               <p className="net-worth">Net worth <strong>£{netWorth.toLocaleString("en-GB", { minimumFractionDigits: Number.isInteger(netWorth) ? 0 : 2, maximumFractionDigits: 2 })}</strong></p>
             </div>

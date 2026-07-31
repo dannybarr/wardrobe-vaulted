@@ -23,5 +23,5 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const navigate = useNavigate();
-  return <LandingPage onEnter={() => navigate({ to: "/auth" })} />;
+  return <LandingPage onEnter={() => navigate({ to: "/try" })} />;
 }

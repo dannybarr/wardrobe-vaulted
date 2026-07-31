@@ -23,13 +23,20 @@ function WardrobeRoute() {
   const fetchAccess = useServerFn(getVaultAccess);
 
   // First visit after signing up: make sure the account has its wardrobe,
-  // allowances and plan before the gallery asks for them.
+  // allowances and plan before the gallery asks for them, then move anything
+  // built during the guest trial into it.
   const { isPending, error, isSuccess } = useQuery({
     queryKey: ["account-ready"],
-    queryFn: () => prepareAccount(),
+    queryFn: async () => {
+      const account = await prepareAccount();
+      const { migrateTrialPieces } = await import("@/lib/trial/migrate");
+      await migrateTrialPieces().catch(() => 0);
+      return account;
+    },
     staleTime: Infinity,
     retry: 1,
   });
+
 
   const { data: access } = useQuery({
     queryKey: ["vault-access"],

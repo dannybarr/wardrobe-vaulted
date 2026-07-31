@@ -752,6 +752,30 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_runs: {
+        Row: {
+          address_hash: string
+          created_at: string
+          device_id: string
+          id: string
+          kind: string
+        }
+        Insert: {
+          address_hash: string
+          created_at?: string
+          device_id: string
+          id?: string
+          kind: string
+        }
+        Update: {
+          address_hash?: string
+          created_at?: string
+          device_id?: string
+          id?: string
+          kind?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
