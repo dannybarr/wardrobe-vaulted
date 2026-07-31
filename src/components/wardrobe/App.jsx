@@ -5,7 +5,9 @@ import { WishlistPane } from "./wishlist.jsx";
 import { OutfitsPane } from "./outfits.jsx";
 import { AddPieceModal } from "./add-piece.jsx";
 import { OptimizedImage } from "./OptimizedImage.jsx";
+import { ProfileBadge } from "./ProfileBadge.tsx";
 import { apiFetch } from "../../lib/api-fetch";
+
 
 const STORAGE_KEY = "open-wardrobe-edits-v1";
 const DELETED_STORAGE_KEY = "open-wardrobe-deleted-v1";
@@ -744,10 +746,12 @@ export function WardrobeApp() {
       <main className="gallery-pane">
         <header className="gallery-header">
           <div className="gallery-meta-row">
-            <div>
+            <div className="gallery-identity">
+              <ProfileBadge netWorth={netWorth} />
               <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"}</p>
               <p className="net-worth">Net worth <strong>£{netWorth.toLocaleString("en-GB", { minimumFractionDigits: Number.isInteger(netWorth) ? 0 : 2, maximumFractionDigits: 2 })}</strong></p>
             </div>
+
             <div className="meta-actions">
               <button className="add-piece-button" type="button" onClick={() => setAddOpen(true)}>
                 <Plus size={14} weight="bold" aria-hidden="true" /> Add piece
