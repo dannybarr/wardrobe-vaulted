@@ -89,11 +89,11 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
                     </div>
                   ))}
                 </div>
-                <button className="vault-outfit" type="button" onClick={onEnter}>
+                <div className="vault-outfit">
                   <span>OUTFIT_001</span>
                   <strong>Your new look is ready.</strong>
                   <i>→</i>
-                </button>
+                </div>
               </div>
             ) : (
               <label
@@ -143,7 +143,7 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
                   ? "AI ANALYSING"
                   : "AWAITING IMAGE"}
             </span>
-            <span>PRIVATE ENCRYPTED LIBRARY</span>
+            <span>SECURE PRIVATE LIBRARY</span>
           </div>
         </section>
       </section>
