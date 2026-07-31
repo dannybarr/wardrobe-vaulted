@@ -748,6 +748,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      provision_account: {
+        Args: { _display_name?: string; _email: string; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       ai_job_kind:
