@@ -22,6 +22,7 @@ import { Route as ApiImportConfigRouteImport } from './routes/api/import/config'
 import { Route as ApiImportCutoutRouteImport } from './routes/api/import/cutout'
 import { Route as ApiImportGateRouteImport } from './routes/api/import/gate'
 import { Route as ApiImportModeledRouteImport } from './routes/api/import/modeled'
+import { Route as ApiImportPiecesRouteImport } from './routes/api/import/pieces'
 import { Route as ApiImportWardrobeRouteImport } from './routes/api/import/wardrobe'
 import { Route as ApiImportWardrobeIdRouteImport } from './routes/api/import/wardrobe.$id'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -90,6 +91,11 @@ const ApiImportModeledRoute = ApiImportModeledRouteImport.update({
   path: '/api/import/modeled',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiImportPiecesRoute = ApiImportPiecesRouteImport.update({
+  id: '/api/import/pieces',
+  path: '/api/import/pieces',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiImportWardrobeRoute = ApiImportWardrobeRouteImport.update({
   id: '/api/import/wardrobe',
   path: '/api/import/wardrobe',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/api/import/cutout': typeof ApiImportCutoutRoute
   '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/modeled': typeof ApiImportModeledRoute
+  '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/api/import/cutout': typeof ApiImportCutoutRoute
   '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/modeled': typeof ApiImportModeledRoute
+  '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/api/import/cutout': typeof ApiImportCutoutRoute
   '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/modeled': typeof ApiImportModeledRoute
+  '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/api/import/cutout'
     | '/api/import/gate'
     | '/api/import/modeled'
+    | '/api/import/pieces'
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/api/import/cutout'
     | '/api/import/gate'
     | '/api/import/modeled'
+    | '/api/import/pieces'
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/api/import/cutout'
     | '/api/import/gate'
     | '/api/import/modeled'
+    | '/api/import/pieces'
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   ApiImportCutoutRoute: typeof ApiImportCutoutRoute
   ApiImportGateRoute: typeof ApiImportGateRoute
   ApiImportModeledRoute: typeof ApiImportModeledRoute
+  ApiImportPiecesRoute: typeof ApiImportPiecesRoute
   ApiImportWardrobeRoute: typeof ApiImportWardrobeRouteWithChildren
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiImportModeledRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/import/pieces': {
+      id: '/api/import/pieces'
+      path: '/api/import/pieces'
+      fullPath: '/api/import/pieces'
+      preLoaderRoute: typeof ApiImportPiecesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/import/wardrobe': {
       id: '/api/import/wardrobe'
       path: '/api/import/wardrobe'
@@ -384,6 +404,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiImportCutoutRoute: ApiImportCutoutRoute,
   ApiImportGateRoute: ApiImportGateRoute,
   ApiImportModeledRoute: ApiImportModeledRoute,
+  ApiImportPiecesRoute: ApiImportPiecesRoute,
   ApiImportWardrobeRoute: ApiImportWardrobeRouteWithChildren,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
