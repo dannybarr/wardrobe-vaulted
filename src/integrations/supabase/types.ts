@@ -572,8 +572,13 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string
           current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
           owner_id: string
           plan: string
+          price_id: string | null
+          product_id: string | null
           status: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -583,8 +588,13 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
           owner_id: string
           plan?: string
+          price_id?: string | null
+          product_id?: string | null
           status?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -594,8 +604,13 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
           owner_id?: string
           plan?: string
+          price_id?: string | null
+          product_id?: string | null
           status?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -741,11 +756,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      garment_count: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_vault_access: {
+        Args: { _environment?: string; _user_id: string }
         Returns: boolean
       }
       provision_account: {
