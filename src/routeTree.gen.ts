@@ -17,6 +17,7 @@ import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedWardrobeRouteImport } from './routes/_authenticated/wardrobe'
+import { Route as ApiImportAnalyzeRouteImport } from './routes/api/import/analyze'
 import { Route as ApiImportConfigRouteImport } from './routes/api/import/config'
 import { Route as ApiImportGateRouteImport } from './routes/api/import/gate'
 import { Route as ApiImportWardrobeRouteImport } from './routes/api/import/wardrobe'
@@ -62,6 +63,11 @@ const AuthenticatedWardrobeRoute = AuthenticatedWardrobeRouteImport.update({
   path: '/wardrobe',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiImportAnalyzeRoute = ApiImportAnalyzeRouteImport.update({
+  id: '/api/import/analyze',
+  path: '/api/import/analyze',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiImportConfigRoute = ApiImportConfigRouteImport.update({
   id: '/api/import/config',
   path: '/api/import/config',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/gate': typeof ApiImportGateRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/billing'
     | '/wardrobe'
+    | '/api/import/analyze'
     | '/api/import/config'
     | '/api/import/gate'
     | '/api/import/wardrobe'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/billing'
     | '/wardrobe'
+    | '/api/import/analyze'
     | '/api/import/config'
     | '/api/import/gate'
     | '/api/import/wardrobe'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/_authenticated/billing'
     | '/_authenticated/wardrobe'
+    | '/api/import/analyze'
     | '/api/import/config'
     | '/api/import/gate'
     | '/api/import/wardrobe'
@@ -186,6 +198,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  ApiImportAnalyzeRoute: typeof ApiImportAnalyzeRoute
   ApiImportConfigRoute: typeof ApiImportConfigRoute
   ApiImportGateRoute: typeof ApiImportGateRoute
   ApiImportWardrobeRoute: typeof ApiImportWardrobeRouteWithChildren
@@ -249,6 +262,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/wardrobe'
       preLoaderRoute: typeof AuthenticatedWardrobeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/import/analyze': {
+      id: '/api/import/analyze'
+      path: '/api/import/analyze'
+      fullPath: '/api/import/analyze'
+      preLoaderRoute: typeof ApiImportAnalyzeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/import/config': {
       id: '/api/import/config'
@@ -319,6 +339,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  ApiImportAnalyzeRoute: ApiImportAnalyzeRoute,
   ApiImportConfigRoute: ApiImportConfigRoute,
   ApiImportGateRoute: ApiImportGateRoute,
   ApiImportWardrobeRoute: ApiImportWardrobeRouteWithChildren,
