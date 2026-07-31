@@ -135,23 +135,46 @@ function AuthPage() {
         <p className="auth-wordmark">
           WARDROBE<span>®</span>
         </p>
+        {mode !== "forgot" && (
+          <div className="auth-tabs" role="tablist" aria-label="Sign in or sign up">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "signin"}
+              className={mode === "signin" ? "is-active" : ""}
+              onClick={() => setMode("signin")}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "signup"}
+              className={mode === "signup" ? "is-active" : ""}
+              onClick={() => setMode("signup")}
+            >
+              Sign up
+            </button>
+          </div>
+        )}
         <p className="auth-kicker">
           {mode === "signup" ? "Invitation only" : mode === "forgot" ? "Password reset" : "Private alpha"}
         </p>
         <h1>
           {mode === "signup"
-            ? "Claim your invitation."
+            ? "Create your wardrobe."
             : mode === "forgot"
               ? "Set a new password."
               : "Welcome back."}
         </h1>
         <p className="auth-lede">
           {mode === "signup"
-            ? "Wardrobe is in a small private alpha. Enter the code you were sent to create your account."
+            ? "Wardrobe is in a small private alpha. Enter the invitation code you were sent, and we'll set up your account."
             : mode === "forgot"
               ? "We'll email you a link to choose a new password."
               : "Sign in to your wardrobe. Everything in it stays private to you."}
         </p>
+
 
         <form className="auth-form" onSubmit={onSubmit}>
           {mode === "signup" && (
@@ -231,7 +254,7 @@ function AuthPage() {
 
         {mode === "signin" && (
           <p className="auth-alt">
-            Have an invitation? <button type="button" onClick={() => setMode("signup")}>Redeem it</button>
+            New here? <button type="button" onClick={() => setMode("signup")}>Create an account</button>
             {" · "}
             <button type="button" onClick={() => setMode("forgot")}>Forgot password</button>
           </p>
@@ -241,6 +264,7 @@ function AuthPage() {
             Already have an account? <button type="button" onClick={() => setMode("signin")}>Sign in</button>
           </p>
         )}
+
         {mode === "forgot" && (
           <p className="auth-alt">
             <button type="button" onClick={() => setMode("signin")}>Back to sign in</button>
