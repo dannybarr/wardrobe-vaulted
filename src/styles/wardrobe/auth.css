@@ -186,3 +186,153 @@
   color: var(--ink);
 }
 .vault-notice a { color: inherit; text-underline-offset: 3px; }
+
+/* ---- AI credit ------------------------------------------------------------ */
+
+.ai-credits {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(26, 24, 21, 0.12);
+  text-align: left;
+}
+
+.ai-credits__label {
+  margin: 20px 0 8px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.ai-credits__balance {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  margin-top: 16px;
+  background: rgba(26, 24, 21, 0.04);
+}
+
+.ai-credits__balance span {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.ai-credits__balance strong {
+  font-size: 26px;
+  letter-spacing: -0.01em;
+}
+
+.ai-credits__balance small {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.ai-credits__packs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-credits__pack {
+  padding: 10px 18px;
+  border: 1px solid rgba(26, 24, 21, 0.2);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.ai-credits__pack.is-active,
+.ai-credits__pack:hover {
+  border-color: currentColor;
+  background: rgba(26, 24, 21, 0.06);
+}
+
+.ai-credits__key,
+.ai-credits__key-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ai-credits__key-form input {
+  flex: 1 1 220px;
+  padding: 10px 12px;
+  border: 1px solid rgba(26, 24, 21, 0.2);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+}
+
+.ai-credits__fine {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.6;
+}
+
+.ai-credits__usage {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+}
+
+.ai-credits__usage li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(26, 24, 21, 0.08);
+}
+
+.ai-credits__usage li span:first-child {
+  text-transform: capitalize;
+}
+
+/* ---- Cost confirmation before an AI run ---------------------------------- */
+
+.ai-confirm {
+  padding: 18px;
+  border: 1px solid rgba(26, 24, 21, 0.16);
+  background: rgba(26, 24, 21, 0.03);
+  text-align: left;
+}
+
+.ai-confirm__amount {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+}
+
+.ai-confirm__lede {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  opacity: 0.75;
+}
+
+.ai-confirm__stages {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  font-size: 13px;
+}
+
+.ai-confirm__stages li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(26, 24, 21, 0.08);
+}
+
+.ai-confirm__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
