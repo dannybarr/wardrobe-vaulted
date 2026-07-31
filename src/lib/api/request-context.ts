@@ -49,6 +49,7 @@ export async function withUser(
   if (!token) return json({ error: "Please sign in." }, 401);
 
   const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) console.error("api auth debug", { hasToken: Boolean(token), url: Boolean(process.env["SUPABASE_URL"]), key: Boolean(process.env["SUPABASE_PUBLISHABLE_KEY"]), error: error?.message });
   if (error || !data.user) return json({ error: "Please sign in." }, 401);
 
   try {
