@@ -231,37 +231,48 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
     return () => { window.removeEventListener("dragenter", onDragEnter); window.removeEventListener("dragover", onDragOver); window.removeEventListener("dragleave", onDragLeave); window.removeEventListener("drop", onDrop); window.removeEventListener("paste", onPaste); };
   }, [submitFiles]);
 
+  const draftMetadata = (job) => {
+    const draft = drafts[job.id] || defaultDraft(job);
+    return {
+      name: draft.name.trim() || "New piece",
+      part: draft.part,
+      color: draft.color,
+      secondaryColor: draft.secondaryColor || null,
+      tags: draft.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+      value: parseDraftValue(draft.value),
+    };
+  };
+
   const perform = async (job, stage, action, prompt = "") => {
     setBusyId(job.id); setError("");
     try {
-      if (stage === "garment" && action === "approve") {
-        const draft = drafts[job.id];
-        const numericValue = parseDraftValue(draft.value);
-        const metadata = { ...draft, value: numericValue, secondaryColor: draft.secondaryColor || null, tags: draft.tags.split(",").map((tag) => tag.trim()).filter(Boolean) };
-        await api(`${API}/${job.id}/metadata`, { method: "PATCH", body: JSON.stringify({ metadata }) });
-        const updated = await api(`${API}/${job.id}/stages/garment/approve`, { method: "POST" });
-        if (numericValue != null) persistValueEdit(`import-${job.id}`, numericValue);
-        const garmentPath = `/api/import/library/import-${job.id}-garment.png`;
-        onGarmentApproved?.({ id: `import-${job.id}`, ...metadata, image: garmentPath, thumbnail: garmentPath, modeledImage: null, canGenerateModeled: true, palette: [metadata.color, metadata.secondaryColor].filter(Boolean), importJobId: job.id });
-        const remainingJobs = jobs.filter((item) => item.id !== job.id);
-        setJobs(remainingJobs);
-        setDrafts((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== job.id)));
-        setSelectedReviewId(null);
-        if (!remainingJobs.length) setOpen(false);
-      } else {
-        const updated = await api(`${API}/${job.id}/stages/${stage}/${action}`, { method: "POST", body: action === "regenerate" ? JSON.stringify({ prompt }) : undefined });
-        const removeFromQueue = action === "reject" || (stage === "modeled" && action === "approve");
-        const remainingJobs = removeFromQueue ? jobs.filter((item) => item.id !== job.id) : null;
-        setJobs((current) => removeFromQueue ? current.filter((item) => item.id !== job.id) : current.map((item) => item.id === job.id ? updated : item));
-        if (removeFromQueue) {
-          setDrafts((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== job.id)));
-          setSelectedReviewId(null);
-          if (!remainingJobs.length) setOpen(false);
-        }
-        if (action === "regenerate") setRegenerationPrompts((current) => ({ ...current, [`${job.id}:${stage}`]: "" }));
-        if (stage === "modeled" && action === "approve") onModeledApproved?.(job.id, `/api/import/library/import-${job.id}-modeled.png`);
+      if (action === "reject") { dropJob(job.id); return; }
+
+      if (stage === "crop" && action === "approve") {
+        setJob({ ...job, stages: { ...job.stages, crop: { ...job.stages.crop, status: "approved" }, garment: { status: "processing" } } });
+        setJob(await generateGarment(job, { metadata: draftMetadata(job) }));
+        setSelectedReviewId(job.id);
+        return;
       }
-    } catch (requestError) { setError(requestError.message); }
+
+      if (stage === "garment" && action === "regenerate") {
+        setJob({ ...job, stages: { ...job.stages, garment: { status: "processing" } } });
+        setJob(await generateGarment(job, { direction: prompt, metadata: draftMetadata(job) }));
+        setRegenerationPrompts((current) => ({ ...current, [`${job.id}:${stage}`]: "" }));
+        setSelectedReviewId(job.id);
+        return;
+      }
+
+      if (stage === "garment" && action === "approve") {
+        const metadata = draftMetadata(job);
+        const item = await savePiece(job, metadata);
+        onGarmentApproved?.({ ...item, canGenerateModeled: true });
+        dropJob(job.id);
+      }
+    } catch (requestError) {
+      setError(requestError.message);
+      setJobs((current) => current.map((item) => item.id === job.id ? { ...item, stages: { ...item.stages, garment: { ...item.stages.garment, status: item.stages.garment.assetUrl ? "review" : "failed", error: requestError.message } } } : item));
+    }
     finally { setBusyId(null); }
   };
 
@@ -269,8 +280,8 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
     setBusyId(job.id); setError("");
     try {
       const tolerance = requestedTolerance ?? cleanupTolerances[job.id] ?? job.stages?.garment?.cleanupTolerance ?? 46;
-      const updated = await api(`${API}/${job.id}/stages/garment/cleanup-${action}`, { method: "POST", body: JSON.stringify({ tolerance }) });
-      setJobs((current) => current.map((item) => item.id === job.id ? updated : item));
+      const updated = await runCleanup(job, tolerance, action === "accept");
+      setJob(updated);
       setCleanupTolerances((current) => ({ ...current, [job.id]: updated.stages?.garment?.cleanupTolerance ?? tolerance }));
       setSelectedReviewId(job.id);
     } catch (requestError) { setError(requestError.message); }
@@ -278,17 +289,10 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
   };
 
   const deleteJob = async (job) => {
-    setBusyId(job.id); setError("");
-    try {
-      await api(`${API}/${job.id}`, { method: "DELETE" });
-      const remaining = jobs.filter((item) => item.id !== job.id);
-      setJobs(remaining);
-      setDrafts((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== job.id)));
-      if (selectedReviewId === job.id) setSelectedReviewId(null);
-      if (!remaining.length) setOpen(false);
-    } catch (requestError) { setError(requestError.message); }
-    finally { setBusyId(null); }
+    setError("");
+    dropJob(job.id);
   };
+
 
   const active = jobs[jobs.length - 1];
   const setupRequired = setup?.ready === false;
