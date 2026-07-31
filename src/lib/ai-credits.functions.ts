@@ -130,11 +130,14 @@ export const setAiMode = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
 
     if (data.mode === "byok") {
-      const { count } = await supabase
-        .from("ai_credentials")
-        .select("owner_id", { count: "exact", head: true })
-        .eq("owner_id", userId);
-      if (!count) throw new Error("Add your OpenAI key first.");
+      // Saved keys are server-only, so the profile's masked hint is what tells
+      // us a key exists.
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("ai_key_hint")
+        .eq("id", userId)
+        .maybeSingle();
+      if (!profile?.ai_key_hint) throw new Error("Add your OpenAI key first.");
     }
 
     await supabase.from("profiles").update({ ai_mode: data.mode }).eq("id", userId);
