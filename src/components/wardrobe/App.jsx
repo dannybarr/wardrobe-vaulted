@@ -5,7 +5,9 @@ import { WishlistPane } from "./wishlist.jsx";
 import { OutfitsPane } from "./outfits.jsx";
 import { AddPieceModal } from "./add-piece.jsx";
 import { OptimizedImage } from "./OptimizedImage.jsx";
+import { ProfileBadge } from "./ProfileBadge.tsx";
 import { apiFetch } from "../../lib/api-fetch";
+
 
 const STORAGE_KEY = "open-wardrobe-edits-v1";
 const DELETED_STORAGE_KEY = "open-wardrobe-deleted-v1";
