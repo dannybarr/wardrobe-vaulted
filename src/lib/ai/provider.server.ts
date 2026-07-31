@@ -53,7 +53,7 @@ export async function analyzePhoto(
   const items = run.mode === "byok" && run.apiKey
     ? await analyzeWithOpenAi(run.apiKey, image)
     : await analyzeWithGateway(image);
-  return items.map(normalizeDetected);
+  return dedupeDetected(items.map(normalizeDetected));
 }
 
 async function analyzeWithGateway(image: ImageInput): Promise<unknown[]> {

@@ -50,7 +50,7 @@ export const MODELED_PROMPT =
   "Create a professional horizontal 3:2 editorial fashion photograph of the person in Image 1 wearing the exact garment from Image 2. Preserve the person's recognizable identity, face, hair, age and proportions. Preserve every garment color, material, fit, construction, graphic, logo and distinctive detail. Keep the complete featured item clearly visible and unobstructed, use understated neutral supporting clothes, realistic anatomy, natural light, authentic fabric, a tasteful real-world setting, and leave environmental space around the model. No text, watermark, product mockup, or synthetic appearance.";
 
 export const ANALYZE_INSTRUCTION =
-  "Identify every distinct wearable clothing item visible in this image. A photo may show one isolated garment or a person wearing several items. Return one record per actual item that should enter a wardrobe. Ignore the person's body and non-wearable background objects. For each item, include a tight bounding box around only that item using integer coordinates normalized to a 1000 by 1000 image: x and y are the top-left corner, followed by width and height. Boxes may overlap when garments overlap, but each box must focus on one distinct item. Use only these category ids: upperbody, wholebody_up, lowerbody, accessories_up, shoes. Suggest a concise specific name, primary hex color, optional genuinely distinct secondary hex color, and 1-4 useful lowercase detail tags.";
+  "Identify every distinct wearable clothing item visible in this image. Each physical item must appear exactly once in the result: never repeat the same garment under different names, and never return several boxes for different parts, halves or details of one garment. A photo may show one isolated garment or a person wearing several items. Return one record per actual item that should enter a wardrobe. Ignore the person's body and non-wearable background objects. For each item, include a tight bounding box around only that item using integer coordinates normalized to a 1000 by 1000 image: x and y are the top-left corner, followed by width and height. Boxes may overlap when garments overlap, but each box must focus on one distinct item. Use only these category ids: upperbody, wholebody_up, lowerbody, accessories_up, shoes. Suggest a concise specific name, primary hex color, optional genuinely distinct secondary hex color, and 1-4 useful lowercase detail tags.";
 
 export const ANALYZE_SCHEMA = {
   type: "object",
@@ -139,4 +139,64 @@ export function normalizeDetected(value: unknown): DetectedPiece {
     },
   };
 
+}
+
+/** Normalised name used to spot the same garment returned twice. */
+function nameKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, " ")
+    .split(/\s+/)
+    .filter((word) => word && !["the", "a", "an", "of", "with"].includes(word))
+    .sort()
+    .join(" ");
+}
+
+type Box = { x: number; y: number; width: number; height: number };
+
+function area(box: Box): number {
+  return box.width * box.height;
+}
+
+function intersection(a: Box, b: Box): number {
+  const width = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
+  const height = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+  return width > 0 && height > 0 ? width * height : 0;
+}
+
+/**
+ * The vision model sometimes reports one garment several times — once per sleeve,
+ * once per crop, or simply repeated. Every duplicate would become its own import
+ * job, so they are collapsed here before the UI ever sees them: a detection is
+ * dropped when it shares a name with a kept item, or when its box overlaps a kept
+ * box of the same category heavily enough that it cannot be a separate piece.
+ */
+export function dedupeDetected(items: DetectedPiece[]): DetectedPiece[] {
+  const ordered = [...items].sort((a, b) => area(b.boundingBox) - area(a.boundingBox));
+  const kept: DetectedPiece[] = [];
+  const seenNames = new Set<string>();
+
+  for (const item of ordered) {
+    const key = `${item.part}|${nameKey(item.name)}`;
+    if (key && seenNames.has(key)) continue;
+
+    const duplicate = kept.some((existing) => {
+      const overlap = intersection(existing.boundingBox, item.boundingBox);
+      if (!overlap) return false;
+      const smaller = Math.min(area(existing.boundingBox), area(item.boundingBox));
+      const union = area(existing.boundingBox) + area(item.boundingBox) - overlap;
+      const containment = overlap / smaller;
+      const iou = overlap / union;
+      if (existing.part === item.part) return containment > 0.6 || iou > 0.4;
+      return containment > 0.9;
+    });
+    if (duplicate) continue;
+
+    seenNames.add(key);
+    kept.push(item);
+  }
+
+  return kept.sort(
+    (a, b) => items.indexOf(a) - items.indexOf(b),
+  );
 }
