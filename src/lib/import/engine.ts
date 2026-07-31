@@ -23,12 +23,12 @@ export type StageStatus = "processing" | "review" | "approved" | "rejected" | "f
 
 export type ImportStage = {
   status: StageStatus;
-  assetUrl?: string | null;
-  failedAssetUrl?: string | null;
-  cleanupPreviewUrl?: string | null;
+  assetUrl?: string | null | undefined;
+  failedAssetUrl?: string | null | undefined;
+  cleanupPreviewUrl?: string | null | undefined;
   cleanupTolerance?: number;
   cleanupDiagnostics?: { contaminatedPixels: number; maxSpill: number };
-  error?: string | null;
+  error?: string | null | undefined;
 };
 
 export type ImportMetadata = {
@@ -49,7 +49,7 @@ export type ImportJob = {
 };
 
 /** Image data lives outside React state; only display URLs go into the jobs. */
-type JobAssets = { source: Blob; crop: Blob; generated?: Blob; cutout?: Blob };
+type JobAssets = { source: Blob; crop: Blob; generated?: Blob | undefined; cutout?: Blob | undefined };
 const assets = new Map<string, JobAssets>();
 
 const objectUrls = new Set<string>();
