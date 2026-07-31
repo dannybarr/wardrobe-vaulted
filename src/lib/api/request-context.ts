@@ -48,8 +48,10 @@ export async function withUser(
   const { supabase, token } = clientForRequest(request);
   if (!token) return json({ error: "Please sign in." }, 401);
 
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) return json({ error: "Please sign in.", debug: { hasToken: Boolean(token), url: process.env["SUPABASE_URL"] ?? null, keyPrefix: (process.env["SUPABASE_PUBLISHABLE_KEY"] ?? "").slice(0, 12), message: error?.message ?? null, status: (error as { status?: number } | null)?.status ?? null } }, 401);
+  // The token comes from the request, not from a stored session, so it has to be
+  // passed explicitly for Supabase to validate it.
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) return json({ error: "Please sign in." }, 401);
   if (error || !data.user) return json({ error: "Please sign in." }, 401);
 
   try {
