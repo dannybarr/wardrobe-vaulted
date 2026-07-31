@@ -162,3 +162,27 @@
   .auth-card { box-shadow: 5px 5px 0 var(--vault-ink); padding: 26px 20px 22px; }
   .auth-card h1 { font-size: 28px; }
 }
+
+/* Membership / payment notices */
+.payment-banner {
+  padding: 9px 16px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(24, 52, 46, 0.24);
+  background: #f3efe4;
+  color: var(--ink);
+}
+.payment-banner--error { background: #f7e4e1; color: #8c2f28; border-bottom-color: #8c2f28; }
+
+.vault-notice {
+  padding: 12px 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  border-bottom: 1px solid rgba(24, 52, 46, 0.24);
+  background: #fff;
+  color: var(--ink);
+}
+.vault-notice a { color: inherit; text-underline-offset: 3px; }
