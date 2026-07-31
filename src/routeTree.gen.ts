@@ -26,6 +26,7 @@ import { Route as ApiImportPiecesRouteImport } from './routes/api/import/pieces'
 import { Route as ApiImportWardrobeRouteImport } from './routes/api/import/wardrobe'
 import { Route as ApiImportWardrobeIdRouteImport } from './routes/api/import/wardrobe.$id'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiImportWardrobeIdModeledRouteImport } from './routes/api/import/wardrobe.$id.modeled'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -112,6 +113,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiImportWardrobeIdModeledRoute =
+  ApiImportWardrobeIdModeledRouteImport.update({
+    id: '/modeled',
+    path: '/modeled',
+    getParentRoute: () => ApiImportWardrobeIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -128,8 +135,9 @@ export interface FileRoutesByFullPath {
   '/api/import/modeled': typeof ApiImportModeledRoute
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
-  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
+  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -146,8 +154,9 @@ export interface FileRoutesByTo {
   '/api/import/modeled': typeof ApiImportModeledRoute
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
-  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
+  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -166,8 +175,9 @@ export interface FileRoutesById {
   '/api/import/modeled': typeof ApiImportModeledRoute
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
-  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRoute
+  '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
+    | '/api/import/wardrobe/$id/modeled'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
+    | '/api/import/wardrobe/$id/modeled'
   id:
     | '__root__'
     | '/'
@@ -225,6 +237,7 @@ export interface FileRouteTypes {
     | '/api/import/wardrobe'
     | '/api/import/wardrobe/$id'
     | '/api/public/payments/webhook'
+    | '/api/import/wardrobe/$id/modeled'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/import/wardrobe/$id/modeled': {
+      id: '/api/import/wardrobe/$id/modeled'
+      path: '/modeled'
+      fullPath: '/api/import/wardrobe/$id/modeled'
+      preLoaderRoute: typeof ApiImportWardrobeIdModeledRouteImport
+      parentRoute: typeof ApiImportWardrobeIdRoute
+    }
   }
 }
 
@@ -381,12 +401,23 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ApiImportWardrobeIdRouteChildren {
+  ApiImportWardrobeIdModeledRoute: typeof ApiImportWardrobeIdModeledRoute
+}
+
+const ApiImportWardrobeIdRouteChildren: ApiImportWardrobeIdRouteChildren = {
+  ApiImportWardrobeIdModeledRoute: ApiImportWardrobeIdModeledRoute,
+}
+
+const ApiImportWardrobeIdRouteWithChildren =
+  ApiImportWardrobeIdRoute._addFileChildren(ApiImportWardrobeIdRouteChildren)
+
 interface ApiImportWardrobeRouteChildren {
-  ApiImportWardrobeIdRoute: typeof ApiImportWardrobeIdRoute
+  ApiImportWardrobeIdRoute: typeof ApiImportWardrobeIdRouteWithChildren
 }
 
 const ApiImportWardrobeRouteChildren: ApiImportWardrobeRouteChildren = {
-  ApiImportWardrobeIdRoute: ApiImportWardrobeIdRoute,
+  ApiImportWardrobeIdRoute: ApiImportWardrobeIdRouteWithChildren,
 }
 
 const ApiImportWardrobeRouteWithChildren =
