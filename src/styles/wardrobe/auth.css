@@ -359,3 +359,74 @@
   cursor: default;
   opacity: 0.4;
 }
+
+/* ---- Open cost estimator -------------------------------------------------- */
+
+.ai-estimator {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgba(26, 24, 21, 0.16);
+}
+
+.ai-estimator .ai-credits__label {
+  margin-top: 0;
+}
+
+.ai-estimator__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ai-estimator__legend {
+  flex: 0 0 88px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.ai-estimator__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-estimator__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 14px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.ai-estimator__result {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  padding: 14px 0;
+  border-top: 1px solid rgba(26, 24, 21, 0.12);
+  border-bottom: 1px solid rgba(26, 24, 21, 0.12);
+  margin-bottom: 14px;
+}
+
+.ai-estimator__result div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ai-estimator__result span {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.ai-estimator__result strong {
+  font-size: 24px;
+  letter-spacing: -0.01em;
+}
