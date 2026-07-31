@@ -48,7 +48,10 @@ export async function withUser(
   const { supabase, token } = clientForRequest(request);
   if (!token) return json({ error: "Please sign in." }, 401);
 
-  const { data, error } = await supabase.auth.getUser();
+  // The token comes from the request, not from a stored session, so it has to be
+  // passed explicitly for Supabase to validate it.
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) return json({ error: "Please sign in." }, 401);
   if (error || !data.user) return json({ error: "Please sign in." }, 401);
 
   try {
