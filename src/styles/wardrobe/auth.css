@@ -454,3 +454,22 @@
   color: #fff;
   background: var(--vault-ink);
 }
+
+/* ---- Guest trial banner --------------------------------------------------- */
+
+.vault-notice--trial {
+  background: var(--ink, #183430);
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.01em;
+}
+
+.vault-notice--trial strong {
+  font-weight: 600;
+}
+
+.vault-notice--trial a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
