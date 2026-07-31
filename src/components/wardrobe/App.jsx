@@ -704,26 +704,10 @@ export function WardrobeApp() {
   }, []);
 
   const generateOnModel = useCallback(async (item) => {
-    const start = await apiFetch(`/api/import/wardrobe/${item.id}/modeled`, { method: "POST" });
-    const result = await start.json().catch(() => ({}));
-    if (!start.ok) throw new Error(result.error || "The on-model image could not be started.");
-
-    for (let attempt = 0; attempt < 90; attempt += 1) {
-      await new Promise((resolve) => window.setTimeout(resolve, 1000));
-      const response = await apiFetch("/api/import/wardrobe", { cache: "no-store" });
-      const library = response.ok ? await response.json() : [];
-      const updated = library.find((entry) => entry.id === item.id);
-      if (updated?.modeledImage) {
-        setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, ...updated } : entry));
-        return;
-      }
-      const jobResponse = await apiFetch(`/api/import/jobs/${item.importJobId}`, { cache: "no-store" });
-      if (jobResponse.ok) {
-        const job = await jobResponse.json();
-        if (job.stages?.modeled?.status === "failed") throw new Error(job.stages.modeled.error || "The on-model image could not be generated.");
-      }
-    }
-    throw new Error("Generation is taking longer than expected. You can leave this item open and try again shortly.");
+    const response = await apiFetch(`/api/import/wardrobe/${item.id}/modeled`, { method: "POST" });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "The on-model image could not be created.");
+    setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, modeledImage: result.modeledImage } : entry));
   }, []);
 
   if (view === "wishlist") {
