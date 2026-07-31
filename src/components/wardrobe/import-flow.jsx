@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowCounterClockwise, Check, Plus, SpinnerGap, Trash, UploadSimple, WarningCircle, X } from "@phosphor-icons/react";
 import { apiFetch } from "../../lib/api-fetch";
+import { generateGarment, releaseJob, runCleanup, savePiece, startImport } from "../../lib/import/engine";
 
-const API = "/api/import/jobs";
 const CONFIG_API = "/api/import/config";
 const PARTS = [
   ["upperbody", "Tops"],
@@ -13,22 +13,16 @@ const PARTS = [
 ];
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
-const fileToDataUrl = (file) => new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = () => resolve(reader.result);
-  reader.onerror = () => reject(reader.error || new Error("Could not read that image."));
-  reader.readAsDataURL(file);
-});
-
 async function api(path, options) {
   const response = await apiFetch(path, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
   });
   const value = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(value.error || "The import job could not be updated.");
+  if (!response.ok) throw new Error(value.error || "That request could not be completed.");
   return value;
 }
+
 
 function deriveStatus(job) {
   const crop = job.stages?.crop;
