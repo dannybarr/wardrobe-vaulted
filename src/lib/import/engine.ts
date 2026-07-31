@@ -41,6 +41,8 @@ export type ImportMetadata = {
 
 export type ImportJob = {
   id: string;
+  sourceKey: string;
+  detectionKey: string;
   metadata: ImportMetadata;
   originalAssetUrl: string;
   chromaKey: string;
@@ -124,6 +126,14 @@ function nextJobId(): string {
   return `${Date.now().toString(36)}${counter.toString(36)}`;
 }
 
+function sourceKeyFor(file: File): string {
+  return [file.name, file.size, file.lastModified, file.type].join(":");
+}
+
+function detectionKeyFor(box: AnalyzeResponse["items"][number]["boundingBox"]): string {
+  return [box.x, box.y, box.width, box.height].map((value) => Math.round(value)).join(":");
+}
+
 /**
  * Stage one: the photo is read by the AI, then each detected item is cropped out
  * locally and offered for approval.
@@ -144,6 +154,7 @@ export async function startImport(
 
   const fallbackName = extra.name || file.name.replace(/\.[^.]+$/, "");
   const jobs: ImportJob[] = [];
+  const sourceKey = sourceKeyFor(file);
 
   for (const detected of result.items) {
     const id = nextJobId();
@@ -151,6 +162,8 @@ export async function startImport(
     assets.set(id, { source: normalized, crop });
     jobs.push({
       id,
+      sourceKey,
+      detectionKey: detectionKeyFor(detected.boundingBox),
       metadata: {
         name: result.items.length === 1 && fallbackName ? fallbackName : detected.name,
         part: detected.part,

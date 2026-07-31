@@ -147,6 +147,7 @@ function CleanupEditor({ job, tolerance, setTolerance, busy, onPreview, onAccept
 
 export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
   const inputRef = useRef(null);
+  const submittedFilesRef = useRef(new Set());
   const [jobs, setJobs] = useState([]);
   const [drafts, setDrafts] = useState({});
   const [regenerationPrompts, setRegenerationPrompts] = useState({});
@@ -185,6 +186,9 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
     if (!images.length) return;
     setDragging(false); setError(""); setNotice(null);
     for (const file of images) {
+      const submissionKey = [file.name, file.size, file.lastModified, file.type].join(":");
+      if (submittedFilesRef.current.has(submissionKey)) continue;
+      submittedFilesRef.current.add(submissionKey);
       try {
         const { jobs: createdJobs, noClothingDetected } = await startImport(file, { name: extra?.name });
         if (noClothingDetected) {
@@ -192,7 +196,19 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
           setOpen(true);
           continue;
         }
-        setJobs((current) => [...current, ...createdJobs]);
+        setJobs((current) => {
+          const known = new Set(current.map((job) => `${job.sourceKey}:${job.detectionKey}`));
+          const uniqueCreated = createdJobs.filter((job) => {
+            const key = `${job.sourceKey}:${job.detectionKey}`;
+            if (known.has(key)) {
+              releaseJob(job.id);
+              return false;
+            }
+            known.add(key);
+            return true;
+          });
+          return [...current, ...uniqueCreated];
+        });
         setDrafts((current) => ({
           ...current,
           ...Object.fromEntries(createdJobs.map((job) => {
@@ -206,7 +222,10 @@ export function WardrobeImportFlow({ onGarmentApproved, onModeledApproved }) {
             return [job.id, draft];
           })),
         }));
-      } catch (requestError) { setError(requestError.message); }
+      } catch (requestError) {
+        submittedFilesRef.current.delete(submissionKey);
+        setError(requestError.message);
+      }
     }
   }, [setup]);
 
