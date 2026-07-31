@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_credentials: {
+        Row: {
+          created_at: string
+          owner_id: string
+          provider: string
+          secret: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          owner_id: string
+          provider?: string
+          secret: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          owner_id?: string
+          provider?: string
+          secret?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_jobs: {
         Row: {
           attempts: number
@@ -104,6 +128,110 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ai_topups: {
+        Row: {
+          created_at: string
+          environment: string
+          owner_id: string
+          pence: number
+          price_id: string | null
+          stripe_session_id: string
+        }
+        Insert: {
+          created_at?: string
+          environment?: string
+          owner_id: string
+          pence: number
+          price_id?: string | null
+          stripe_session_id: string
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          owner_id?: string
+          pence?: number
+          price_id?: string | null
+          stripe_session_id?: string
+        }
+        Relationships: []
+      }
+      ai_usage: {
+        Row: {
+          ai_job_id: string | null
+          charged_pence: number
+          cost_pence: number
+          created_at: string
+          id: string
+          kind: string
+          markup_bps: number
+          mode: string
+          model: string | null
+          note: string | null
+          owner_id: string
+        }
+        Insert: {
+          ai_job_id?: string | null
+          charged_pence?: number
+          cost_pence?: number
+          created_at?: string
+          id?: string
+          kind: string
+          markup_bps?: number
+          mode?: string
+          model?: string | null
+          note?: string | null
+          owner_id: string
+        }
+        Update: {
+          ai_job_id?: string | null
+          charged_pence?: number
+          cost_pence?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          markup_bps?: number
+          mode?: string
+          model?: string | null
+          note?: string | null
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_ai_job_id_fkey"
+            columns: ["ai_job_id"]
+            isOneToOne: false
+            referencedRelation: "ai_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_wallets: {
+        Row: {
+          balance_pence: number
+          created_at: string
+          owner_id: string
+          spent_pence: number
+          topped_up_pence: number
+          updated_at: string
+        }
+        Insert: {
+          balance_pence?: number
+          created_at?: string
+          owner_id: string
+          spent_pence?: number
+          topped_up_pence?: number
+          updated_at?: string
+        }
+        Update: {
+          balance_pence?: number
+          created_at?: string
+          owner_id?: string
+          spent_pence?: number
+          topped_up_pence?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       analytics_events: {
         Row: {
@@ -531,6 +659,8 @@ export type Database = {
       profiles: {
         Row: {
           ai_consent_at: string | null
+          ai_key_hint: string | null
+          ai_mode: string
           created_at: string
           display_name: string | null
           email: string | null
@@ -543,6 +673,8 @@ export type Database = {
         }
         Insert: {
           ai_consent_at?: string | null
+          ai_key_hint?: string | null
+          ai_mode?: string
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -555,6 +687,8 @@ export type Database = {
         }
         Update: {
           ai_consent_at?: string | null
+          ai_key_hint?: string | null
+          ai_mode?: string
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -756,6 +890,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      charge_ai_wallet: {
+        Args: {
+          _charged_pence: number
+          _cost_pence: number
+          _kind: string
+          _markup_bps?: number
+          _model?: string
+          _note?: string
+          _user_id: string
+        }
+        Returns: number
+      }
+      credit_ai_wallet: {
+        Args: {
+          _environment?: string
+          _pence: number
+          _price_id?: string
+          _session_id: string
+          _user_id: string
+        }
+        Returns: number
+      }
       garment_count: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
