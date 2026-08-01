@@ -12,7 +12,9 @@
   flex-direction: column;
   padding: 28px clamp(24px, 5.25vw, 84px) 36px;
   color: var(--vault-ink);
-  background: var(--vault-paper);
+  background:
+    radial-gradient(120% 55% at 50% -12%, rgba(224,169,85,.42), rgba(224,169,85,0) 62%),
+    linear-gradient(180deg, #f2ece2 0%, var(--vault-paper) 42%, #e3d9cb 100%);
   font-family: "DM Sans", sans-serif;
 }
 .landing-page::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .35; background-image: radial-gradient(rgba(58,44,32,.18) .65px, transparent .65px); background-size: 5px 5px; mix-blend-mode: multiply; }
