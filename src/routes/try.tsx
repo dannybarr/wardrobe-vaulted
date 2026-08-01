@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { WardrobeApp } from "@/components/wardrobe/App.jsx";
 import { FirstOutfitPrompt } from "@/components/wardrobe/FirstOutfitPrompt";
 import { countTrialPieces } from "@/lib/trial/store";
+import { TRIAL_PIECE_ALLOWANCE } from "@/lib/trial/transport";
 
 
 export const Route = createFileRoute("/try")({
