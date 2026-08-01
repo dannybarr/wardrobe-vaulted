@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 /** Pieces anyone may add before the Vault subscription is required. */
-export const FREE_PIECE_ALLOWANCE = 1;
+export const FREE_PIECE_ALLOWANCE = 3;
 
 export type VaultGate = {
   subscribed: boolean;

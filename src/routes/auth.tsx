@@ -168,7 +168,7 @@ function AuthPage() {
         </h1>
         <p className="auth-lede">
           {mode === "signup"
-            ? "Create your account and we'll set up your wardrobe. Your first piece is on us."
+            ? "Create your account and we'll set up your wardrobe. Your first three pieces are on us."
             : mode === "forgot"
               ? "We'll email you a link to choose a new password."
               : "Sign in to your wardrobe. Everything in it stays private to you."}

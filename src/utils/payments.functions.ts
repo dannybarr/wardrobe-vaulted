@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { FREE_PIECE_ALLOWANCE } from "@/lib/api/vault-gate";
 import {
   type StripeEnv,
   createStripeClient,
@@ -205,8 +206,8 @@ export const getVaultAccess = createServerFn({ method: "POST" })
     return {
       subscribed,
       pieces,
-      freePieceRemaining: !subscribed && pieces < 1,
-      canAddPieces: subscribed || pieces < 1,
+      freePieceRemaining: !subscribed && pieces < FREE_PIECE_ALLOWANCE,
+      canAddPieces: subscribed || pieces < FREE_PIECE_ALLOWANCE,
       plan: sub?.plan ?? "none",
       status: sub?.status ?? "inactive",
       currentPeriodEnd: sub?.current_period_end ?? null,

@@ -39,8 +39,8 @@ export const Route = createFileRoute("/api/public/trial/analyze")({
 
         try {
           const items = await analyzePhoto(TRIAL_RUN_CONTEXT, image);
-          // A guest builds one piece, so only the clearest detection is offered.
-          const trimmed = items.slice(0, 1);
+          // A guest builds up to three pieces, so the clearest few are offered.
+          const trimmed = items.slice(0, 3);
           return json({
             items: trimmed,
             noClothingDetected: trimmed.length === 0,

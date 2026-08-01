@@ -97,7 +97,7 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
   const founder = access?.plan === "founder" || credits?.founder;
 
   const membership = guest
-    ? "Guest trial — your first piece is free"
+    ? "Guest trial — your first three pieces are free"
     : founder
     ? "Founder — free for life"
     : access?.subscribed
@@ -106,7 +106,7 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
         : renewal
           ? `Vault · £4.99/mo, renews ${renewal}`
           : "Vault · £4.99 a month"
-      : "No membership — first piece free";
+      : "No membership — first three pieces free";
 
   return (
     <div className="profile-badge" ref={wrapper}>
@@ -132,7 +132,7 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
 
           <dl className="profile-panel__rows">
             <div>
-              <dt>Net worth</dt>
+              <dt>Wardrobe value</dt>
               <dd>
                 £
                 {netWorth.toLocaleString("en-GB", {
@@ -149,7 +149,7 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
               <dt>AI credit</dt>
               <dd>
                 {guest
-                  ? "Free for your first piece"
+                  ? "Free for your first three pieces"
                   : credits?.founder
                   ? "Unlimited"
                   : credits?.mode === "byok"
