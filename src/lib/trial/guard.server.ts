@@ -8,8 +8,8 @@
  */
 export type TrialKind = "analyze" | "cutout";
 
-const DEVICE_CAP: Record<TrialKind, number> = { analyze: 2, cutout: 4 };
-const ADDRESS_DAILY_CAP: Record<TrialKind, number> = { analyze: 20, cutout: 40 };
+const DEVICE_CAP: Record<TrialKind, number> = { analyze: 5, cutout: 8 };
+const ADDRESS_DAILY_CAP: Record<TrialKind, number> = { analyze: 40, cutout: 70 };
 const GLOBAL_DAILY_CAP = 600;
 
 function json(body: unknown, status: number) {

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { WardrobeApp } from "@/components/wardrobe/App.jsx";
 import { FirstOutfitPrompt } from "@/components/wardrobe/FirstOutfitPrompt";
 import { countTrialPieces } from "@/lib/trial/store";
+import { TRIAL_PIECE_ALLOWANCE } from "@/lib/trial/transport";
 
 
 export const Route = createFileRoute("/try")({
@@ -51,18 +52,24 @@ function TryWardrobe() {
   return (
     <>
       <div className="vault-notice vault-notice--trial">
-        {pieces > 0 ? (
+        {pieces >= TRIAL_PIECE_ALLOWANCE ? (
           <>
-            <strong>Your piece is ready.</strong>{" "}
+            <strong>Your three free pieces are ready.</strong>{" "}
             <Link to="/auth" search={{ mode: "signup", redirect: "/wardrobe" }}>
               Create your free account
             </Link>{" "}
-            and it moves straight into your wardrobe.
+            and they move straight into your wardrobe.
+          </>
+        ) : pieces > 0 ? (
+          <>
+            <strong>Nicely done.</strong> {TRIAL_PIECE_ALLOWANCE - pieces} more free{" "}
+            {TRIAL_PIECE_ALLOWANCE - pieces === 1 ? "piece" : "pieces"} to add before you sign up —
+            still no account, no card.
           </>
         ) : (
           <>
-            <strong>You're trying Wardrobe.</strong> Add your first piece free — no account, no card.
-            You'll be asked to sign up only when it's ready to keep.
+            <strong>You're trying Wardrobe.</strong> Add your first three pieces free — no account,
+            no card. You'll be asked to sign up only when they're ready to keep.
           </>
         )}
       </div>

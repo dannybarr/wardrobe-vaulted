@@ -97,13 +97,13 @@ function Billing() {
             <>
               <h1>Keep your vault.</h1>
               <p className="auth-lede">
-                Your first piece is on us. Vault membership is £4.99 a month and keeps your whole
+                Your first three pieces are on us. Vault membership is £4.99 a month and keeps your whole
                 wardrobe — pieces, outfits and wishlist — stored privately and backed up, with the
                 styling tools switched on.
               </p>
               <p className="auth-lede">
                 {data?.freePieceRemaining
-                  ? "You still have your free first piece to add."
+                  ? "You still have free pieces to add."
                   : "You've used your free piece — subscribe to add more."}
               </p>
               {checkoutOpen ? (
