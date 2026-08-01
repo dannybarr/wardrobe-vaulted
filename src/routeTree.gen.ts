@@ -18,6 +18,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TryRouteImport } from './routes/try'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedWardrobeRouteImport } from './routes/_authenticated/wardrobe'
+import { Route as ApiWishlistRouteImport } from './routes/api/wishlist'
 import { Route as ApiImportAnalyzeRouteImport } from './routes/api/import/analyze'
 import { Route as ApiImportConfigRouteImport } from './routes/api/import/config'
 import { Route as ApiImportCutoutRouteImport } from './routes/api/import/cutout'
@@ -74,6 +75,11 @@ const AuthenticatedWardrobeRoute = AuthenticatedWardrobeRouteImport.update({
   id: '/wardrobe',
   path: '/wardrobe',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiWishlistRoute = ApiWishlistRouteImport.update({
+  id: '/api/wishlist',
+  path: '/api/wishlist',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiImportAnalyzeRoute = ApiImportAnalyzeRouteImport.update({
   id: '/api/import/analyze',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/try': typeof TryRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/wishlist': typeof ApiWishlistRoute
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/cutout': typeof ApiImportCutoutRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/try': typeof TryRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/wishlist': typeof ApiWishlistRoute
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/cutout': typeof ApiImportCutoutRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/try': typeof TryRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/wishlist': typeof ApiWishlistRoute
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
   '/api/import/cutout': typeof ApiImportCutoutRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/try'
     | '/billing'
     | '/wardrobe'
+    | '/api/wishlist'
     | '/api/import/analyze'
     | '/api/import/config'
     | '/api/import/cutout'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/try'
     | '/billing'
     | '/wardrobe'
+    | '/api/wishlist'
     | '/api/import/analyze'
     | '/api/import/config'
     | '/api/import/cutout'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/try'
     | '/_authenticated/billing'
     | '/_authenticated/wardrobe'
+    | '/api/wishlist'
     | '/api/import/analyze'
     | '/api/import/config'
     | '/api/import/cutout'
@@ -284,6 +296,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   TryRoute: typeof TryRoute
+  ApiWishlistRoute: typeof ApiWishlistRoute
   ApiImportAnalyzeRoute: typeof ApiImportAnalyzeRoute
   ApiImportConfigRoute: typeof ApiImportConfigRoute
   ApiImportCutoutRoute: typeof ApiImportCutoutRoute
@@ -360,6 +373,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/wardrobe'
       preLoaderRoute: typeof AuthenticatedWardrobeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/wishlist': {
+      id: '/api/wishlist'
+      path: '/api/wishlist'
+      fullPath: '/api/wishlist'
+      preLoaderRoute: typeof ApiWishlistRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/import/analyze': {
       id: '/api/import/analyze'
@@ -491,6 +511,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   TryRoute: TryRoute,
+  ApiWishlistRoute: ApiWishlistRoute,
   ApiImportAnalyzeRoute: ApiImportAnalyzeRoute,
   ApiImportConfigRoute: ApiImportConfigRoute,
   ApiImportCutoutRoute: ApiImportCutoutRoute,

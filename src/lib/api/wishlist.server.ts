@@ -136,14 +136,14 @@ export async function attachWishlistImage(
 }
 
 export type WishlistDraft = {
-  name?: string | null;
-  brand?: string | null;
-  price?: string | null;
-  part?: string | null;
-  url?: string | null;
-  note?: string | null;
-  color?: string | null;
-  tags?: string[];
+  name?: string | null | undefined;
+  brand?: string | null | undefined;
+  price?: string | null | undefined;
+  part?: string | null | undefined;
+  url?: string | null | undefined;
+  note?: string | null | undefined;
+  color?: string | null | undefined;
+  tags?: string[] | undefined;
 };
 
 export async function createWishlistItem(
