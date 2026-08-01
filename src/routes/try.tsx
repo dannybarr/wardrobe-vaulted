@@ -67,6 +67,8 @@ function TryWardrobe() {
         )}
       </div>
       <WardrobeApp />
+      {pieces === 0 && <FirstOutfitPrompt />}
+
     </>
   );
 }
