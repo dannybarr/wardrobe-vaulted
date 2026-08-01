@@ -170,7 +170,9 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         const rawEnv = new URL(request.url).searchParams.get("env");
         if (rawEnv !== "sandbox" && rawEnv !== "live") {
           console.error("Payment webhook with invalid env:", rawEnv);
-          return Response.json({ received: true, ignored: "invalid env" });
+          // Never answer 200 here: Stripe would treat the event as delivered and
+          // never retry it, silently losing a payment.
+          return new Response("Unknown payment environment", { status: 400 });
         }
         try {
           await handleWebhook(request, rawEnv);

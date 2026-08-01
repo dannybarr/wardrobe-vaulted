@@ -18,10 +18,14 @@ export function FirstOutfitPrompt() {
     window.dispatchEvent(new CustomEvent("wardrobe:add-piece", { detail: { files: [file] } }));
   };
 
-  // A photo already chosen on the landing page skips the ask entirely.
+  // A photo already chosen on the landing page skips the ask entirely. Handing it
+  // over is deferred to the next frame so the wardrobe screen is listening (and
+  // fully mounted) before the import starts.
   useEffect(() => {
     const handed = takePendingOutfitPhoto();
-    if (handed) submit(handed);
+    if (!handed) return undefined;
+    const frame = requestAnimationFrame(() => submit(handed));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
