@@ -68,9 +68,10 @@ function TryWardrobe() {
           </>
         ) : (
           <>
-            <strong>You're trying Wardrobe.</strong> Add your first three pieces free — no account,
-            no card. You'll be asked to sign up only when they're ready to keep.
+            <strong>You're trying Wardrobe. Add your first item free!</strong> No account, no card —
+            you'll be asked to sign up only when your pieces are ready to keep.
           </>
+
         )}
       </div>
       <WardrobeApp />
