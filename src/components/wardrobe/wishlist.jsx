@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowSquareOut, Check, LinkSimple, Plus, ShoppingBagOpen, Sparkle, SpinnerGap, Trash, UploadSimple, X } from "@phosphor-icons/react";
 import { apiFetch } from "../../lib/api-fetch";
+import { importPhotoToWishlist } from "../../lib/import/engine";
 
 const API = "/api/wishlist";
 const TYPES = [
@@ -249,6 +250,7 @@ export function WishlistPane({ toggle, setupReady, onPurchased }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [adding, setAdding] = useState(false);
+  const [addingPhoto, setAddingPhoto] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
@@ -280,6 +282,29 @@ export function WishlistPane({ toggle, setupReady, onPurchased }) {
     }
   }, []);
 
+  // A photo goes through exactly the same extraction the wardrobe uses, and each
+  // piece it finds lands on the wishlist ready to edit.
+  const addPhoto = useCallback(async (file) => {
+    if (!file?.type?.startsWith("image/")) return;
+    setAddingPhoto(true);
+    setError("");
+    setNotice("");
+    try {
+      const { items: added, noClothingDetected } = await importPhotoToWishlist(file);
+      if (noClothingDetected || !added.length) {
+        setNotice("No clothing was found in that photo. Try a clearer one.");
+        return;
+      }
+      setItems((current) => [...current, ...added]);
+      setNotice(added.length === 1 ? "Added from your photo." : `Added ${added.length} pieces from your photo.`);
+      setSelectedId(added[0].id);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setAddingPhoto(false);
+    }
+  }, []);
+
   const changeItem = useCallback((updated) => {
     setItems((current) => current.map((item) => item.id === updated.id ? updated : item));
   }, []);
@@ -305,7 +330,7 @@ export function WishlistPane({ toggle, setupReady, onPurchased }) {
           <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"} wished for</p>
           {toggle}
         </div>
-        <AddLinkBar onAdd={addLink} busy={adding} />
+        <AddLinkBar onAdd={addLink} busy={adding} onPhoto={addPhoto} photoBusy={addingPhoto} />
       </header>
 
       {error && <p className="status error">{error}</p>}
