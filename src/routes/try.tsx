@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { WardrobeApp } from "@/components/wardrobe/App.jsx";
+import { FirstOutfitPrompt } from "@/components/wardrobe/FirstOutfitPrompt";
 import { countTrialPieces } from "@/lib/trial/store";
+
 
 export const Route = createFileRoute("/try")({
   // The trial wardrobe lives entirely in this browser, so it is rendered here.
@@ -65,6 +67,8 @@ function TryWardrobe() {
         )}
       </div>
       <WardrobeApp />
+      {pieces === 0 && <FirstOutfitPrompt />}
+
     </>
   );
 }

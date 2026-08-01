@@ -11,7 +11,13 @@ const DEMO_PIECES = [
  * The original one-screen landing experience, preserved. The only change is that
  * "Craft your vault" now starts real account onboarding via `onEnter`.
  */
-export function LandingPage({ onEnter }: { onEnter: () => void }) {
+export function LandingPage({
+  onEnter,
+  onPhotoChosen,
+}: {
+  onEnter: () => void;
+  onPhotoChosen?: (file: File) => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState("");
   const [stage, setStage] = useState<"ready" | "processing" | "complete">("ready");
@@ -28,8 +34,14 @@ export function LandingPage({ onEnter }: { onEnter: () => void }) {
     if (preview) URL.revokeObjectURL(preview);
     setPreview(URL.createObjectURL(file));
     setStage("processing");
+    // A direct upload goes straight into the wardrobe's first-outfit flow.
+    if (onPhotoChosen) {
+      onPhotoChosen(file);
+      return;
+    }
     window.setTimeout(() => setStage("complete"), 1250);
   };
+
 
   const onDrop = (event: React.DragEvent<HTMLLabelElement>) => {
     event.preventDefault();

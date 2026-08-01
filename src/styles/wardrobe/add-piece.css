@@ -212,3 +212,12 @@
   .addpiece-actions .primary-button,
   .addpiece-actions .secondary-button { min-height: 44px; }
 }
+
+/* First-run onboarding: the single ask to add a first outfit. */
+.onboard-modal { text-align: left; }
+
+.onboard-modal .addpiece-drop { margin-top: 16px; }
+
+.onboard-note { margin-top: 14px; font-size: 13px; line-height: 1.55; }
+
+.onboard-modal .addpiece-actions { justify-content: center; }
