@@ -1,9 +1,9 @@
 
 .landing-page {
-  --vault-ink: #18342e;
-  --vault-paper: #e8e3d7;
+  --vault-ink: #3a2c20;
+  --vault-paper: #ece5da;
   --vault-lime: #e0a955;
-  --vault-clay: #d36b4c;
+  --vault-clay: #b98a5e;
   --vault-line: rgba(58,44,32, .25);
   position: relative;
   min-height: 100svh;
