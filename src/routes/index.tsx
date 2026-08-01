@@ -25,5 +25,14 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const navigate = useNavigate();
-  return <LandingPage onEnter={() => navigate({ to: "/try" })} />;
+  return (
+    <LandingPage
+      onEnter={() => navigate({ to: "/try" })}
+      onPhotoChosen={(file) => {
+        setPendingOutfitPhoto(file);
+        navigate({ to: "/try" });
+      }}
+    />
+  );
 }
+
