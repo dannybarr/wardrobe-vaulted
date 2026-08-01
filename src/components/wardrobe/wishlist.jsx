@@ -28,8 +28,9 @@ const fileToDataUrl = (file) => new Promise((resolve, reject) => {
   reader.readAsDataURL(file);
 });
 
-function AddLinkBar({ onAdd, busy }) {
+function AddLinkBar({ onAdd, busy, onPhoto, photoBusy }) {
   const [value, setValue] = useState("");
+  const photoInputRef = useRef(null);
 
   const submit = async () => {
     const url = value.trim();
@@ -45,7 +46,7 @@ function AddLinkBar({ onAdd, busy }) {
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={(event) => event.key === "Enter" && submit()}
-        placeholder="Paste a product link to add it to your wishlist"
+        placeholder="Paste a product link, or add a photo"
         aria-label="Product link"
         disabled={busy}
       />
@@ -53,9 +54,31 @@ function AddLinkBar({ onAdd, busy }) {
         {busy ? <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" /> : <Plus size={15} aria-hidden="true" />}
         {busy ? "Fetching" : "Add"}
       </button>
+      <button
+        type="button"
+        className="wishlist-add-photo"
+        onClick={() => photoInputRef.current?.click()}
+        disabled={photoBusy}
+        title="Add a wishlist piece from a photo"
+      >
+        {photoBusy ? <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" /> : <UploadSimple size={15} aria-hidden="true" />}
+        {photoBusy ? "Reading photo" : "Add photo"}
+      </button>
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (file) onPhoto(file);
+        }}
+      />
     </div>
   );
 }
+
 
 function WishlistCard({ item, onOpen }) {
   return (
