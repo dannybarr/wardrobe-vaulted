@@ -33,6 +33,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicTrialAnalyzeRouteImport } from './routes/api/public/trial/analyze'
 import { Route as ApiPublicTrialCutoutRouteImport } from './routes/api/public/trial/cutout'
 import { Route as ApiWishlistIdImageRouteImport } from './routes/api/wishlist.$id.image'
+import { Route as ApiWishlistIdTryonRouteImport } from './routes/api/wishlist.$id.tryon'
 import { Route as ApiImportWardrobeIdModeledRouteImport } from './routes/api/import/wardrobe.$id.modeled'
 
 const IndexRoute = IndexRouteImport.update({
@@ -155,6 +156,11 @@ const ApiWishlistIdImageRoute = ApiWishlistIdImageRouteImport.update({
   path: '/image',
   getParentRoute: () => ApiWishlistIdRoute,
 } as any)
+const ApiWishlistIdTryonRoute = ApiWishlistIdTryonRouteImport.update({
+  id: '/tryon',
+  path: '/tryon',
+  getParentRoute: () => ApiWishlistIdRoute,
+} as any)
 const ApiImportWardrobeIdModeledRoute =
   ApiImportWardrobeIdModeledRouteImport.update({
     id: '/modeled',
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
   '/api/wishlist/$id/image': typeof ApiWishlistIdImageRoute
+  '/api/wishlist/$id/tryon': typeof ApiWishlistIdTryonRoute
   '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
 export interface FileRoutesByTo {
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
   '/api/wishlist/$id/image': typeof ApiWishlistIdImageRoute
+  '/api/wishlist/$id/tryon': typeof ApiWishlistIdTryonRoute
   '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
 export interface FileRoutesById {
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
   '/api/wishlist/$id/image': typeof ApiWishlistIdImageRoute
+  '/api/wishlist/$id/tryon': typeof ApiWishlistIdTryonRoute
   '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
 export interface FileRouteTypes {
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
     | '/api/wishlist/$id/image'
+    | '/api/wishlist/$id/tryon'
     | '/api/import/wardrobe/$id/modeled'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
     | '/api/wishlist/$id/image'
+    | '/api/wishlist/$id/tryon'
     | '/api/import/wardrobe/$id/modeled'
   id:
     | '__root__'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
     | '/api/wishlist/$id/image'
+    | '/api/wishlist/$id/tryon'
     | '/api/import/wardrobe/$id/modeled'
   fileRoutesById: FileRoutesById
 }
@@ -515,6 +527,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWishlistIdImageRouteImport
       parentRoute: typeof ApiWishlistIdRoute
     }
+    '/api/wishlist/$id/tryon': {
+      id: '/api/wishlist/$id/tryon'
+      path: '/tryon'
+      fullPath: '/api/wishlist/$id/tryon'
+      preLoaderRoute: typeof ApiWishlistIdTryonRouteImport
+      parentRoute: typeof ApiWishlistIdRoute
+    }
     '/api/import/wardrobe/$id/modeled': {
       id: '/api/import/wardrobe/$id/modeled'
       path: '/modeled'
@@ -540,10 +559,12 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface ApiWishlistIdRouteChildren {
   ApiWishlistIdImageRoute: typeof ApiWishlistIdImageRoute
+  ApiWishlistIdTryonRoute: typeof ApiWishlistIdTryonRoute
 }
 
 const ApiWishlistIdRouteChildren: ApiWishlistIdRouteChildren = {
   ApiWishlistIdImageRoute: ApiWishlistIdImageRoute,
+  ApiWishlistIdTryonRoute: ApiWishlistIdTryonRoute,
 }
 
 const ApiWishlistIdRouteWithChildren = ApiWishlistIdRoute._addFileChildren(
