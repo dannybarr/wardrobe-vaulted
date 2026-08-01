@@ -349,3 +349,34 @@ export async function fetchRemoteImage(url: string): Promise<string | null> {
     return null;
   }
 }
+
+/** Reads the stored wishlist image back out for a follow-up AI or save step. */
+export async function readWishlistImageBase64(
+  supabase: Client,
+  id: string,
+): Promise<{ base64: string; mime: string } | null> {
+  const { data: row } = await supabase
+    .from("wishlist_items")
+    .select("image_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (!row?.image_id) return null;
+
+  const { data: image } = await supabase
+    .from("garment_images")
+    .select("bucket, storage_path")
+    .eq("id", row.image_id)
+    .maybeSingle();
+  if (!image) return null;
+
+  const { data: file, error } = await supabase.storage.from(image.bucket).download(image.storage_path);
+  if (error || !file) return null;
+
+  const buffer = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  const chunk = 0x8000;
+  for (let index = 0; index < buffer.length; index += chunk) {
+    binary += String.fromCharCode(...buffer.subarray(index, index + chunk));
+  }
+  return { base64: btoa(binary), mime: file.type || "image/png" };
+}
