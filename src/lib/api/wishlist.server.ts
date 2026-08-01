@@ -104,10 +104,11 @@ export async function attachWishlistImage(
   base64: string,
   kind: "cutout" | "modeled",
 ): Promise<WishlistItem> {
-  const { bytes } = decodeBase64Image(base64);
-  const path = `${userId}/wishlist/${itemId}/${kind}-${Date.now()}.png`;
+  const { bytes, mime } = decodeBase64Image(base64);
+  const extension = mime.includes("jpeg") || mime.includes("jpg") ? "jpg" : mime.includes("webp") ? "webp" : "png";
+  const path = `${userId}/wishlist/${itemId}/${kind}-${Date.now()}.${extension}`;
   const { error: uploadError } = await supabase.storage.from(PRIVATE_BUCKET).upload(path, bytes, {
-    contentType: "image/png",
+    contentType: mime,
     upsert: true,
   });
   if (uploadError) throw uploadError;
