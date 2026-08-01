@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { json, withUser } from "@/lib/api/request-context";
 import { requireVaultCapacity } from "@/lib/api/vault-gate";
 import { persistPiece } from "@/lib/api/pieces.server";
+import { environmentFromRequest } from "@/lib/api/import-support";
 import {
   deleteWishlistItem,
   readWishlistImageBase64,
@@ -18,8 +19,12 @@ export const Route = createFileRoute("/api/wishlist/$id/purchase")({
           const image = await readWishlistImageBase64(supabase, params.id);
           if (!image) return json({ error: "Add a product image before moving this over." }, 409);
 
-          const gate = await requireVaultCapacity(user.id);
-          if (gate) return gate;
+          const gate = await requireVaultCapacity(
+            supabase,
+            user.id,
+            environmentFromRequest(request),
+          );
+          if (!gate.ok) return gate.response;
 
           const record = await persistPiece(supabase, user.id, {
             name: item.name,
