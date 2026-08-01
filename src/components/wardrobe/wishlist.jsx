@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowSquareOut, Check, LinkSimple, Plus, ShoppingBagOpen, Sparkle, SpinnerGap, Trash, UploadSimple, X } from "@phosphor-icons/react";
 import { apiFetch } from "../../lib/api-fetch";
+import { importPhotoToWishlist } from "../../lib/import/engine";
 
 const API = "/api/wishlist";
 const TYPES = [
@@ -28,8 +29,9 @@ const fileToDataUrl = (file) => new Promise((resolve, reject) => {
   reader.readAsDataURL(file);
 });
 
-function AddLinkBar({ onAdd, busy }) {
+function AddLinkBar({ onAdd, busy, onPhoto, photoBusy }) {
   const [value, setValue] = useState("");
+  const photoInputRef = useRef(null);
 
   const submit = async () => {
     const url = value.trim();
@@ -45,7 +47,7 @@ function AddLinkBar({ onAdd, busy }) {
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={(event) => event.key === "Enter" && submit()}
-        placeholder="Paste a product link to add it to your wishlist"
+        placeholder="Paste a product link, or add a photo"
         aria-label="Product link"
         disabled={busy}
       />
@@ -53,9 +55,31 @@ function AddLinkBar({ onAdd, busy }) {
         {busy ? <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" /> : <Plus size={15} aria-hidden="true" />}
         {busy ? "Fetching" : "Add"}
       </button>
+      <button
+        type="button"
+        className="wishlist-add-photo"
+        onClick={() => photoInputRef.current?.click()}
+        disabled={photoBusy}
+        title="Add a wishlist piece from a photo"
+      >
+        {photoBusy ? <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" /> : <UploadSimple size={15} aria-hidden="true" />}
+        {photoBusy ? "Reading photo" : "Add photo"}
+      </button>
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (file) onPhoto(file);
+        }}
+      />
     </div>
   );
 }
+
 
 function WishlistCard({ item, onOpen }) {
   return (
@@ -226,6 +250,7 @@ export function WishlistPane({ toggle, setupReady, onPurchased }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [adding, setAdding] = useState(false);
+  const [addingPhoto, setAddingPhoto] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
@@ -257,6 +282,29 @@ export function WishlistPane({ toggle, setupReady, onPurchased }) {
     }
   }, []);
 
+  // A photo goes through exactly the same extraction the wardrobe uses, and each
+  // piece it finds lands on the wishlist ready to edit.
+  const addPhoto = useCallback(async (file) => {
+    if (!file?.type?.startsWith("image/")) return;
+    setAddingPhoto(true);
+    setError("");
+    setNotice("");
+    try {
+      const { items: added, noClothingDetected } = await importPhotoToWishlist(file);
+      if (noClothingDetected || !added.length) {
+        setNotice("No clothing was found in that photo. Try a clearer one.");
+        return;
+      }
+      setItems((current) => [...current, ...added]);
+      setNotice(added.length === 1 ? "Added from your photo." : `Added ${added.length} pieces from your photo.`);
+      setSelectedId(added[0].id);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setAddingPhoto(false);
+    }
+  }, []);
+
   const changeItem = useCallback((updated) => {
     setItems((current) => current.map((item) => item.id === updated.id ? updated : item));
   }, []);
@@ -282,7 +330,7 @@ export function WishlistPane({ toggle, setupReady, onPurchased }) {
           <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"} wished for</p>
           {toggle}
         </div>
-        <AddLinkBar onAdd={addLink} busy={adding} />
+        <AddLinkBar onAdd={addLink} busy={adding} onPhoto={addPhoto} photoBusy={addingPhoto} />
       </header>
 
       {error && <p className="status error">{error}</p>}

@@ -327,3 +327,47 @@ export async function savePiece(
   releaseJob(job.id);
   return item;
 }
+
+export type WishlistPiece = {
+  id: string;
+  name: string;
+  brand: string | null;
+  price: string | null;
+  part: string;
+  url: string | null;
+  note: string | null;
+  status: string;
+  image: string | null;
+  modeledImage: string | null;
+};
+
+/**
+ * The same extraction the wardrobe uses, filed on the wishlist instead: the photo
+ * is read, each detected item is cropped locally, turned into a clean cut-out and
+ * saved as something the member wants rather than owns.
+ */
+export async function importPhotoToWishlist(file: File): Promise<{
+  items: WishlistPiece[];
+  noClothingDetected: boolean;
+}> {
+  const { jobs, noClothingDetected } = await startImport(file);
+  if (!jobs.length) return { items: [], noClothingDetected };
+
+  const items: WishlistPiece[] = [];
+  for (const job of jobs) {
+    const finished = await generateGarment(job);
+    const cutout = assets.get(job.id)?.cutout;
+    if (!cutout) continue;
+    const item = await post<WishlistPiece>("/api/wishlist", {
+      name: finished.metadata.name,
+      part: finished.metadata.part,
+      color: finished.metadata.color,
+      tags: finished.metadata.tags,
+      imageDataUrl: `data:image/png;base64,${await blobToBase64(cutout)}`,
+    });
+    items.push(item);
+    releaseJob(job.id);
+  }
+
+  return { items, noClothingDetected: false };
+}

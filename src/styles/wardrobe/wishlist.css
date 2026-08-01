@@ -74,6 +74,18 @@
 
 .wishlist-add-bar button:disabled { opacity: .45; cursor: default; }
 
+.wishlist-add-bar .wishlist-add-photo {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+}
+
+@media (max-width: 560px) {
+  .wishlist-add-bar { flex-wrap: wrap; padding: 12px; }
+  .wishlist-add-bar input { flex: 1 0 100%; }
+  .wishlist-add-bar button { flex: 1; justify-content: center; }
+}
+
 .wishlist-spinner { animation: wishlist-spin 900ms linear infinite; }
 
 @keyframes wishlist-spin { to { transform: rotate(360deg); } }
