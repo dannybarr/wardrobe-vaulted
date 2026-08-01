@@ -33,6 +33,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicTrialAnalyzeRouteImport } from './routes/api/public/trial/analyze'
 import { Route as ApiPublicTrialCutoutRouteImport } from './routes/api/public/trial/cutout'
 import { Route as ApiWishlistIdImageRouteImport } from './routes/api/wishlist.$id.image'
+import { Route as ApiWishlistIdPurchaseRouteImport } from './routes/api/wishlist.$id.purchase'
 import { Route as ApiWishlistIdTryonRouteImport } from './routes/api/wishlist.$id.tryon'
 import { Route as ApiImportWardrobeIdModeledRouteImport } from './routes/api/import/wardrobe.$id.modeled'
 
@@ -156,6 +157,11 @@ const ApiWishlistIdImageRoute = ApiWishlistIdImageRouteImport.update({
   path: '/image',
   getParentRoute: () => ApiWishlistIdRoute,
 } as any)
+const ApiWishlistIdPurchaseRoute = ApiWishlistIdPurchaseRouteImport.update({
+  id: '/purchase',
+  path: '/purchase',
+  getParentRoute: () => ApiWishlistIdRoute,
+} as any)
 const ApiWishlistIdTryonRoute = ApiWishlistIdTryonRouteImport.update({
   id: '/tryon',
   path: '/tryon',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
   '/api/wishlist/$id/image': typeof ApiWishlistIdImageRoute
+  '/api/wishlist/$id/purchase': typeof ApiWishlistIdPurchaseRoute
   '/api/wishlist/$id/tryon': typeof ApiWishlistIdTryonRoute
   '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
   '/api/wishlist/$id/image': typeof ApiWishlistIdImageRoute
+  '/api/wishlist/$id/purchase': typeof ApiWishlistIdPurchaseRoute
   '/api/wishlist/$id/tryon': typeof ApiWishlistIdTryonRoute
   '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
   '/api/wishlist/$id/image': typeof ApiWishlistIdImageRoute
+  '/api/wishlist/$id/purchase': typeof ApiWishlistIdPurchaseRoute
   '/api/wishlist/$id/tryon': typeof ApiWishlistIdTryonRoute
   '/api/import/wardrobe/$id/modeled': typeof ApiImportWardrobeIdModeledRoute
 }
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
     | '/api/wishlist/$id/image'
+    | '/api/wishlist/$id/purchase'
     | '/api/wishlist/$id/tryon'
     | '/api/import/wardrobe/$id/modeled'
   fileRoutesByTo: FileRoutesByTo
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
     | '/api/wishlist/$id/image'
+    | '/api/wishlist/$id/purchase'
     | '/api/wishlist/$id/tryon'
     | '/api/import/wardrobe/$id/modeled'
   id:
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
     | '/api/wishlist/$id/image'
+    | '/api/wishlist/$id/purchase'
     | '/api/wishlist/$id/tryon'
     | '/api/import/wardrobe/$id/modeled'
   fileRoutesById: FileRoutesById
@@ -527,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWishlistIdImageRouteImport
       parentRoute: typeof ApiWishlistIdRoute
     }
+    '/api/wishlist/$id/purchase': {
+      id: '/api/wishlist/$id/purchase'
+      path: '/purchase'
+      fullPath: '/api/wishlist/$id/purchase'
+      preLoaderRoute: typeof ApiWishlistIdPurchaseRouteImport
+      parentRoute: typeof ApiWishlistIdRoute
+    }
     '/api/wishlist/$id/tryon': {
       id: '/api/wishlist/$id/tryon'
       path: '/tryon'
@@ -559,11 +578,13 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface ApiWishlistIdRouteChildren {
   ApiWishlistIdImageRoute: typeof ApiWishlistIdImageRoute
+  ApiWishlistIdPurchaseRoute: typeof ApiWishlistIdPurchaseRoute
   ApiWishlistIdTryonRoute: typeof ApiWishlistIdTryonRoute
 }
 
 const ApiWishlistIdRouteChildren: ApiWishlistIdRouteChildren = {
   ApiWishlistIdImageRoute: ApiWishlistIdImageRoute,
+  ApiWishlistIdPurchaseRoute: ApiWishlistIdPurchaseRoute,
   ApiWishlistIdTryonRoute: ApiWishlistIdTryonRoute,
 }
 
