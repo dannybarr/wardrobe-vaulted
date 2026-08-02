@@ -14,10 +14,12 @@ import { apiFetch } from "@/lib/api-fetch";
 import {
   chooseChromaKey,
   cropDetectedItem,
+  encodeForUpload,
   normalizeImage,
   processChromaBackground,
   rasterToBlob,
 } from "@/lib/image/pixels";
+
 
 export type StageStatus = "processing" | "review" | "approved" | "rejected" | "failed";
 
