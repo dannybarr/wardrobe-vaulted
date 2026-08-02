@@ -19,6 +19,7 @@ export function LandingPage({
   onPhotoChosen?: (file: File) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const timerRef = useRef<number | null>(null);
   const [preview, setPreview] = useState("");
   const [stage, setStage] = useState<"ready" | "processing" | "complete">("ready");
 
@@ -27,6 +28,14 @@ export function LandingPage({
       if (preview) URL.revokeObjectURL(preview);
     },
     [preview],
+  );
+
+  // The reveal timer must not outlive the page, or it settles a screen that has gone.
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    },
+    [],
   );
 
   const processPhoto = (file?: File | null) => {
@@ -39,8 +48,10 @@ export function LandingPage({
       onPhotoChosen(file);
       return;
     }
-    window.setTimeout(() => setStage("complete"), 1250);
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setStage("complete"), 1250);
   };
+
 
 
   const onDrop = (event: React.DragEvent<HTMLLabelElement>) => {
