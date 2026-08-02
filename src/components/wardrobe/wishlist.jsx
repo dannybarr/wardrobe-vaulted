@@ -22,12 +22,10 @@ async function api(path, options) {
   return value;
 }
 
-const fileToDataUrl = (file) => new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = () => resolve(reader.result);
-  reader.onerror = () => reject(reader.error || new Error("Could not read that image."));
-  reader.readAsDataURL(file);
-});
+// Phone photos are far bigger than any endpoint accepts, so every image is
+// resized and re-encoded here before it is sent.
+const fileToDataUrl = (file) => fileToUploadDataUrl(file);
+
 
 function AddLinkBar({ onAdd, busy, onPhoto, photoBusy }) {
   const [value, setValue] = useState("");
