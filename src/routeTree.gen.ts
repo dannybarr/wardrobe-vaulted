@@ -31,6 +31,7 @@ import { Route as ApiOutfitsIdRouteImport } from './routes/api/outfits.$id'
 import { Route as ApiWishlistIdRouteImport } from './routes/api/wishlist.$id'
 import { Route as ApiWishlistResolveRouteImport } from './routes/api/wishlist.resolve'
 import { Route as ApiImportWardrobeIdRouteImport } from './routes/api/import/wardrobe.$id'
+import { Route as ApiOutfitsIdModeledRouteImport } from './routes/api/outfits.$id.modeled'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicTrialAnalyzeRouteImport } from './routes/api/public/trial/analyze'
 import { Route as ApiPublicTrialCutoutRouteImport } from './routes/api/public/trial/cutout'
@@ -148,6 +149,11 @@ const ApiImportWardrobeIdRoute = ApiImportWardrobeIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ApiImportWardrobeRoute,
 } as any)
+const ApiOutfitsIdModeledRoute = ApiOutfitsIdModeledRouteImport.update({
+  id: '/modeled',
+  path: '/modeled',
+  getParentRoute: () => ApiOutfitsIdRoute,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -204,10 +210,11 @@ export interface FileRoutesByFullPath {
   '/api/import/modeled': typeof ApiImportModeledRoute
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
-  '/api/outfits/$id': typeof ApiOutfitsIdRoute
+  '/api/outfits/$id': typeof ApiOutfitsIdRouteWithChildren
   '/api/wishlist/$id': typeof ApiWishlistIdRouteWithChildren
   '/api/wishlist/resolve': typeof ApiWishlistResolveRoute
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
+  '/api/outfits/$id/modeled': typeof ApiOutfitsIdModeledRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
@@ -234,10 +241,11 @@ export interface FileRoutesByTo {
   '/api/import/modeled': typeof ApiImportModeledRoute
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
-  '/api/outfits/$id': typeof ApiOutfitsIdRoute
+  '/api/outfits/$id': typeof ApiOutfitsIdRouteWithChildren
   '/api/wishlist/$id': typeof ApiWishlistIdRouteWithChildren
   '/api/wishlist/resolve': typeof ApiWishlistResolveRoute
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
+  '/api/outfits/$id/modeled': typeof ApiOutfitsIdModeledRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
@@ -266,10 +274,11 @@ export interface FileRoutesById {
   '/api/import/modeled': typeof ApiImportModeledRoute
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
-  '/api/outfits/$id': typeof ApiOutfitsIdRoute
+  '/api/outfits/$id': typeof ApiOutfitsIdRouteWithChildren
   '/api/wishlist/$id': typeof ApiWishlistIdRouteWithChildren
   '/api/wishlist/resolve': typeof ApiWishlistResolveRoute
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
+  '/api/outfits/$id/modeled': typeof ApiOutfitsIdModeledRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/trial/analyze': typeof ApiPublicTrialAnalyzeRoute
   '/api/public/trial/cutout': typeof ApiPublicTrialCutoutRoute
@@ -302,6 +311,7 @@ export interface FileRouteTypes {
     | '/api/wishlist/$id'
     | '/api/wishlist/resolve'
     | '/api/import/wardrobe/$id'
+    | '/api/outfits/$id/modeled'
     | '/api/public/payments/webhook'
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
     | '/api/wishlist/$id'
     | '/api/wishlist/resolve'
     | '/api/import/wardrobe/$id'
+    | '/api/outfits/$id/modeled'
     | '/api/public/payments/webhook'
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
@@ -363,6 +374,7 @@ export interface FileRouteTypes {
     | '/api/wishlist/$id'
     | '/api/wishlist/resolve'
     | '/api/import/wardrobe/$id'
+    | '/api/outfits/$id/modeled'
     | '/api/public/payments/webhook'
     | '/api/public/trial/analyze'
     | '/api/public/trial/cutout'
@@ -550,6 +562,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiImportWardrobeIdRouteImport
       parentRoute: typeof ApiImportWardrobeRoute
     }
+    '/api/outfits/$id/modeled': {
+      id: '/api/outfits/$id/modeled'
+      path: '/modeled'
+      fullPath: '/api/outfits/$id/modeled'
+      preLoaderRoute: typeof ApiOutfitsIdModeledRouteImport
+      parentRoute: typeof ApiOutfitsIdRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -615,12 +634,24 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ApiOutfitsIdRouteChildren {
+  ApiOutfitsIdModeledRoute: typeof ApiOutfitsIdModeledRoute
+}
+
+const ApiOutfitsIdRouteChildren: ApiOutfitsIdRouteChildren = {
+  ApiOutfitsIdModeledRoute: ApiOutfitsIdModeledRoute,
+}
+
+const ApiOutfitsIdRouteWithChildren = ApiOutfitsIdRoute._addFileChildren(
+  ApiOutfitsIdRouteChildren,
+)
+
 interface ApiOutfitsRouteChildren {
-  ApiOutfitsIdRoute: typeof ApiOutfitsIdRoute
+  ApiOutfitsIdRoute: typeof ApiOutfitsIdRouteWithChildren
 }
 
 const ApiOutfitsRouteChildren: ApiOutfitsRouteChildren = {
-  ApiOutfitsIdRoute: ApiOutfitsIdRoute,
+  ApiOutfitsIdRoute: ApiOutfitsIdRouteWithChildren,
 }
 
 const ApiOutfitsRouteWithChildren = ApiOutfitsRoute._addFileChildren(
