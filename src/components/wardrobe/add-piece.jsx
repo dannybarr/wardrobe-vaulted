@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, UploadSimple, X } from "@phosphor-icons/react";
 import { apiFetch } from "../../lib/api-fetch";
+import { fileToUploadDataUrl } from "../../lib/image/pixels";
+
 
 const PARTS = [
   ["upperbody", "Tops"],
