@@ -143,12 +143,17 @@ export async function startImport(
   extra: { name?: string } = {},
 ): Promise<{ jobs: ImportJob[]; noClothingDetected: boolean }> {
   const normalized = await normalizeImage(file);
-  const base64 = await blobToBase64(normalized);
+  // The read stage only needs to *see* the photo, so a compact JPEG goes up:
+  // a full-resolution PNG from a phone camera is tens of megabytes and gets
+  // refused as too large. Crops below still come from the full-quality copy.
+  const forReading = await encodeForUpload(normalized, { maxEdge: 1600, quality: 0.9 });
+  const base64 = await blobToBase64(forReading);
   const result = await post<AnalyzeResponse>("/api/import/analyze", {
     imageBase64: base64,
-    mime: "image/png",
-    byteSize: normalized.size,
+    mime: "image/jpeg",
+    byteSize: forReading.size,
   });
+
 
   if (!result.items.length) return { jobs: [], noClothingDetected: true };
 
