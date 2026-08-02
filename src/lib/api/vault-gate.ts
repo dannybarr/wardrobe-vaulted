@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 /** Pieces anyone may add before the Vault subscription is required. */
-export const FREE_PIECE_ALLOWANCE = 3;
+export const FREE_PIECE_ALLOWANCE = 4;
 
 export type VaultGate = {
   subscribed: boolean;
@@ -13,7 +13,7 @@ export type VaultGate = {
 
 /**
  * The add-a-piece rule in one place: founders and paying members always may,
- * everyone else gets one free piece. Members whose payment is being retried, or
+ * everyone else gets four free pieces. Members whose payment is being retried, or
  * who cancelled but are still inside the paid period, keep full access — the
  * database routine `has_vault_access` decides that part.
  */

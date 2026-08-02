@@ -19,10 +19,10 @@ import {
 } from "@/lib/trial/store";
 
 /** How many pieces a guest may build before an account is required. */
-export const TRIAL_PIECE_ALLOWANCE = 3;
+export const TRIAL_PIECE_ALLOWANCE = 4;
 
 const SIGNUP_PROMPT =
-  "That's your three free pieces. Create your free account to keep them and carry on adding.";
+  "That's your four free pieces. Create your free account to keep them and carry on adding.";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
