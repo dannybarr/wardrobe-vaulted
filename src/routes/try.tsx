@@ -54,7 +54,7 @@ function TryWardrobe() {
       <div className="vault-notice vault-notice--trial">
         {pieces >= TRIAL_PIECE_ALLOWANCE ? (
           <>
-            <strong>Your three free pieces are ready.</strong>{" "}
+            <strong>Your four free pieces are ready.</strong>{" "}
             <Link to="/auth" search={{ mode: "signup", redirect: "/wardrobe" }}>
               Create your free account
             </Link>{" "}

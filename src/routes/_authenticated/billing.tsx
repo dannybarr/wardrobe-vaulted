@@ -97,7 +97,7 @@ function Billing() {
             <>
               <h1>Keep your vault.</h1>
               <p className="auth-lede">
-                Your first three pieces are on us. Vault membership is £4.99 a month and keeps your whole
+                Your first four pieces are on us. Vault membership is £4.99 a month and keeps your whole
                 wardrobe — pieces, outfits and wishlist — stored privately and backed up, with the
                 styling tools switched on.
               </p>
