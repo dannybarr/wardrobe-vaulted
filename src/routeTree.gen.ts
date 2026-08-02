@@ -28,6 +28,7 @@ import { Route as ApiImportModeledRouteImport } from './routes/api/import/modele
 import { Route as ApiImportPiecesRouteImport } from './routes/api/import/pieces'
 import { Route as ApiImportWardrobeRouteImport } from './routes/api/import/wardrobe'
 import { Route as ApiOutfitsIdRouteImport } from './routes/api/outfits.$id'
+import { Route as ApiWardrobeDirectAddRouteImport } from './routes/api/wardrobe.direct-add'
 import { Route as ApiWishlistIdRouteImport } from './routes/api/wishlist.$id'
 import { Route as ApiWishlistResolveRouteImport } from './routes/api/wishlist.resolve'
 import { Route as ApiImportWardrobeIdRouteImport } from './routes/api/import/wardrobe.$id'
@@ -134,6 +135,11 @@ const ApiOutfitsIdRoute = ApiOutfitsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ApiOutfitsRoute,
 } as any)
+const ApiWardrobeDirectAddRoute = ApiWardrobeDirectAddRouteImport.update({
+  id: '/api/wardrobe/direct-add',
+  path: '/api/wardrobe/direct-add',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWishlistIdRoute = ApiWishlistIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/outfits/$id': typeof ApiOutfitsIdRouteWithChildren
+  '/api/wardrobe/direct-add': typeof ApiWardrobeDirectAddRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRouteWithChildren
   '/api/wishlist/resolve': typeof ApiWishlistResolveRoute
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/outfits/$id': typeof ApiOutfitsIdRouteWithChildren
+  '/api/wardrobe/direct-add': typeof ApiWardrobeDirectAddRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRouteWithChildren
   '/api/wishlist/resolve': typeof ApiWishlistResolveRoute
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/api/import/pieces': typeof ApiImportPiecesRoute
   '/api/import/wardrobe': typeof ApiImportWardrobeRouteWithChildren
   '/api/outfits/$id': typeof ApiOutfitsIdRouteWithChildren
+  '/api/wardrobe/direct-add': typeof ApiWardrobeDirectAddRoute
   '/api/wishlist/$id': typeof ApiWishlistIdRouteWithChildren
   '/api/wishlist/resolve': typeof ApiWishlistResolveRoute
   '/api/import/wardrobe/$id': typeof ApiImportWardrobeIdRouteWithChildren
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
     | '/api/import/pieces'
     | '/api/import/wardrobe'
     | '/api/outfits/$id'
+    | '/api/wardrobe/direct-add'
     | '/api/wishlist/$id'
     | '/api/wishlist/resolve'
     | '/api/import/wardrobe/$id'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/api/import/pieces'
     | '/api/import/wardrobe'
     | '/api/outfits/$id'
+    | '/api/wardrobe/direct-add'
     | '/api/wishlist/$id'
     | '/api/wishlist/resolve'
     | '/api/import/wardrobe/$id'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/api/import/pieces'
     | '/api/import/wardrobe'
     | '/api/outfits/$id'
+    | '/api/wardrobe/direct-add'
     | '/api/wishlist/$id'
     | '/api/wishlist/resolve'
     | '/api/import/wardrobe/$id'
@@ -401,6 +413,7 @@ export interface RootRouteChildren {
   ApiImportModeledRoute: typeof ApiImportModeledRoute
   ApiImportPiecesRoute: typeof ApiImportPiecesRoute
   ApiImportWardrobeRoute: typeof ApiImportWardrobeRouteWithChildren
+  ApiWardrobeDirectAddRoute: typeof ApiWardrobeDirectAddRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicTrialAnalyzeRoute: typeof ApiPublicTrialAnalyzeRoute
   ApiPublicTrialCutoutRoute: typeof ApiPublicTrialCutoutRoute
@@ -540,6 +553,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/outfits/$id'
       preLoaderRoute: typeof ApiOutfitsIdRouteImport
       parentRoute: typeof ApiOutfitsRoute
+    }
+    '/api/wardrobe/direct-add': {
+      id: '/api/wardrobe/direct-add'
+      path: '/api/wardrobe/direct-add'
+      fullPath: '/api/wardrobe/direct-add'
+      preLoaderRoute: typeof ApiWardrobeDirectAddRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/wishlist/$id': {
       id: '/api/wishlist/$id'
@@ -727,6 +747,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiImportModeledRoute: ApiImportModeledRoute,
   ApiImportPiecesRoute: ApiImportPiecesRoute,
   ApiImportWardrobeRoute: ApiImportWardrobeRouteWithChildren,
+  ApiWardrobeDirectAddRoute: ApiWardrobeDirectAddRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicTrialAnalyzeRoute: ApiPublicTrialAnalyzeRoute,
   ApiPublicTrialCutoutRoute: ApiPublicTrialCutoutRoute,
