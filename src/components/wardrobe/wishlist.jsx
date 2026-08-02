@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowSquareOut, Check, LinkSimple, Plus, ShoppingBagOpen, Sparkle, SpinnerGap, Trash, UploadSimple, X } from "@phosphor-icons/react";
 import { apiFetch } from "../../lib/api-fetch";
 import { importPhotoToWishlist } from "../../lib/import/engine";
+import { fileToUploadDataUrl } from "../../lib/image/pixels";
+
 
 const API = "/api/wishlist";
 const TYPES = [
