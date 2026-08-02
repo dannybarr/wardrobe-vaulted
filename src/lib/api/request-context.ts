@@ -52,7 +52,6 @@ export async function withUser(
   // passed explicitly for Supabase to validate it.
   const { data, error } = await supabase.auth.getUser(token);
   if (error || !data.user) return json({ error: "Please sign in." }, 401);
-  if (error || !data.user) return json({ error: "Please sign in." }, 401);
 
   try {
     return await handler({ supabase, user: data.user });
