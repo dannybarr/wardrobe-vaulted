@@ -1,11 +1,19 @@
 @import "@fontsource-variable/instrument-sans";
 
 :root {
-  --paper: #f4f0e8;
-  --ink: #191919;
+  /* Paper, ink and the button brown are carried over from the landing page
+     (see landing-page.css --vault-paper / --vault-ink) so the app and the
+     landing read as one surface. */
+  --paper: #ece5da;
+  --ink: #3a2c20;
+  --ink-hover: #4b392a;
   --muted: #66625d;
   --line: #cfc8bc;
   --accent: #6e302e;
+  /* The landing hero wash, reused as the app's page background. */
+  --paper-wash:
+    radial-gradient(120% 55% at 50% -12%, rgba(224, 169, 85, .42), rgba(224, 169, 85, 0) 62%),
+    linear-gradient(180deg, #f2ece2 0%, var(--paper) 42%, #e3d9cb 100%);
   font-family: "Instrument Sans Variable", "Helvetica Neue", Arial, sans-serif;
   color: var(--ink);
   background: var(--paper);
@@ -21,9 +29,20 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--paper);
+  background: transparent;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Viewport-pinned so the wash reads the same on a long scrolling page as it
+   does on the landing hero, rather than stretching over the document. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--paper-wash);
 }
 
 body.viewer-open { overflow: hidden; }
@@ -32,7 +51,7 @@ button { font: inherit; }
 
 .app-shell {
   min-height: 100vh;
-  background: var(--paper);
+  background: transparent;
 }
 
 .gallery-pane { min-width: 0; }
@@ -758,7 +777,7 @@ button { font: inherit; }
 }
 
 .primary-button:hover,
-.primary-button:focus-visible { background: var(--accent); border-color: var(--accent); outline: none; }
+.primary-button:focus-visible { background: var(--ink-hover); border-color: var(--ink-hover); outline: none; }
 .delete-button:hover,
 .delete-button:focus-visible { text-decoration: underline; outline: none; }
 
@@ -1200,9 +1219,9 @@ button { font: inherit; }
   font-size: 12px;
   font-weight: 600;
   letter-spacing: .06em;
-  color: #f4f0e8;
-  background: #18342e;
-  border: 1px solid #18342e;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1px solid var(--ink);
   border-radius: 999px;
   cursor: pointer;
 }
@@ -1216,9 +1235,9 @@ button { font: inherit; }
   width: 280px;
   padding: 16px;
   text-align: left;
-  background: #fbf8f1;
-  border: 1px solid #18342e;
-  box-shadow: 6px 6px 0 #18342e;
+  background: #f1ebe1;
+  border: 1px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
 }
 
 .profile-panel__name { margin: 0; font-size: 15px; font-weight: 600; }

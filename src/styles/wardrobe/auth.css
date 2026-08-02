@@ -1,11 +1,13 @@
 /* Account screens — same editorial language as the vault: paper, ink, DM Mono labels. */
 .auth-page {
-  --vault-ink: #18342e;
+  /* Matches the landing page's --vault-ink so account screens share its
+     brown, rather than the dark green they were carrying. */
+  --vault-ink: #3a2c20;
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 48px 20px;
-  background: var(--paper);
+  background: transparent;
   font-family: "DM Sans", sans-serif;
 }
 
@@ -88,7 +90,7 @@
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #f4f0e8;
+  color: var(--paper);
   background: var(--vault-ink);
   border: 1px solid var(--vault-ink);
   cursor: pointer;
@@ -451,16 +453,16 @@
   cursor: pointer;
 }
 .auth-tabs button.is-active {
-  color: #fff;
+  color: var(--paper);
   background: var(--vault-ink);
 }
 
 /* ---- Guest trial banner --------------------------------------------------- */
 
 .vault-notice--trial {
-  background: var(--ink, #183430);
-  color: #fff;
-  border-bottom-color: rgba(255, 255, 255, 0.18);
+  background: var(--ink, #3a2c20);
+  color: var(--paper);
+  border-bottom-color: rgba(236, 229, 218, 0.18);
   letter-spacing: 0.01em;
 }
 
@@ -469,7 +471,7 @@
 }
 
 .vault-notice--trial a {
-  color: #fff;
+  color: var(--paper);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

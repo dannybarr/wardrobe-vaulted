@@ -1,7 +1,8 @@
 :root {
-  --import-ivory: #f4f0e7;
-  --import-paper: #fbf8f1;
-  --import-ink: #24231f;
+  /* Same paper/ink pair as the landing page and the rest of the app. */
+  --import-ivory: #ece5da;
+  --import-paper: #f1ebe1;
+  --import-ink: #3a2c20;
   --import-muted: #77736a;
   --import-line: rgba(36, 35, 31, 0.16);
   --import-shadow: 0 18px 55px rgba(42, 37, 28, 0.14);
@@ -17,7 +18,7 @@
   place-items: center;
   padding: 28px;
   color: var(--import-ink);
-  background: rgba(244, 240, 231, 0.9);
+  background: rgba(236, 229, 218, 0.9);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   opacity: 0;
@@ -44,7 +45,7 @@
   text-align: center;
   border: 1px dashed rgba(36, 35, 31, 0.42);
   border-radius: 28px;
-  background: rgba(251, 248, 241, 0.62);
+  background: rgba(241, 235, 225, 0.62);
   transform: scale(0.985);
   transition: transform 360ms var(--import-ease), background 200ms ease;
 }
