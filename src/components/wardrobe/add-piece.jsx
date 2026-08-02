@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, UploadSimple, X } from "@phosphor-icons/react";
 import { apiFetch } from "../../lib/api-fetch";
+import { fileToUploadDataUrl } from "../../lib/image/pixels";
+
 
 const PARTS = [
   ["upperbody", "Tops"],
@@ -10,12 +12,10 @@ const PARTS = [
   ["shoes", "Shoes"],
 ];
 
-const fileToDataUrl = (file) => new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = () => resolve(reader.result);
-  reader.onerror = () => reject(reader.error || new Error("Could not read that image."));
-  reader.readAsDataURL(file);
-});
+// Resized and re-encoded first: a raw camera photo is many times larger than the
+// upload endpoints accept.
+const fileToDataUrl = (file) => fileToUploadDataUrl(file);
+
 
 const EMPTY_DRAFT = { name: "", part: "upperbody", value: "", tags: "" };
 

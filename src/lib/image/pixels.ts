@@ -34,12 +34,29 @@ async function decode(blob: Blob): Promise<ImageBitmap> {
   return createImageBitmap(blob, { imageOrientation: "from-image", colorSpaceConversion: "default" });
 }
 
-export async function readRaster(blob: Blob): Promise<Raster> {
+/**
+ * The widest edge we ever hand to a canvas. Phone cameras produce 12–48MP files;
+ * decoding those at full size blows past mobile Safari's canvas limit and turns
+ * into a 30MB+ PNG, which the upload endpoints rightly refuse. Working at 2400px
+ * keeps every downstream stage (crops at 1536, cut-outs at 1024) lossless in
+ * practice while making uploads small enough to send.
+ */
+export const MAX_WORKING_EDGE = 2400;
+
+function fit(width: number, height: number, maxEdge: number) {
+  const longest = Math.max(width, height);
+  if (!maxEdge || longest <= maxEdge) return { width, height };
+  const scale = maxEdge / longest;
+  return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) };
+}
+
+export async function readRaster(blob: Blob, maxEdge = 0): Promise<Raster> {
   const bitmap = await decode(blob);
   try {
-    const { context } = canvasOf(bitmap.width, bitmap.height);
-    context.drawImage(bitmap, 0, 0);
-    const image = context.getImageData(0, 0, bitmap.width, bitmap.height);
+    const size = fit(bitmap.width, bitmap.height, maxEdge);
+    const { context } = canvasOf(size.width, size.height);
+    context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, size.width, size.height);
+    const image = context.getImageData(0, 0, size.width, size.height);
     return { data: image.data, width: image.width, height: image.height };
   } finally {
     bitmap.close();
@@ -56,11 +73,52 @@ export function rasterToBlob(raster: Raster): Promise<Blob> {
 
 /**
  * Normalize an upload the way the original did before anything else touched it:
- * upright, sRGB, PNG.
+ * upright, sRGB, PNG — now also capped to a workable size.
  */
-export async function normalizeImage(file: Blob): Promise<Blob> {
-  return rasterToBlob(await readRaster(file));
+export async function normalizeImage(file: Blob, maxEdge = MAX_WORKING_EDGE): Promise<Blob> {
+  return rasterToBlob(await readRaster(file, maxEdge));
 }
+
+/**
+ * A compact JPEG copy for the stages where the image is only being *read* by the
+ * model (photo analysis) or stored as the member's own snapshot. Same picture,
+ * a fraction of the bytes, so uploads from a phone always fit.
+ */
+export async function encodeForUpload(
+  file: Blob,
+  { maxEdge = 1600, quality = 0.9 }: { maxEdge?: number; quality?: number } = {},
+): Promise<Blob> {
+  const bitmap = await decode(file);
+  try {
+    const size = fit(bitmap.width, bitmap.height, maxEdge);
+    const { canvas, context } = canvasOf(size.width, size.height);
+    context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, size.width, size.height);
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("Could not prepare that photo"))),
+        "image/jpeg",
+        quality,
+      );
+    });
+  } finally {
+    bitmap.close();
+  }
+}
+
+/** A data URL of the compact copy, for the plain (non-AI) upload paths. */
+export async function fileToUploadDataUrl(
+  file: Blob,
+  options?: { maxEdge?: number; quality?: number },
+): Promise<string> {
+  const prepared = await encodeForUpload(file, options);
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error || new Error("Could not read that image."));
+    reader.readAsDataURL(prepared);
+  });
+}
+
 
 function normalizeBoundingBox(box: Partial<BoundingBox> = {}): BoundingBox {
   const number = (value: unknown, fallback: number) =>
