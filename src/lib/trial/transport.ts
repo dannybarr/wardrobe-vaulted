@@ -145,7 +145,47 @@ export async function handleTrialRequest(
     }
   }
 
-  // Outfits, on-model shots, the wishlist: everything else needs an account.
+  // Adding a piece by hand, with no AI step: stored locally like any trial piece.
+  if (url === "/api/wardrobe/direct-add" && method === "POST") {
+    if ((await countTrialPieces()) >= TRIAL_PIECE_ALLOWANCE) return signupRequired();
+    const body = await readBody(init);
+    const metadata = (body["metadata"] ?? {}) as Record<string, unknown>;
+    const image = asString(body["imageDataUrl"]);
+    if (!image) return json({ error: "Choose a photo of the piece first." }, 400);
+
+    const rawValue = metadata["value"];
+    const parsedValue =
+      typeof rawValue === "number"
+        ? rawValue
+        : Number(String(rawValue ?? "").replace(/[^0-9.]/g, ""));
+
+    const piece: TrialPiece = {
+      id: `trial-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`,
+      name: asString(metadata["name"], "New piece") || "New piece",
+      part: asString(metadata["part"], "upperbody"),
+      brand: "",
+      occasion: "",
+      value: Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : null,
+      color: null,
+      secondaryColor: null,
+      palette: [],
+      tags: Array.isArray(metadata["tags"])
+        ? (metadata["tags"] as string[]).map(String).slice(0, 24)
+        : [],
+      cutout: image.replace(/^data:[^,]+,/, ""),
+      createdAt: Date.now(),
+    };
+
+    await putTrialPiece(piece);
+    return json(toTrialWardrobeItem(piece), 201);
+  }
+
+  // Reading looks and the wishlist while still a guest: simply empty, so the
+  // screens show their own invitation rather than an error.
+  if ((url === "/api/outfits" || url === "/api/wishlist") && method === "GET") return json([]);
+
+  // Saving outfits, on-model shots and the wishlist: everything else needs an account.
+
   return json(
     {
       error: "Create your free account to unlock outfits, on-model shots and your wishlist.",
