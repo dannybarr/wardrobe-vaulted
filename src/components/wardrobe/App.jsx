@@ -6,6 +6,7 @@ import { OutfitsPane } from "./outfits.jsx";
 import { AddPieceModal } from "./add-piece.jsx";
 import { OptimizedImage } from "./OptimizedImage.jsx";
 import { ProfileBadge } from "./ProfileBadge.tsx";
+import { OnboardingChecklist } from "./OnboardingChecklist.tsx";
 import { apiFetch } from "../../lib/api-fetch";
 
 
@@ -712,6 +713,25 @@ export function WardrobeApp() {
     setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, modeledImage: result.modeledImage } : entry));
   }, []);
 
+  // Shown on every pane so a new member can pick up the next step from wherever
+  // they are. It takes itself off screen once all three are done.
+  const checklist = (
+    <OnboardingChecklist
+      pieceCount={items.length}
+      ready={!loading}
+      onUploadWardrobe={() => {
+        setView("wardrobe");
+        chooseType("all");
+        setAddOpen(true);
+      }}
+      onCraftOutfit={() => {
+        setView("wardrobe");
+        chooseType("outfits");
+      }}
+      onAddWishlist={() => setView("wishlist")}
+    />
+  );
+
   if (view === "wishlist") {
     return (
       <div className="app-shell">
@@ -720,6 +740,7 @@ export function WardrobeApp() {
           setupReady={setupReady}
           onPurchased={addImportedItem}
         />
+        {checklist}
       </div>
     );
   }
@@ -737,6 +758,7 @@ export function WardrobeApp() {
         <OutfitsPane items={items} setupReady={setupReady} toggle={<ViewToggle view={view} onChange={setView} />} navigation={outfitNavigation} onReturnToWardrobe={() => chooseType("all")} onAddPiece={() => setAddOpen(true)} />
         <AddPieceModal open={addOpen} setupReady={setupReady} onClose={() => setAddOpen(false)} onDirectAdded={addImportedItem} />
         <WardrobeImportFlow onGarmentApproved={addImportedItem} onModeledApproved={attachImportedModeledImage} />
+        {checklist}
       </div>
     );
   }
@@ -815,6 +837,7 @@ export function WardrobeApp() {
       {selectedItem && <ItemViewer item={selectedItem} onClose={() => setSelectedId(null)} onSave={saveItem} onDelete={deleteItem} onGenerateModel={generateOnModel} />}
       <AddPieceModal open={addOpen} setupReady={setupReady} onClose={() => setAddOpen(false)} onDirectAdded={addImportedItem} />
       <WardrobeImportFlow onGarmentApproved={addImportedItem} onModeledApproved={attachImportedModeledImage} />
+      {checklist}
     </div>
   );
 }
