@@ -18,6 +18,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TryRouteImport } from './routes/try'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedWardrobeRouteImport } from './routes/_authenticated/wardrobe'
+import { Route as ApiOutfitsRouteImport } from './routes/api/outfits'
 import { Route as ApiWishlistRouteImport } from './routes/api/wishlist'
 import { Route as ApiImportAnalyzeRouteImport } from './routes/api/import/analyze'
 import { Route as ApiImportConfigRouteImport } from './routes/api/import/config'
@@ -80,6 +81,11 @@ const AuthenticatedWardrobeRoute = AuthenticatedWardrobeRouteImport.update({
   id: '/wardrobe',
   path: '/wardrobe',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiOutfitsRoute = ApiOutfitsRouteImport.update({
+  id: '/api/outfits',
+  path: '/api/outfits',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWishlistRoute = ApiWishlistRouteImport.update({
   id: '/api/wishlist',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/try': typeof TryRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/outfits': typeof ApiOutfitsRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/try': typeof TryRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/outfits': typeof ApiOutfitsRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/try': typeof TryRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/wardrobe': typeof AuthenticatedWardrobeRoute
+  '/api/outfits': typeof ApiOutfitsRoute
   '/api/wishlist': typeof ApiWishlistRouteWithChildren
   '/api/import/analyze': typeof ApiImportAnalyzeRoute
   '/api/import/config': typeof ApiImportConfigRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/try'
     | '/billing'
     | '/wardrobe'
+    | '/api/outfits'
     | '/api/wishlist'
     | '/api/import/analyze'
     | '/api/import/config'
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/try'
     | '/billing'
     | '/wardrobe'
+    | '/api/outfits'
     | '/api/wishlist'
     | '/api/import/analyze'
     | '/api/import/config'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/try'
     | '/_authenticated/billing'
     | '/_authenticated/wardrobe'
+    | '/api/outfits'
     | '/api/wishlist'
     | '/api/import/analyze'
     | '/api/import/config'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   TryRoute: typeof TryRoute
+  ApiOutfitsRoute: typeof ApiOutfitsRoute
   ApiWishlistRoute: typeof ApiWishlistRouteWithChildren
   ApiImportAnalyzeRoute: typeof ApiImportAnalyzeRoute
   ApiImportConfigRoute: typeof ApiImportConfigRoute
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/wardrobe'
       preLoaderRoute: typeof AuthenticatedWardrobeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/outfits': {
+      id: '/api/outfits'
+      path: '/api/outfits'
+      fullPath: '/api/outfits'
+      preLoaderRoute: typeof ApiOutfitsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/wishlist': {
       id: '/api/wishlist'
@@ -636,6 +656,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   TryRoute: TryRoute,
+  ApiOutfitsRoute: ApiOutfitsRoute,
   ApiWishlistRoute: ApiWishlistRouteWithChildren,
   ApiImportAnalyzeRoute: ApiImportAnalyzeRoute,
   ApiImportConfigRoute: ApiImportConfigRoute,
