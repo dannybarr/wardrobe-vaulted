@@ -1,10 +1,20 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowSquareOut, Check, LinkSimple, Plus, ShoppingBagOpen, Sparkle, SpinnerGap, Trash, UploadSimple, X } from "@phosphor-icons/react";
+import {
+  ArrowSquareOut,
+  Check,
+  LinkSimple,
+  Plus,
+  ShoppingBagOpen,
+  Sparkle,
+  SpinnerGap,
+  Trash,
+  UploadSimple,
+  X,
+} from "@phosphor-icons/react";
 import { apiFetch } from "../../lib/api-fetch";
 import { importPhotoToWishlist, type WishlistPiece } from "../../lib/import/engine";
 import { fileToUploadDataUrl } from "../../lib/image/pixels";
 import type { DirectPiece } from "./add-piece";
-
 
 const API = "/api/wishlist";
 const TYPES = [
@@ -13,16 +23,35 @@ const TYPES = [
   { id: "lowerbody", label: "Bottoms" },
   { id: "accessories_up", label: "Accessories" },
   { id: "shoes", label: "Shoes" },
+  { id: "bags", label: "Bags" },
+  { id: "watches", label: "Watches" },
+  { id: "jewellery", label: "Jewellery" },
 ];
 
 type WishlistDraft = { name: string; brand: string; price: string; part: string };
 
 function isWishlistPiece(value: unknown): value is WishlistPiece {
-  return typeof value === "object" && value !== null && "id" in value && typeof value.id === "string" && "name" in value && typeof value.name === "string" && "part" in value && typeof value.part === "string";
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    "name" in value &&
+    typeof value.name === "string" &&
+    "part" in value &&
+    typeof value.part === "string"
+  );
 }
 
 function errorText(value: unknown, fallback: string): string {
-  if (typeof value === "object" && value !== null && "error" in value && typeof value.error === "string" && value.error) return value.error;
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "error" in value &&
+    typeof value.error === "string" &&
+    value.error
+  )
+    return value.error;
   return fallback;
 }
 
@@ -30,7 +59,10 @@ function messageOf(error: unknown, fallback: string): string {
   return error instanceof Error && error.message ? error.message : fallback;
 }
 
-async function api(path: string, options?: { method?: string; body?: string; headers?: Record<string, string> }): Promise<unknown> {
+async function api(
+  path: string,
+  options?: { method?: string; body?: string; headers?: Record<string, string> },
+): Promise<unknown> {
   const response = await apiFetch(path, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) },
@@ -43,7 +75,6 @@ async function api(path: string, options?: { method?: string; body?: string; hea
 // Phone photos are far bigger than any endpoint accepts, so every image is
 // resized and re-encoded here before it is sent.
 const fileToDataUrl = (file: File) => fileToUploadDataUrl(file);
-
 
 function AddLinkBar({
   onAdd,
@@ -72,13 +103,25 @@ function AddLinkBar({
       <input
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        onKeyDown={(event) => { if (event.key === "Enter") void submit(); }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") void submit();
+        }}
         placeholder="Paste a product link, or add a photo"
         aria-label="Product link"
         disabled={busy}
       />
-      <button type="button" onClick={() => { void submit(); }} disabled={busy || !value.trim()}>
-        {busy ? <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" /> : <Plus size={15} aria-hidden="true" />}
+      <button
+        type="button"
+        onClick={() => {
+          void submit();
+        }}
+        disabled={busy || !value.trim()}
+      >
+        {busy ? (
+          <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" />
+        ) : (
+          <Plus size={15} aria-hidden="true" />
+        )}
         {busy ? "Fetching" : "Add"}
       </button>
       <button
@@ -88,7 +131,11 @@ function AddLinkBar({
         disabled={photoBusy}
         title="Add a wishlist piece from a photo"
       >
-        {photoBusy ? <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" /> : <UploadSimple size={15} aria-hidden="true" />}
+        {photoBusy ? (
+          <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" />
+        ) : (
+          <UploadSimple size={15} aria-hidden="true" />
+        )}
         {photoBusy ? "Reading photo" : "Add photo"}
       </button>
       <input
@@ -106,16 +153,27 @@ function AddLinkBar({
   );
 }
 
-
 function WishlistCard({ item, onOpen }: { item: WishlistPiece; onOpen: (id: string) => void }) {
   return (
-    <button className="gallery-item wishlist-card" type="button" onClick={() => onOpen(item.id)} aria-label={`View ${item.name}`}>
-      {item.image
-        ? <img src={item.image} alt="" loading="lazy" />
-        : <span className="wishlist-card-placeholder"><UploadSimple size={22} aria-hidden="true" />Image needed</span>}
+    <button
+      className="gallery-item wishlist-card"
+      type="button"
+      onClick={() => onOpen(item.id)}
+      aria-label={`View ${item.name}`}
+    >
+      {item.image ? (
+        <img src={item.image} alt="" loading="lazy" />
+      ) : (
+        <span className="wishlist-card-placeholder">
+          <UploadSimple size={22} aria-hidden="true" />
+          Image needed
+        </span>
+      )}
       <span className="wishlist-card-meta">
         <span className="wishlist-card-name">{item.name}</span>
-        <span className="wishlist-card-detail">{[item.brand, item.price].filter(Boolean).join(" · ") || " "}</span>
+        <span className="wishlist-card-detail">
+          {[item.brand, item.price].filter(Boolean).join(" · ") || " "}
+        </span>
       </span>
     </button>
   );
@@ -138,12 +196,22 @@ function WishlistViewer({
 }) {
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [draft, setDraft] = useState<WishlistDraft>({ name: item.name, brand: item.brand || "", price: item.price || "", part: item.part });
+  const [draft, setDraft] = useState<WishlistDraft>({
+    name: item.name,
+    brand: item.brand || "",
+    price: item.price || "",
+    part: item.part,
+  });
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setDraft({ name: item.name, brand: item.brand || "", price: item.price || "", part: item.part });
+    setDraft({
+      name: item.name,
+      brand: item.brand || "",
+      price: item.price || "",
+      part: item.part,
+    });
     setError("");
   }, [item]);
 
@@ -163,22 +231,38 @@ function WishlistViewer({
   const run = async (label: string, task: () => Promise<void>) => {
     setBusy(label);
     setError("");
-    try { await task(); }
-    catch (requestError: unknown) { setError(messageOf(requestError, "The wishlist request failed.")); }
-    finally { setBusy(null); }
+    try {
+      await task();
+    } catch (requestError: unknown) {
+      setError(messageOf(requestError, "The wishlist request failed."));
+    } finally {
+      setBusy(null);
+    }
   };
 
-  const save = () => run("save", async () => {
-    const updated = await api(`${API}/${item.id}`, { method: "PATCH", body: JSON.stringify({ name: draft.name, brand: draft.brand, price: draft.price, part: draft.part }) });
-    if (!isWishlistPiece(updated)) throw new Error("The wishlist request failed.");
-    onChange(updated);
-  });
+  const save = () =>
+    run("save", async () => {
+      const updated = await api(`${API}/${item.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: draft.name,
+          brand: draft.brand,
+          price: draft.price,
+          part: draft.part,
+        }),
+      });
+      if (!isWishlistPiece(updated)) throw new Error("The wishlist request failed.");
+      onChange(updated);
+    });
 
   const attachImage = (file: File | null | undefined) => {
     if (!file || !file.type.startsWith("image/")) return;
     void run("image", async () => {
       const imageDataUrl = await fileToDataUrl(file);
-      const updated = await api(`${API}/${item.id}/image`, { method: "POST", body: JSON.stringify({ imageDataUrl }) });
+      const updated = await api(`${API}/${item.id}/image`, {
+        method: "POST",
+        body: JSON.stringify({ imageDataUrl }),
+      });
       if (!isWishlistPiece(updated)) throw new Error("The wishlist request failed.");
       onChange(updated);
     });
@@ -186,39 +270,73 @@ function WishlistViewer({
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
-      const file = [...(event.clipboardData?.files ?? [])].find((candidate) => candidate.type.startsWith("image/"));
-      if (file) { event.preventDefault(); attachImage(file); }
+      const file = [...(event.clipboardData?.files ?? [])].find((candidate) =>
+        candidate.type.startsWith("image/"),
+      );
+      if (file) {
+        event.preventDefault();
+        attachImage(file);
+      }
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
   }, [item.id]);
 
-  const tryOn = () => run("tryon", async () => {
-    const updated = await api(`${API}/${item.id}/tryon`, { method: "POST" });
-    if (!isWishlistPiece(updated)) throw new Error("The wishlist request failed.");
-    onChange(updated);
-  });
+  const tryOn = () =>
+    run("tryon", async () => {
+      const updated = await api(`${API}/${item.id}/tryon`, { method: "POST" });
+      if (!isWishlistPiece(updated)) throw new Error("The wishlist request failed.");
+      onChange(updated);
+    });
 
-  const purchase = () => run("purchase", async () => {
-    const result = await api(`${API}/${item.id}/purchase`, { method: "POST" });
-    if (typeof result !== "object" || result === null || !("record" in result) || !isPurchased(result.record)) throw new Error("The wishlist request failed.");
-    onPurchased(item.id, result.record);
-  });
+  const purchase = () =>
+    run("purchase", async () => {
+      const result = await api(`${API}/${item.id}/purchase`, { method: "POST" });
+      if (
+        typeof result !== "object" ||
+        result === null ||
+        !("record" in result) ||
+        !isPurchased(result.record)
+      )
+        throw new Error("The wishlist request failed.");
+      onPurchased(item.id, result.record);
+    });
 
-  const isDirty = draft.name !== item.name || draft.brand !== (item.brand || "") || draft.price !== (item.price || "") || draft.part !== item.part;
+  const isDirty =
+    draft.name !== item.name ||
+    draft.brand !== (item.brand || "") ||
+    draft.price !== (item.price || "") ||
+    draft.part !== item.part;
 
   return (
-    <div className="viewer-overlay" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <div
+      className="viewer-overlay"
+      role="presentation"
+      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+    >
       <div className="viewer-entry">
-        <aside className="viewer editing wishlist-viewer" role="dialog" aria-modal="true" aria-label="Selected wishlist item">
-          <button className="viewer-icon-close" type="button" onClick={onClose} aria-label="Close viewer" ref={closeButtonRef}>
+        <aside
+          className="viewer editing wishlist-viewer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Selected wishlist item"
+        >
+          <button
+            className="viewer-icon-close"
+            type="button"
+            onClick={onClose}
+            aria-label="Close viewer"
+            ref={closeButtonRef}
+          >
             <X size={24} weight="light" aria-hidden="true" />
           </button>
 
           <div className="viewer-heading">
             <div>
               <h2>{draft.name || "Wishlist piece"}</h2>
-              <p className="wishlist-viewer-sub">{[item.brand, item.price].filter(Boolean).join(" · ")}</p>
+              <p className="wishlist-viewer-sub">
+                {[item.brand, item.price].filter(Boolean).join(" · ")}
+              </p>
             </div>
           </div>
 
@@ -230,56 +348,156 @@ function WishlistViewer({
           )}
 
           <div className="viewer-art wishlist-art">
-            {item.image
-              ? <img src={item.image} alt={item.name} />
-              : (
-                <div className="wishlist-image-fallback">
-                  <UploadSimple size={26} aria-hidden="true" />
-                  <p>{item.note || "This site blocked automatic fetching. Add the product image yourself."}</p>
-                  <button className="secondary-button" type="button" disabled={busy === "image"} onClick={() => fileInputRef.current?.click()}>
-                    {busy === "image" ? "Saving" : "Choose image"}
-                  </button>
-                  <small>Or paste a copied image while this panel is open.</small>
-                </div>
-              )}
+            {item.image ? (
+              <img src={item.image} alt={item.name} />
+            ) : (
+              <div className="wishlist-image-fallback">
+                <UploadSimple size={26} aria-hidden="true" />
+                <p>
+                  {item.note ||
+                    "This site blocked automatic fetching. Add the product image yourself."}
+                </p>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  disabled={busy === "image"}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {busy === "image" ? "Saving" : "Choose image"}
+                </button>
+                <small>Or paste a copied image while this panel is open.</small>
+              </div>
+            )}
           </div>
-          <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={(event) => { attachImage(event.target.files?.[0]); event.target.value = ""; }} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(event) => {
+              attachImage(event.target.files?.[0]);
+              event.target.value = "";
+            }}
+          />
 
           <div className="viewer-details editing">
             <div className="item-editor">
-              <label className="field"><span>Name</span><input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} /></label>
-              <label className="field"><span>Brand</span><input value={draft.brand} onChange={(event) => setDraft({ ...draft, brand: event.target.value })} placeholder="Brand" /></label>
-              <label className="field"><span>Price</span><input value={draft.price} onChange={(event) => setDraft({ ...draft, price: event.target.value })} placeholder="£0.00" /></label>
-              <label className="field"><span>Category</span>
-                <select value={draft.part} onChange={(event) => setDraft({ ...draft, part: event.target.value })}>
-                  {TYPES.map((type) => <option value={type.id} key={type.id}>{type.label}</option>)}
+              <label className="field">
+                <span>Name</span>
+                <input
+                  value={draft.name}
+                  onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+                />
+              </label>
+              <label className="field">
+                <span>Brand</span>
+                <input
+                  value={draft.brand}
+                  onChange={(event) => setDraft({ ...draft, brand: event.target.value })}
+                  placeholder="Brand"
+                />
+              </label>
+              <label className="field">
+                <span>Price</span>
+                <input
+                  value={draft.price}
+                  onChange={(event) => setDraft({ ...draft, price: event.target.value })}
+                  placeholder="£0.00"
+                />
+              </label>
+              <label className="field">
+                <span>Category</span>
+                <select
+                  value={draft.part}
+                  onChange={(event) => setDraft({ ...draft, part: event.target.value })}
+                >
+                  {TYPES.map((type) => (
+                    <option value={type.id} key={type.id}>
+                      {type.label}
+                    </option>
+                  ))}
                 </select>
               </label>
             </div>
 
             <div className="wishlist-feature-actions">
-              <button className="secondary-button" type="button" disabled={!item.image || busy === "tryon" || !setupReady} onClick={tryOn} title={setupReady ? undefined : "Add your OpenAI key and reference photo to enable try-on"}>
-                {busy === "tryon" ? <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" /> : <Sparkle size={15} aria-hidden="true" />}
-                {busy === "tryon" ? "Generating your try-on" : item.modeledImage ? "Regenerate try-on" : "Try it on"}
+              <button
+                className="secondary-button"
+                type="button"
+                disabled={!item.image || busy === "tryon" || !setupReady}
+                onClick={tryOn}
+                title={
+                  setupReady
+                    ? undefined
+                    : "Add your OpenAI key and reference photo to enable try-on"
+                }
+              >
+                {busy === "tryon" ? (
+                  <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" />
+                ) : (
+                  <Sparkle size={15} aria-hidden="true" />
+                )}
+                {busy === "tryon"
+                  ? "Generating your try-on"
+                  : item.modeledImage
+                    ? "Regenerate try-on"
+                    : "Try it on"}
               </button>
-              <a className="secondary-button wishlist-outlink" href={item.url ?? undefined} target="_blank" rel="noreferrer noopener">
+              <a
+                className="secondary-button wishlist-outlink"
+                href={item.url ?? undefined}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
                 <ArrowSquareOut size={15} aria-hidden="true" /> View product
               </a>
             </div>
-            {!setupReady && <p className="wishlist-hint">Try-on needs your OpenAI key and reference photo set up first.</p>}
+            {!setupReady && (
+              <p className="wishlist-hint">
+                Try-on needs your OpenAI key and reference photo set up first.
+              </p>
+            )}
 
-            {error && <p className="unsaved-notice" role="alert">{error}</p>}
+            {error && (
+              <p className="unsaved-notice" role="alert">
+                {error}
+              </p>
+            )}
 
             <div className="viewer-actions">
-              <button className="delete-button" type="button" disabled={busy === "delete"} onClick={() => run("delete", async () => { await api(`${API}/${item.id}`, { method: "DELETE" }); onDelete(item.id); })}>
+              <button
+                className="delete-button"
+                type="button"
+                disabled={busy === "delete"}
+                onClick={() =>
+                  run("delete", async () => {
+                    await api(`${API}/${item.id}`, { method: "DELETE" });
+                    onDelete(item.id);
+                  })
+                }
+              >
                 <Trash size={15} aria-hidden="true" /> Remove
               </button>
               <span className="action-spacer" />
-              <button className="secondary-button" type="button" disabled={!item.image || busy === "purchase"} onClick={purchase}>
-                {busy === "purchase" ? <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" /> : <ShoppingBagOpen size={15} aria-hidden="true" />}
+              <button
+                className="secondary-button"
+                type="button"
+                disabled={!item.image || busy === "purchase"}
+                onClick={purchase}
+              >
+                {busy === "purchase" ? (
+                  <SpinnerGap size={15} className="wishlist-spinner" aria-hidden="true" />
+                ) : (
+                  <ShoppingBagOpen size={15} aria-hidden="true" />
+                )}
                 I bought it
               </button>
-              <button className="primary-button" type="button" disabled={!isDirty || busy === "save"} onClick={save}>
+              <button
+                className="primary-button"
+                type="button"
+                disabled={!isDirty || busy === "save"}
+                onClick={save}
+              >
                 <Check size={15} weight="bold" aria-hidden="true" /> Save
               </button>
             </div>
@@ -291,7 +509,16 @@ function WishlistViewer({
 }
 
 function isPurchased(value: unknown): value is DirectPiece {
-  return typeof value === "object" && value !== null && "id" in value && typeof value.id === "string" && "name" in value && typeof value.name === "string" && "part" in value && typeof value.part === "string";
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    "name" in value &&
+    typeof value.name === "string" &&
+    "part" in value &&
+    typeof value.part === "string"
+  );
 }
 
 export function WishlistPane({
@@ -314,7 +541,9 @@ export function WishlistPane({
   useEffect(() => {
     api(API)
       .then((loaded) => setItems(Array.isArray(loaded) ? loaded.filter(isWishlistPiece) : []))
-      .catch((requestError: unknown) => setError(messageOf(requestError, "The wishlist request failed.")))
+      .catch((requestError: unknown) =>
+        setError(messageOf(requestError, "The wishlist request failed.")),
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -323,8 +552,17 @@ export function WishlistPane({
     setError("");
     setNotice("");
     try {
-      const payload = await api(`${API}/resolve`, { method: "POST", body: JSON.stringify({ url }) });
-      if (typeof payload !== "object" || payload === null || !("item" in payload) || !isWishlistPiece(payload.item)) throw new Error("The wishlist request failed.");
+      const payload = await api(`${API}/resolve`, {
+        method: "POST",
+        body: JSON.stringify({ url }),
+      });
+      if (
+        typeof payload !== "object" ||
+        payload === null ||
+        !("item" in payload) ||
+        !isWishlistPiece(payload.item)
+      )
+        throw new Error("The wishlist request failed.");
       const item = payload.item;
       if ("duplicate" in payload && payload.duplicate) {
         setNotice("That link is already on your wishlist.");
@@ -357,7 +595,11 @@ export function WishlistPane({
         return;
       }
       setItems((current) => [...current, ...added]);
-      setNotice(added.length === 1 ? "Added from your photo." : `Added ${added.length} pieces from your photo.`);
+      setNotice(
+        added.length === 1
+          ? "Added from your photo."
+          : `Added ${added.length} pieces from your photo.`,
+      );
       setSelectedId(first.id);
     } catch (requestError: unknown) {
       setError(messageOf(requestError, "The wishlist request failed."));
@@ -367,7 +609,7 @@ export function WishlistPane({
   }, []);
 
   const changeItem = useCallback((updated: WishlistPiece) => {
-    setItems((current) => current.map((item) => item.id === updated.id ? updated : item));
+    setItems((current) => current.map((item) => (item.id === updated.id ? updated : item)));
   }, []);
 
   const removeItem = useCallback((id: string) => {
@@ -375,12 +617,15 @@ export function WishlistPane({
     setSelectedId(null);
   }, []);
 
-  const purchasedItem = useCallback((id: string, record: DirectPiece) => {
-    setItems((current) => current.filter((item) => item.id !== id));
-    setSelectedId(null);
-    setNotice("Moved to your wardrobe.");
-    onPurchased(record);
-  }, [onPurchased]);
+  const purchasedItem = useCallback(
+    (id: string, record: DirectPiece) => {
+      setItems((current) => current.filter((item) => item.id !== id));
+      setSelectedId(null);
+      setNotice("Moved to your wardrobe.");
+      onPurchased(record);
+    },
+    [onPurchased],
+  );
 
   const selectedItem = items.find((item) => item.id === selectedId) || null;
 
@@ -388,20 +633,30 @@ export function WishlistPane({
     <main className="gallery-pane">
       <header className="gallery-header">
         <div className="gallery-meta-row">
-          <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"} wished for</p>
+          <p className="piece-count">
+            {items.length} {items.length === 1 ? "piece" : "pieces"} wished for
+          </p>
           {toggle}
         </div>
         <AddLinkBar onAdd={addLink} busy={adding} onPhoto={addPhoto} photoBusy={addingPhoto} />
       </header>
 
       {error && <p className="status error">{error}</p>}
-      {notice && !error && <p className="status" role="status">{notice}</p>}
+      {notice && !error && (
+        <p className="status" role="status">
+          {notice}
+        </p>
+      )}
       {!error && loading && <p className="status">Loading wishlist</p>}
-      {!error && !loading && !items.length && <p className="status empty">Paste a product link above to start your wishlist.</p>}
+      {!error && !loading && !items.length && (
+        <p className="status empty">Paste a product link above to start your wishlist.</p>
+      )}
 
       {!!items.length && (
         <section className="gallery-grid wishlist-grid" aria-label="Wishlist items">
-          {items.map((item) => <WishlistCard key={item.id} item={item} onOpen={setSelectedId} />)}
+          {items.map((item) => (
+            <WishlistCard key={item.id} item={item} onOpen={setSelectedId} />
+          ))}
         </section>
       )}
 

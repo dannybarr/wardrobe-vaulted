@@ -23,6 +23,20 @@ export type WardrobeItem = {
   thumbnail: string | null;
   modeledImage: string | null;
   importJobId: string | null;
+  size: string | null;
+  condition: string | null;
+  purchasePrice: number | null;
+  purchaseDate: string | null;
+  estimatedResaleValue: number | null;
+  valueLow: number | null;
+  valueHigh: number | null;
+  valueSource: string | null;
+  valuedAt: string | null;
+  valueConfidence: string | null;
+  valueOverridden: boolean;
+  lastWornAt: string | null;
+  wearCount: number;
+  updatedAt: string | null;
 };
 
 /** Short-lived private links, one signing round-trip for the whole wardrobe. */
@@ -70,6 +84,21 @@ export function toWardrobeItem(
     importJobId: garment.legacy_id?.startsWith("import-")
       ? garment.legacy_id.slice("import-".length)
       : null,
+    size: garment.size_label,
+    condition: garment.condition,
+    purchasePrice: garment.purchase_price === null ? null : Number(garment.purchase_price),
+    purchaseDate: garment.purchase_date,
+    estimatedResaleValue:
+      garment.estimated_resale_value === null ? null : Number(garment.estimated_resale_value),
+    valueLow: garment.value_low === null ? null : Number(garment.value_low),
+    valueHigh: garment.value_high === null ? null : Number(garment.value_high),
+    valueSource: garment.value_source,
+    valuedAt: garment.valued_at,
+    valueConfidence: garment.value_confidence,
+    valueOverridden: garment.value_overridden,
+    lastWornAt: garment.last_worn_at,
+    wearCount: garment.wear_count ?? 0,
+    updatedAt: garment.updated_at,
   };
 }
 
@@ -92,7 +121,10 @@ export async function loadWardrobe(supabase: Client): Promise<WardrobeItem[]> {
     );
   if (imageError) throw imageError;
 
-  const signed = await signPaths(supabase, (images ?? []).map((image) => image.storage_path));
+  const signed = await signPaths(
+    supabase,
+    (images ?? []).map((image) => image.storage_path),
+  );
 
   return garments.map((garment) =>
     toWardrobeItem(

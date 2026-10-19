@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type SetStateAction } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { Check, Plus, Sparkle, Trash, X } from "@phosphor-icons/react";
 import { WardrobeImportFlow } from "./import-flow";
 import { WishlistPane } from "./wishlist";
@@ -15,7 +24,6 @@ import { summariseWardrobe } from "@/lib/worth/summarise";
 import { formatRange } from "@/lib/worth/format";
 import type { Condition, ValueConfidence, WorthPiece } from "@/lib/worth/types";
 
-
 const TYPES: Array<{ id: string; label: string; singular?: string }> = [
   { id: "all", label: "All" },
   { id: "upperbody", label: "Tops", singular: "Top" },
@@ -23,10 +31,16 @@ const TYPES: Array<{ id: string; label: string; singular?: string }> = [
   { id: "lowerbody", label: "Bottoms", singular: "Bottom" },
   { id: "accessories_up", label: "Accessories", singular: "Accessory" },
   { id: "shoes", label: "Shoes", singular: "Shoes" },
+  { id: "bags", label: "Bags", singular: "Bag" },
+  { id: "watches", label: "Watches", singular: "Watch" },
+  { id: "jewellery", label: "Jewellery", singular: "Jewellery" },
 ];
 
-const TYPE_MAP: Record<string, { id: string; label: string; singular?: string } | undefined> = Object.fromEntries(TYPES.map((type) => [type.id, type]));
-const TYPE_ORDER: Record<string, number> = Object.fromEntries(TYPES.slice(1).map((type, index) => [type.id, index]));
+const TYPE_MAP: Record<string, { id: string; label: string; singular?: string } | undefined> =
+  Object.fromEntries(TYPES.map((type) => [type.id, type]));
+const TYPE_ORDER: Record<string, number> = Object.fromEntries(
+  TYPES.slice(1).map((type, index) => [type.id, index]),
+);
 const OCCASIONS = ["Work", "Casual", "Formal", "Night Out"];
 
 type AppView = "worth" | "wardrobe" | "outfits" | "wishlist";
@@ -50,7 +64,16 @@ function at(values: ArrayLike<number>, index: number): number {
 }
 
 function isPiece(value: unknown): value is DirectPiece {
-  return typeof value === "object" && value !== null && "id" in value && typeof value.id === "string" && "name" in value && typeof value.name === "string" && "part" in value && typeof value.part === "string";
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    "name" in value &&
+    typeof value.name === "string" &&
+    "part" in value &&
+    typeof value.part === "string"
+  );
 }
 
 function piecesFrom(value: unknown): DirectPiece[] {
@@ -70,8 +93,10 @@ function isConfidence(value: string | null | undefined): value is ValueConfidenc
 }
 
 function toWorthPiece(item: DirectPiece): WorthPiece {
-  const low = typeof item.valueLow === "number" && Number.isFinite(item.valueLow) ? item.valueLow : null;
-  const high = typeof item.valueHigh === "number" && Number.isFinite(item.valueHigh) ? item.valueHigh : null;
+  const low =
+    typeof item.valueLow === "number" && Number.isFinite(item.valueLow) ? item.valueLow : null;
+  const high =
+    typeof item.valueHigh === "number" && Number.isFinite(item.valueHigh) ? item.valueHigh : null;
   const priced = low !== null && high !== null;
   const confidence = isConfidence(item.valueConfidence) ? item.valueConfidence : null;
   return {
@@ -138,9 +163,9 @@ function rgbToHex(red: number, green: number, blue: number): string {
 
 function colorDistance(first: Rgb, second: Rgb): number {
   return Math.sqrt(
-    ((first.red - second.red) ** 2)
-    + ((first.green - second.green) ** 2)
-    + ((first.blue - second.blue) ** 2),
+    (first.red - second.red) ** 2 +
+      (first.green - second.green) ** 2 +
+      (first.blue - second.blue) ** 2,
   );
 }
 
@@ -198,7 +223,11 @@ function buildSamplingCanvas(image: HTMLImageElement): HTMLCanvasElement {
   return canvas;
 }
 
-function sampleImageColor(image: HTMLImageElement, canvas: HTMLCanvasElement, event: { clientX: number; clientY: number }): string | null {
+function sampleImageColor(
+  image: HTMLImageElement,
+  canvas: HTMLCanvasElement,
+  event: { clientX: number; clientY: number },
+): string | null {
   const bounds = image.getBoundingClientRect();
   const scale = Math.min(bounds.width / image.naturalWidth, bounds.height / image.naturalHeight);
   const renderedWidth = image.naturalWidth * scale;
@@ -215,18 +244,27 @@ function sampleImageColor(image: HTMLImageElement, canvas: HTMLCanvasElement, ev
   for (let radius = 0; radius <= 18; radius += 2) {
     const startX = Math.max(0, imageX - radius);
     const startY = Math.max(0, imageY - radius);
-    const width = Math.min(canvas.width - startX, (radius * 2) + 1);
-    const height = Math.min(canvas.height - startY, (radius * 2) + 1);
+    const width = Math.min(canvas.width - startX, radius * 2 + 1);
+    const height = Math.min(canvas.height - startY, radius * 2 + 1);
     const data = context.getImageData(startX, startY, width, height).data;
     for (let index = 0; index < data.length; index += 4) {
-      if (at(data, index + 3) > 96) return rgbToHex(at(data, index), at(data, index + 1), at(data, index + 2));
+      if (at(data, index + 3) > 96)
+        return rgbToHex(at(data, index), at(data, index + 1), at(data, index + 2));
     }
   }
 
   return null;
 }
 
-function GalleryItem({ item, selected, onOpen }: { item: DirectPiece; selected: boolean; onOpen: (id: string) => void }) {
+function GalleryItem({
+  item,
+  selected,
+  onOpen,
+}: {
+  item: DirectPiece;
+  selected: boolean;
+  onOpen: (id: string) => void;
+}) {
   const type = TYPE_MAP[item.part]?.singular || "wardrobe item";
 
   return (
@@ -264,7 +302,11 @@ function TagEditor({ tags, onChange }: { tags: string[]; onChange: (tags: string
         {tags.map((tag) => (
           <span className="editable-tag" key={tag}>
             {tag}
-            <button type="button" onClick={() => onChange(tags.filter((existing) => existing !== tag))} aria-label={`Remove ${tag}`}>
+            <button
+              type="button"
+              onClick={() => onChange(tags.filter((existing) => existing !== tag))}
+              aria-label={`Remove ${tag}`}
+            >
               <X size={12} weight="regular" aria-hidden="true" />
             </button>
           </span>
@@ -322,7 +364,9 @@ function ColorControl({
           <small>Optional</small>
         </div>
         <p>No distinct secondary color detected.</p>
-        <button className="add-secondary-button" type="button" onClick={() => onAdd?.()}>Add secondary color</button>
+        <button className="add-secondary-button" type="button" onClick={() => onAdd?.()}>
+          Add secondary color
+        </button>
       </div>
     );
   }
@@ -331,7 +375,11 @@ function ColorControl({
     <div className="color-slot">
       <div className="color-slot-heading">
         <span>{label}</span>
-        {optional && <button type="button" onClick={() => onClear?.()}>Remove</button>}
+        {optional && (
+          <button type="button" onClick={() => onClear?.()}>
+            Remove
+          </button>
+        )}
       </div>
       <label className="selected-color-control">
         <input
@@ -365,7 +413,7 @@ function ColorControl({
       <button
         className={`sample-button${sampling === field ? " active" : ""}`}
         type="button"
-        onClick={() => setSampling((current) => current === field ? null : field)}
+        onClick={() => setSampling((current) => (current === field ? null : field))}
       >
         {sampling === field ? "Cancel picking" : `Pick ${label.toLowerCase()} from image`}
       </button>
@@ -388,7 +436,8 @@ function ItemEditor({
   setSampling: Dispatch<SetStateAction<ColorField | null>>;
   sampleStatus: string;
 }) {
-  const suggestedSecondary = palette.find((color) => color.toLowerCase() !== draft.color.toLowerCase()) || "#9a9286";
+  const suggestedSecondary =
+    palette.find((color) => color.toLowerCase() !== draft.color.toLowerCase()) || "#9a9286";
 
   return (
     <div className="item-editor">
@@ -403,8 +452,15 @@ function ItemEditor({
 
       <label className="field">
         <span>Category</span>
-        <select value={draft.part} onChange={(event) => setDraft((current) => ({ ...current, part: event.target.value }))}>
-          {TYPES.slice(1).map((type) => <option value={type.id} key={type.id}>{type.label}</option>)}
+        <select
+          value={draft.part}
+          onChange={(event) => setDraft((current) => ({ ...current, part: event.target.value }))}
+        >
+          {TYPES.slice(1).map((type) => (
+            <option value={type.id} key={type.id}>
+              {type.label}
+            </option>
+          ))}
         </select>
       </label>
 
@@ -432,12 +488,16 @@ function ItemEditor({
         <span>Occasion</span>
         <input
           value={draft.occasion}
-          onChange={(event) => setDraft((current) => ({ ...current, occasion: event.target.value }))}
+          onChange={(event) =>
+            setDraft((current) => ({ ...current, occasion: event.target.value }))
+          }
           list="occasion-options"
           placeholder="Choose or add an occasion"
         />
         <datalist id="occasion-options">
-          {OCCASIONS.map((occasion) => <option value={occasion} key={occasion} />)}
+          {OCCASIONS.map((occasion) => (
+            <option value={occasion} key={occasion} />
+          ))}
         </datalist>
       </label>
 
@@ -463,15 +523,25 @@ function ItemEditor({
             setSampling={setSampling}
             optional
             onClear={() => setDraft((current) => ({ ...current, secondaryColor: null }))}
-            onAdd={() => setDraft((current) => ({ ...current, secondaryColor: suggestedSecondary }))}
+            onAdd={() =>
+              setDraft((current) => ({ ...current, secondaryColor: suggestedSecondary }))
+            }
           />
         </div>
-        <p className="color-help" aria-live="polite">{sampling ? `Click anywhere on the garment to sample the ${sampling} color.` : sampleStatus || "Primary colors come from the image. A secondary is suggested only when a distinct color has meaningful coverage."}</p>
+        <p className="color-help" aria-live="polite">
+          {sampling
+            ? `Click anywhere on the garment to sample the ${sampling} color.`
+            : sampleStatus ||
+              "Primary colors come from the image. A secondary is suggested only when a distinct color has meaningful coverage."}
+        </p>
       </fieldset>
 
       <div className="field details-field">
         <span>Details</span>
-        <TagEditor tags={draft.tags} onChange={(tags) => setDraft((current) => ({ ...current, tags }))} />
+        <TagEditor
+          tags={draft.tags}
+          onChange={(tags) => setDraft((current) => ({ ...current, tags }))}
+        />
       </div>
     </div>
   );
@@ -525,25 +595,28 @@ function ItemViewer({
 
   const isDirty = useMemo(() => {
     const normalizedTags = (tags: string[]) => tags.map((tag) => tag.trim()).filter(Boolean);
-    return JSON.stringify({
-      name: draft.name.trim(),
-      brand: normalizeBrand(draft.brand),
-      occasion: normalizeOccasion(draft.occasion),
-      part: draft.part,
-      color: draft.color.toLowerCase() || null,
-      secondaryColor: draft.secondaryColor?.toLowerCase() || null,
-      tags: normalizedTags(draft.tags),
-      value: parseDraftValue(draft.value),
-    }) !== JSON.stringify({
-      name: (item.name || "").trim(),
-      brand: normalizeBrand(item.brand),
-      occasion: normalizeOccasion(item.occasion),
-      part: item.part,
-      color: item.color?.toLowerCase() || null,
-      secondaryColor: item.secondaryColor?.toLowerCase() || null,
-      tags: normalizedTags(item.tags || []),
-      value: typeof item.value === "number" && Number.isFinite(item.value) ? item.value : null,
-    });
+    return (
+      JSON.stringify({
+        name: draft.name.trim(),
+        brand: normalizeBrand(draft.brand),
+        occasion: normalizeOccasion(draft.occasion),
+        part: draft.part,
+        color: draft.color.toLowerCase() || null,
+        secondaryColor: draft.secondaryColor?.toLowerCase() || null,
+        tags: normalizedTags(draft.tags),
+        value: parseDraftValue(draft.value),
+      }) !==
+      JSON.stringify({
+        name: (item.name || "").trim(),
+        brand: normalizeBrand(item.brand),
+        occasion: normalizeOccasion(item.occasion),
+        part: item.part,
+        color: item.color?.toLowerCase() || null,
+        secondaryColor: item.secondaryColor?.toLowerCase() || null,
+        tags: normalizedTags(item.tags || []),
+        value: typeof item.value === "number" && Number.isFinite(item.value) ? item.value : null,
+      })
+    );
   }, [draft, item]);
 
   const nudgeUnsaved = useCallback(() => {
@@ -630,20 +703,33 @@ function ItemViewer({
     setPalette([...new Set([...(item.palette || []), ...extracted])].slice(0, 5));
   };
 
-  const handleImageClick = (event: { currentTarget: HTMLImageElement; clientX: number; clientY: number }) => {
+  const handleImageClick = (event: {
+    currentTarget: HTMLImageElement;
+    clientX: number;
+    clientY: number;
+  }) => {
     if (!sampling || !samplingCanvasRef.current) return;
     const color = sampleImageColor(event.currentTarget, samplingCanvasRef.current, event);
     if (!color) {
       setSampleStatus("That spot is transparent—try directly on the garment.");
       return;
     }
-    setDraft((current) => sampling === "secondary" ? { ...current, secondaryColor: color } : { ...current, color });
-    setPalette((current) => [color, ...current.filter((existing) => existing.toLowerCase() !== color.toLowerCase())].slice(0, 5));
+    setDraft((current) =>
+      sampling === "secondary" ? { ...current, secondaryColor: color } : { ...current, color },
+    );
+    setPalette((current) =>
+      [
+        color,
+        ...current.filter((existing) => existing.toLowerCase() !== color.toLowerCase()),
+      ].slice(0, 5),
+    );
     setSampleStatus(`Sampled ${color} as the ${sampling} color.`);
     setSampling(null);
   };
 
-  const rotationStyle = { "--piece-rotation": pieceRotation } as CSSProperties & { "--piece-rotation"?: string };
+  const rotationStyle = { "--piece-rotation": pieceRotation } as CSSProperties & {
+    "--piece-rotation"?: string;
+  };
   const garmentArtwork = (
     <div
       className={`viewer-art${hasModeledImage ? " viewer-art-floating" : ""}${sampling ? " sampling" : ""}`}
@@ -664,75 +750,108 @@ function ItemViewer({
   );
 
   return (
-    <div className="viewer-overlay" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && requestClose()}>
-    <div className="viewer-entry">
-    <aside className={`viewer editing${hasModeledImage ? " has-modeled-image" : ""}${shaking ? " shake" : ""}`} role="dialog" aria-modal="true" aria-label="Selected wardrobe item">
-      <button className="viewer-icon-close" type="button" onClick={requestClose} aria-label="Close viewer" ref={closeButtonRef}>
-        <X size={24} weight="light" aria-hidden="true" />
-      </button>
+    <div
+      className="viewer-overlay"
+      role="presentation"
+      onMouseDown={(event) => event.target === event.currentTarget && requestClose()}
+    >
+      <div className="viewer-entry">
+        <aside
+          className={`viewer editing${hasModeledImage ? " has-modeled-image" : ""}${shaking ? " shake" : ""}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Selected wardrobe item"
+        >
+          <button
+            className="viewer-icon-close"
+            type="button"
+            onClick={requestClose}
+            aria-label="Close viewer"
+            ref={closeButtonRef}
+          >
+            <X size={24} weight="light" aria-hidden="true" />
+          </button>
 
-      {hasModeledImage ? (
-        <div className="modeled-hero">
-          <OptimizedImage
-            className="modeled-hero-photo"
-            src={item.modeledImage}
-            alt={`${draft.name || type} worn by a model`}
-            sizes="(max-width: 860px) 100vw, 520px"
-            breakpoints={[320, 480, 640, 800, 1040, 1280]}
-            quality={82}
-            priority
-          />
-          <div className="viewer-heading modeled-heading">
-            <div>
-              <h2>{draft.name || TYPE_MAP[draft.part]?.singular}</h2>
+          {hasModeledImage ? (
+            <div className="modeled-hero">
+              <OptimizedImage
+                className="modeled-hero-photo"
+                src={item.modeledImage}
+                alt={`${draft.name || type} worn by a model`}
+                sizes="(max-width: 860px) 100vw, 520px"
+                breakpoints={[320, 480, 640, 800, 1040, 1280]}
+                quality={82}
+                priority
+              />
+              <div className="viewer-heading modeled-heading">
+                <div>
+                  <h2>{draft.name || TYPE_MAP[draft.part]?.singular}</h2>
+                </div>
+              </div>
+              {garmentArtwork}
             </div>
-          </div>
-          {garmentArtwork}
-        </div>
-      ) : (
-        <>
-          <div className="viewer-heading">
-            <div>
-              <h2>{draft.name || TYPE_MAP[draft.part]?.singular}</h2>
-            </div>
-          </div>
-          {garmentArtwork}
-          {canGenerateModel && (
-            <div className="viewer-model-request">
-              <button className="secondary-button viewer-model-button" type="button" onClick={() => { void generateModel(); }} disabled={generatingModel}>
-                <Sparkle size={16} weight="fill" aria-hidden="true" /> {generatingModel ? "Generating on model…" : "Generate on model"}
-              </button>
-              {modelError && <p className="viewer-model-error" role="alert">{modelError}</p>}
-            </div>
+          ) : (
+            <>
+              <div className="viewer-heading">
+                <div>
+                  <h2>{draft.name || TYPE_MAP[draft.part]?.singular}</h2>
+                </div>
+              </div>
+              {garmentArtwork}
+              {canGenerateModel && (
+                <div className="viewer-model-request">
+                  <button
+                    className="secondary-button viewer-model-button"
+                    type="button"
+                    onClick={() => {
+                      void generateModel();
+                    }}
+                    disabled={generatingModel}
+                  >
+                    <Sparkle size={16} weight="fill" aria-hidden="true" />{" "}
+                    {generatingModel ? "Generating on model…" : "Generate on model"}
+                  </button>
+                  {modelError && (
+                    <p className="viewer-model-error" role="alert">
+                      {modelError}
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
           )}
-        </>
-      )}
 
-      <div className="viewer-details editing">
-        <ItemEditor
-          draft={draft}
-          setDraft={setDraft}
-          palette={palette}
-          sampling={sampling}
-          setSampling={setSampling}
-          sampleStatus={sampleStatus}
-        />
+          <div className="viewer-details editing">
+            <ItemEditor
+              draft={draft}
+              setDraft={setDraft}
+              palette={palette}
+              sampling={sampling}
+              setSampling={setSampling}
+              sampleStatus={sampleStatus}
+            />
 
-        {closeBlocked && <p className="unsaved-notice" role="status">Save or cancel changes before closing.</p>}
+            {closeBlocked && (
+              <p className="unsaved-notice" role="status">
+                Save or cancel changes before closing.
+              </p>
+            )}
 
-        <div className="viewer-actions">
-          <button className="delete-button" type="button" onClick={() => onDelete(item.id)}>
-            <Trash size={15} weight="regular" aria-hidden="true" /> Delete
-          </button>
-          <span className="action-spacer" />
-          <button className="secondary-button" type="button" onClick={cancelEditing}>Cancel</button>
-          <button className="primary-button" type="button" onClick={saveEditing}>
-            <Check size={15} weight="bold" aria-hidden="true" /> Save
-          </button>
-        </div>
+            <div className="viewer-actions">
+              <button className="delete-button" type="button" onClick={() => onDelete(item.id)}>
+                <Trash size={15} weight="regular" aria-hidden="true" /> Delete
+              </button>
+              <span className="action-spacer" />
+              <button className="secondary-button" type="button" onClick={cancelEditing}>
+                Cancel
+              </button>
+              <button className="primary-button" type="button" onClick={saveEditing}>
+                <Check size={15} weight="bold" aria-hidden="true" /> Save
+              </button>
+            </div>
+          </div>
+        </aside>
       </div>
-    </aside>
-    </div>
     </div>
   );
 }
@@ -741,12 +860,40 @@ function ViewToggle({ view, onChange }: { view: AppView; onChange: (next: AppVie
   return (
     <>
       <nav className="view-toggle" aria-label="Worth and pieces">
-        <button type="button" className={view === "worth" ? "active" : ""} aria-pressed={view === "worth"} onClick={() => onChange("worth")}>Worth</button>
-        <button type="button" className={view === "wardrobe" ? "active" : ""} aria-pressed={view === "wardrobe"} onClick={() => onChange("wardrobe")}>Pieces</button>
+        <button
+          type="button"
+          className={view === "worth" ? "active" : ""}
+          aria-pressed={view === "worth"}
+          onClick={() => onChange("worth")}
+        >
+          Worth
+        </button>
+        <button
+          type="button"
+          className={view === "wardrobe" ? "active" : ""}
+          aria-pressed={view === "wardrobe"}
+          onClick={() => onChange("wardrobe")}
+        >
+          Pieces
+        </button>
       </nav>
       <nav className="view-toggle" aria-label="Looks and wishlist">
-        <button type="button" className={view === "outfits" ? "active" : ""} aria-pressed={view === "outfits"} onClick={() => onChange("outfits")}>Looks</button>
-        <button type="button" className={view === "wishlist" ? "active" : ""} aria-pressed={view === "wishlist"} onClick={() => onChange("wishlist")}>Wishlist</button>
+        <button
+          type="button"
+          className={view === "outfits" ? "active" : ""}
+          aria-pressed={view === "outfits"}
+          onClick={() => onChange("outfits")}
+        >
+          Looks
+        </button>
+        <button
+          type="button"
+          className={view === "wishlist" ? "active" : ""}
+          aria-pressed={view === "wishlist"}
+          onClick={() => onChange("wishlist")}
+        >
+          Wishlist
+        </button>
       </nav>
     </>
   );
@@ -774,7 +921,11 @@ export function WardrobeApp() {
         return config;
       })
       .then((config) => {
-        const ready = typeof config === "object" && config !== null && "ready" in config && Boolean(config.ready);
+        const ready =
+          typeof config === "object" &&
+          config !== null &&
+          "ready" in config &&
+          Boolean(config.ready);
         setSetupReady(ready);
       })
       .catch(() => {});
@@ -788,23 +939,36 @@ export function WardrobeApp() {
         return piecesFrom(loaded);
       })
       .then((loadedItems) => setItems(loadedItems))
-      .catch((requestError: unknown) => setError(messageOf(requestError, "Could not load the wardrobe.")))
+      .catch((requestError: unknown) =>
+        setError(messageOf(requestError, "Could not load the wardrobe.")),
+      )
       .finally(() => setLoading(false));
   }, []);
 
   const selectedItem = items.find((item) => item.id === selectedId) || null;
   const worthPieces = useMemo(() => items.map(toWorthPiece), [items]);
   const summary = useMemo(() => summariseWardrobe(worthPieces), [worthPieces]);
-  const purchaseTotal = useMemo(() => items.reduce((total, item) => total + (typeof item.value === "number" && Number.isFinite(item.value) ? item.value : 0), 0), [items]);
+  const purchaseTotal = useMemo(
+    () =>
+      items.reduce(
+        (total, item) =>
+          total + (typeof item.value === "number" && Number.isFinite(item.value) ? item.value : 0),
+        0,
+      ),
+    [items],
+  );
   const badgeWorth = summary.pricedCount ? (summary.low + summary.high) / 2 : purchaseTotal;
-  const worthLabel = summary.pricedCount ? formatRange(summary.low, summary.high) : moneyLabel(purchaseTotal);
+  const worthLabel = summary.pricedCount
+    ? formatRange(summary.low, summary.high)
+    : moneyLabel(purchaseTotal);
   const sellPiece = worthPieces.find((piece) => piece.id === sellPieceId) ?? null;
 
   const brands = useMemo(() => {
     const uniqueBrands = new Map<string, string>();
     items.forEach((item) => {
       const brand = normalizeBrand(item.brand);
-      if (brand && !uniqueBrands.has(brand.toLocaleLowerCase())) uniqueBrands.set(brand.toLocaleLowerCase(), brand);
+      if (brand && !uniqueBrands.has(brand.toLocaleLowerCase()))
+        uniqueBrands.set(brand.toLocaleLowerCase(), brand);
     });
     return [...uniqueBrands.values()].sort((first, second) => first.localeCompare(second));
   }, [items]);
@@ -813,19 +977,27 @@ export function WardrobeApp() {
     const uniqueOccasions = new Map<string, string>();
     items.forEach((item) => {
       const occasion = normalizeOccasion(item.occasion);
-      if (occasion && !uniqueOccasions.has(occasion.toLocaleLowerCase())) uniqueOccasions.set(occasion.toLocaleLowerCase(), occasion);
+      if (occasion && !uniqueOccasions.has(occasion.toLocaleLowerCase()))
+        uniqueOccasions.set(occasion.toLocaleLowerCase(), occasion);
     });
     return [...uniqueOccasions.values()].sort((first, second) => first.localeCompare(second));
   }, [items]);
 
   const visibleItems = useMemo(() => {
-    const typeFiltered = activeType === "all" ? items : items.filter((item) => item.part === activeType);
-    const filtered = activeType === "all"
-      ? typeFiltered.filter((item) => (
-        (!activeBrand || normalizeBrand(item.brand).toLocaleLowerCase() === activeBrand.toLocaleLowerCase())
-        && (!activeOccasion || normalizeOccasion(item.occasion).toLocaleLowerCase() === activeOccasion.toLocaleLowerCase())
-      ))
-      : typeFiltered;
+    const typeFiltered =
+      activeType === "all" ? items : items.filter((item) => item.part === activeType);
+    const filtered =
+      activeType === "all"
+        ? typeFiltered.filter(
+            (item) =>
+              (!activeBrand ||
+                normalizeBrand(item.brand).toLocaleLowerCase() ===
+                  activeBrand.toLocaleLowerCase()) &&
+              (!activeOccasion ||
+                normalizeOccasion(item.occasion).toLocaleLowerCase() ===
+                  activeOccasion.toLocaleLowerCase()),
+          )
+        : typeFiltered;
     return [...filtered].sort((a, b) => {
       if (activeType === "all") {
         const typeDifference = (TYPE_ORDER[a.part] ?? 99) - (TYPE_ORDER[b.part] ?? 99);
@@ -846,8 +1018,10 @@ export function WardrobeApp() {
   };
 
   const saveItem = (updatedItem: DirectPiece) => {
-    setItems((current) => current.map((item) => item.id === updatedItem.id ? updatedItem : item));
-    saveItemToAccount(updatedItem).catch((saveError: unknown) => setError(messageOf(saveError, "Those changes could not be saved.")));
+    setItems((current) => current.map((item) => (item.id === updatedItem.id ? updatedItem : item)));
+    saveItemToAccount(updatedItem).catch((saveError: unknown) =>
+      setError(messageOf(saveError, "Those changes could not be saved.")),
+    );
   };
 
   const deleteItem = async (id: string) => {
@@ -863,22 +1037,40 @@ export function WardrobeApp() {
   };
 
   const addImportedItem = useCallback((newItem: DirectPiece) => {
-    setItems((current) => current.some((item) => item.id === newItem.id) ? current : [...current, newItem]);
+    setItems((current) =>
+      current.some((item) => item.id === newItem.id) ? current : [...current, newItem],
+    );
   }, []);
 
   const attachImportedModeledImage = useCallback((jobId: string, modeledImage: string) => {
     const id = `import-${jobId}`;
-    setItems((current) => current.map((item) => item.id === id ? { ...item, modeledImage } : item));
+    setItems((current) =>
+      current.map((item) => (item.id === id ? { ...item, modeledImage } : item)),
+    );
   }, []);
 
   const generateOnModel = useCallback(async (item: DirectPiece) => {
     const response = await apiFetch(`/api/import/wardrobe/${item.id}/modeled`, { method: "POST" });
     const result: unknown = await response.json().catch(() => ({}));
-    const failure = typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "The on-model image could not be created.";
+    const failure =
+      typeof result === "object" &&
+      result !== null &&
+      "error" in result &&
+      typeof result.error === "string"
+        ? result.error
+        : "The on-model image could not be created.";
     if (!response.ok) throw new Error(failure);
-    const modeledImage = typeof result === "object" && result !== null && "modeledImage" in result && typeof result.modeledImage === "string" ? result.modeledImage : null;
+    const modeledImage =
+      typeof result === "object" &&
+      result !== null &&
+      "modeledImage" in result &&
+      typeof result.modeledImage === "string"
+        ? result.modeledImage
+        : null;
     if (!modeledImage) throw new Error(failure);
-    setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, modeledImage } : entry));
+    setItems((current) =>
+      current.map((entry) => (entry.id === item.id ? { ...entry, modeledImage } : entry)),
+    );
   }, []);
 
   // Shown on every pane so a new member can pick up the next step from wherever
@@ -900,7 +1092,15 @@ export function WardrobeApp() {
   const outfitNavigation = (
     <nav className="category-nav" aria-label="Switch between wardrobe sections">
       {TYPES.map((type) => (
-        <button key={type.id} type="button" className={view === "wardrobe" && activeType === type.id ? "active" : ""} onClick={() => chooseType(type.id)} aria-pressed={view === "wardrobe" && activeType === type.id}>{type.label}</button>
+        <button
+          key={type.id}
+          type="button"
+          className={view === "wardrobe" && activeType === type.id ? "active" : ""}
+          onClick={() => chooseType(type.id)}
+          aria-pressed={view === "wardrobe" && activeType === type.id}
+        >
+          {type.label}
+        </button>
       ))}
     </nav>
   );
@@ -926,8 +1126,12 @@ export function WardrobeApp() {
             <div className="gallery-meta-row">
               <div className="gallery-identity">
                 <ProfileBadge netWorth={badgeWorth} pieces={items.length} />
-                <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"}</p>
-                <p className="net-worth">Wardrobe value <strong>{worthLabel}</strong></p>
+                <p className="piece-count">
+                  {items.length} {items.length === 1 ? "piece" : "pieces"}
+                </p>
+                <p className="net-worth">
+                  Wardrobe value <strong>{worthLabel}</strong>
+                </p>
               </div>
               <div className="meta-actions">
                 <button className="add-piece-button" type="button" onClick={() => setAddOpen(true)}>
@@ -939,7 +1143,11 @@ export function WardrobeApp() {
           </header>
           {error && <p className="status error">{error}</p>}
           {!error && loading && <p className="status">Loading wardrobe</p>}
-          <NetWorthHome summary={summary} onOpenPiece={setSellPieceId} onShare={() => setShareOpen(true)} />
+          <NetWorthHome
+            summary={summary}
+            onOpenPiece={setSellPieceId}
+            onShare={() => setShareOpen(true)}
+          />
         </main>
       )}
 
@@ -960,8 +1168,12 @@ export function WardrobeApp() {
             <div className="gallery-meta-row">
               <div className="gallery-identity">
                 <ProfileBadge netWorth={badgeWorth} pieces={items.length} />
-                <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"}</p>
-                <p className="net-worth">Wardrobe value <strong>{worthLabel}</strong></p>
+                <p className="piece-count">
+                  {items.length} {items.length === 1 ? "piece" : "pieces"}
+                </p>
+                <p className="net-worth">
+                  Wardrobe value <strong>{worthLabel}</strong>
+                </p>
               </div>
 
               <div className="meta-actions">
@@ -989,16 +1201,32 @@ export function WardrobeApp() {
                 <>
                   <label className="brand-filter">
                     <span>Brand</span>
-                    <select value={activeBrand} onChange={(event) => setActiveBrand(event.target.value)} aria-label="Filter wardrobe by brand">
+                    <select
+                      value={activeBrand}
+                      onChange={(event) => setActiveBrand(event.target.value)}
+                      aria-label="Filter wardrobe by brand"
+                    >
                       <option value="">All brands</option>
-                      {brands.map((brand) => <option value={brand} key={brand.toLocaleLowerCase()}>{brand}</option>)}
+                      {brands.map((brand) => (
+                        <option value={brand} key={brand.toLocaleLowerCase()}>
+                          {brand}
+                        </option>
+                      ))}
                     </select>
                   </label>
                   <label className="brand-filter">
                     <span>Occasion</span>
-                    <select value={activeOccasion} onChange={(event) => setActiveOccasion(event.target.value)} aria-label="Filter wardrobe by occasion">
+                    <select
+                      value={activeOccasion}
+                      onChange={(event) => setActiveOccasion(event.target.value)}
+                      aria-label="Filter wardrobe by occasion"
+                    >
                       <option value="">All occasions</option>
-                      {occasions.map((occasion) => <option value={occasion} key={occasion.toLocaleLowerCase()}>{occasion}</option>)}
+                      {occasions.map((occasion) => (
+                        <option value={occasion} key={occasion.toLocaleLowerCase()}>
+                          {occasion}
+                        </option>
+                      ))}
                     </select>
                   </label>
                 </>
@@ -1008,10 +1236,15 @@ export function WardrobeApp() {
 
           {error && <p className="status error">{error}</p>}
           {!error && loading && <p className="status">Loading wardrobe</p>}
-          {!error && !loading && !items.length && <p className="status empty">Drop, paste, or add a photo to import your first piece.</p>}
+          {!error && !loading && !items.length && (
+            <p className="status empty">Drop, paste, or add a photo to import your first piece.</p>
+          )}
 
           {!!items.length && (
-            <section className="gallery-grid" aria-label={`${TYPE_MAP[activeType]?.label || "All"} wardrobe items`}>
+            <section
+              className="gallery-grid"
+              aria-label={`${TYPE_MAP[activeType]?.label || "All"} wardrobe items`}
+            >
               {visibleItems.map((item) => (
                 <GalleryItem
                   key={item.id}
@@ -1025,11 +1258,33 @@ export function WardrobeApp() {
         </main>
       )}
 
-      {view === "wardrobe" && selectedItem && <ItemViewer item={selectedItem} onClose={() => setSelectedId(null)} onSave={saveItem} onDelete={(id) => { void deleteItem(id); }} onGenerateModel={generateOnModel} />}
-      {view === "worth" && shareOpen && <ShareCards summary={summary} onClose={() => setShareOpen(false)} />}
-      {view === "worth" && sellPiece && <SellSheet piece={sellPiece} onClose={() => setSellPieceId(null)} />}
-      <AddPieceModal open={addOpen} setupReady={setupReady} onClose={() => setAddOpen(false)} onDirectAdded={addImportedItem} />
-      <WardrobeImportFlow onGarmentApproved={addImportedItem} onModeledApproved={attachImportedModeledImage} />
+      {view === "wardrobe" && selectedItem && (
+        <ItemViewer
+          item={selectedItem}
+          onClose={() => setSelectedId(null)}
+          onSave={saveItem}
+          onDelete={(id) => {
+            void deleteItem(id);
+          }}
+          onGenerateModel={generateOnModel}
+        />
+      )}
+      {view === "worth" && shareOpen && (
+        <ShareCards summary={summary} onClose={() => setShareOpen(false)} />
+      )}
+      {view === "worth" && sellPiece && (
+        <SellSheet piece={sellPiece} onClose={() => setSellPieceId(null)} />
+      )}
+      <AddPieceModal
+        open={addOpen}
+        setupReady={setupReady}
+        onClose={() => setAddOpen(false)}
+        onDirectAdded={addImportedItem}
+      />
+      <WardrobeImportFlow
+        onGarmentApproved={addImportedItem}
+        onModeledApproved={attachImportedModeledImage}
+      />
       {checklist}
     </div>
   );

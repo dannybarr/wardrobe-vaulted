@@ -5,7 +5,14 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { PRIVATE_BUCKET, signPaths, toWardrobeItem, type WardrobeItem } from "@/lib/api/wardrobe-payload";
+import {
+  PRIVATE_BUCKET,
+  signPaths,
+  toWardrobeItem,
+  type WardrobeItem,
+} from "@/lib/api/wardrobe-payload";
+import { CuratedBandSource, estimateResale } from "@/lib/worth/estimate";
+import type { Condition } from "@/lib/worth/types";
 
 type Client = SupabaseClient<Database>;
 
@@ -61,6 +68,9 @@ export type PieceInput = {
   cutout: string;
   modeled?: string | null;
   importJobId?: string | null;
+  size?: string | null;
+  condition?: Condition | null;
+  purchasePrice?: number | null;
 };
 
 /** Creates the piece, its cutout, and its on-model image if one was approved. */
@@ -92,8 +102,54 @@ export async function persistPiece(
     .single();
   if (error) throw error;
 
+  const valuation = await estimateResale(
+    {
+      brand: input.brand ?? "",
+      category: input.part,
+      condition: input.condition ?? null,
+      name: input.name || "New piece",
+    },
+    [new CuratedBandSource()],
+  );
+  const valuedAt = new Date().toISOString();
+  const midpoint =
+    valuation.lowGbp !== null && valuation.highGbp !== null
+      ? (valuation.lowGbp + valuation.highGbp) / 2
+      : null;
+  const valuationPatch = {
+    size_label: input.size ?? null,
+    condition: input.condition ?? null,
+    purchase_price: input.purchasePrice ?? null,
+    estimated_resale_value: midpoint,
+    value_low: valuation.lowGbp,
+    value_high: valuation.highGbp,
+    value_source: valuation.source,
+    valued_at: valuedAt,
+    value_confidence: valuation.confidence,
+    value_overridden: false,
+  };
+  await supabase.from("garments").update(valuationPatch).eq("id", garment.id);
+  if (valuation.lowGbp !== null && valuation.highGbp !== null) {
+    const recordedOn = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+    await supabase.from("value_snapshots").upsert(
+      {
+        owner_id: userId,
+        garment_id: garment.id,
+        value_low: valuation.lowGbp,
+        value_high: valuation.highGbp,
+        recorded_on: recordedOn,
+      },
+      { onConflict: "garment_id,recorded_on" },
+    );
+  }
+  Object.assign(garment, valuationPatch);
+
   const images: Database["public"]["Tables"]["garment_images"]["Insert"][] = [];
-  const cutout = await uploadPng(supabase, `${userId}/pieces/${garment.id}/cutout.png`, input.cutout);
+  const cutout = await uploadPng(
+    supabase,
+    `${userId}/pieces/${garment.id}/cutout.png`,
+    input.cutout,
+  );
   images.push({
     owner_id: userId,
     garment_id: garment.id,
@@ -105,7 +161,11 @@ export async function persistPiece(
   });
 
   if (input.modeled) {
-    const modeled = await uploadPng(supabase, `${userId}/pieces/${garment.id}/modeled.png`, input.modeled);
+    const modeled = await uploadPng(
+      supabase,
+      `${userId}/pieces/${garment.id}/modeled.png`,
+      input.modeled,
+    );
     images.push({
       owner_id: userId,
       garment_id: garment.id,
@@ -117,10 +177,16 @@ export async function persistPiece(
     });
   }
 
-  const { data: rows, error: imageError } = await supabase.from("garment_images").insert(images).select("*");
+  const { data: rows, error: imageError } = await supabase
+    .from("garment_images")
+    .insert(images)
+    .select("*");
   if (imageError) throw imageError;
 
-  const signed = await signPaths(supabase, (rows ?? []).map((row) => row.storage_path));
+  const signed = await signPaths(
+    supabase,
+    (rows ?? []).map((row) => row.storage_path),
+  );
   return toWardrobeItem(garment, rows ?? [], signed);
 }
 
@@ -169,7 +235,9 @@ export async function readModelReference(
   const profile = data?.[0];
   if (!profile) return null;
 
-  const { data: file, error } = await supabase.storage.from(profile.bucket).download(profile.storage_path);
+  const { data: file, error } = await supabase.storage
+    .from(profile.bucket)
+    .download(profile.storage_path);
   if (error || !file) return null;
 
   const buffer = new Uint8Array(await file.arrayBuffer());

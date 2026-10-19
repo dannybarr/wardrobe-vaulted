@@ -1,0 +1,296 @@
+.worth-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 36px 20px 96px;
+}
+
+.worth-kicker {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.worth-range {
+  margin: 10px 0 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(40px, 11vw, 76px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.worth-change,
+.worth-disclaimer,
+.worth-note,
+.worth-empty {
+  color: var(--muted);
+}
+
+.worth-change {
+  margin: 14px 0 0;
+  font-size: 15px;
+}
+
+.worth-disclaimer {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.worth-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.worth-section {
+  margin-top: 36px;
+}
+
+.worth-section h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 560;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.worth-bars,
+.worth-list,
+.worth-top {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.worth-bars li + li,
+.worth-list li + li {
+  margin-top: 12px;
+}
+
+.worth-bar-label,
+.worth-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 15px;
+}
+
+.worth-bar-track {
+  height: 6px;
+  margin-top: 6px;
+  background: rgba(58, 44, 32, 0.08);
+}
+
+.worth-bar-fill {
+  height: 100%;
+  background: var(--ink);
+}
+
+.worth-top li + li {
+  margin-top: 8px;
+}
+
+.worth-top button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.worth-top strong,
+.worth-top small,
+.worth-top em {
+  display: block;
+}
+
+.worth-top small {
+  color: var(--muted);
+  font-style: normal;
+}
+
+.worth-top em {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.worth-thumb {
+  width: 56px;
+  height: 72px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.worth-thumb--empty {
+  display: block;
+}
+
+.worth-nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.worth-nav button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px 2px;
+}
+
+.worth-nav button.active {
+  color: var(--ink);
+  box-shadow: inset 0 -1px 0 var(--ink);
+}
+
+.worth-nav .is-secondary {
+  opacity: 0.72;
+}
+
+.worth-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(28, 20, 16, 0.46);
+  display: grid;
+  place-items: end center;
+  padding: 16px;
+}
+
+.worth-sheet {
+  width: min(720px, 100%);
+  max-height: min(92vh, 980px);
+  overflow: auto;
+  background: var(--paper);
+  padding: 22px 20px 28px;
+}
+
+.worth-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.worth-sheet-header h2 {
+  margin: 6px 0 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 500;
+  font-size: 32px;
+}
+
+.worth-hide {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.share-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.share-preview {
+  width: 100%;
+  height: auto;
+  background: #1c1410;
+  display: block;
+}
+
+.share-preview--story {
+  max-height: 420px;
+  object-fit: contain;
+}
+
+.share-grid figcaption {
+  margin: 8px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sell-facts {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.sell-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
+.sell-facts dt {
+  color: var(--muted);
+}
+
+.sell-facts dd {
+  margin: 0;
+}
+
+.sell-copy {
+  line-height: 1.5;
+}
+
+.demo-banner {
+  padding: 10px 16px;
+  background: #3a2c20;
+  color: #f3ecdf;
+  font-size: 13px;
+  text-align: center;
+}
+
+.demo-signup,
+.demo-add {
+  margin: 8px 20px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+}
+
+.demo-signup h2,
+.demo-add h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .share-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .share-preview--story {
+    width: min(100%, 280px);
+    max-height: none;
+  }
+
+  .share-preview--square {
+    width: min(100%, 280px);
+  }
+
+  .worth-sheet-backdrop {
+    place-items: end stretch;
+    padding: 0;
+  }
+}
