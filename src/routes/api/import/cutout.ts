@@ -4,7 +4,12 @@ import { requireVaultCapacity } from "@/lib/api/vault-gate";
 import { chargeForAiRun, readAiRunContext, refundAiCharge } from "@/lib/ai/credits.server";
 import { editImage } from "@/lib/ai/provider.server";
 import { buildGarmentPrompt } from "@/lib/ai/prompts";
-import { environmentFromRequest, insufficientCredit, safeChromaKey, safeDirection } from "@/lib/api/import-support";
+import {
+  environmentFromRequest,
+  insufficientCredit,
+  safeChromaKey,
+  safeDirection,
+} from "@/lib/api/import-support";
 
 /**
  * Stage two: turn the cropped photo into a catalog-style garment image on a flat
@@ -16,7 +21,11 @@ export const Route = createFileRoute("/api/import/cutout")({
     handlers: {
       POST: async ({ request }) =>
         withUser(request, async ({ supabase, user }) => {
-          const capacity = await requireVaultCapacity(supabase, user.id, environmentFromRequest(request));
+          const capacity = await requireVaultCapacity(
+            supabase,
+            user.id,
+            environmentFromRequest(request),
+          );
           if (!capacity.ok) return capacity.response;
 
           const body = (await request.json().catch(() => ({}))) as {
@@ -54,12 +63,20 @@ export const Route = createFileRoute("/api/import/cutout")({
           if (!charge.ok) return insufficientCredit(charge);
 
           const basePrompt = buildGarmentPrompt(metadata, chromaKey);
-          const prompt = direction ? `${basePrompt}\nUser regeneration direction: ${direction}` : basePrompt;
+          const prompt = direction
+            ? `${basePrompt}\nUser regeneration direction: ${direction}`
+            : basePrompt;
 
           try {
             const imageBase64 = await editImage(run, {
               prompt,
-              images: [{ base64: body.imageBase64.replace(/^data:[^,]+,/, ""), mime: "image/png", name: "crop.png" }],
+              images: [
+                {
+                  base64: body.imageBase64.replace(/^data:[^,]+,/, ""),
+                  mime: "image/png",
+                  name: "crop.png",
+                },
+              ],
               size: "1024x1024",
             });
             return json({

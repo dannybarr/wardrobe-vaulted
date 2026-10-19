@@ -13,7 +13,8 @@ export const Route = createFileRoute("/api/import/config")({
       GET: async ({ request }) =>
         withUser(request, async ({ supabase, user }) => {
           const run = await readAiRunContext(user.id);
-          const ready = run.mode === "byok" ? Boolean(run.apiKey) : Boolean(process.env["LOVABLE_API_KEY"]);
+          const ready =
+            run.mode === "byok" ? Boolean(run.apiKey) : Boolean(process.env["LOVABLE_API_KEY"]);
           const reference = await readModelReference(supabase, user.id);
 
           return json({

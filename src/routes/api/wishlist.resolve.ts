@@ -16,7 +16,8 @@ export const Route = createFileRoute("/api/wishlist/resolve")({
         withUser(request, async ({ supabase, user }) => {
           const body = (await request.json().catch(() => ({}))) as { url?: string };
           const url = (body.url || "").trim();
-          if (!/^https?:\/\//i.test(url)) return json({ error: "Please paste a full product link." }, 400);
+          if (!/^https?:\/\//i.test(url))
+            return json({ error: "Please paste a full product link." }, 400);
 
           const existing = await loadWishlist(supabase);
           const duplicate = existing.find((item) => item.url === url);
@@ -39,7 +40,8 @@ export const Route = createFileRoute("/api/wishlist/resolve")({
           );
 
           const remote = details?.imageUrl ? await fetchRemoteImage(details.imageUrl) : null;
-          if (!remote) return json({ item: { ...item, status: "needs-image" }, duplicate: false }, 201);
+          if (!remote)
+            return json({ item: { ...item, status: "needs-image" }, duplicate: false }, 201);
 
           const withImage = await attachWishlistImage(
             supabase,

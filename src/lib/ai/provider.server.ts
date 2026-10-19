@@ -42,18 +42,40 @@ function dataUrl(image: ImageInput): string {
   return `data:${image.mime};base64,${image.base64}`;
 }
 
-async function readJson(response: Response): Promise<any> {
-  return response.json().catch(() => ({}));
+type Json = Record<string, unknown>;
+
+function asJson(value: unknown): Json | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Json)
+    : null;
+}
+
+async function readJson(response: Response): Promise<Json> {
+  const value: unknown = await response.json().catch(() => ({}));
+  return asJson(value) ?? {};
+}
+
+function stringField(value: unknown, key: string): string | undefined {
+  const field = asJson(value)?.[key];
+  return typeof field === "string" ? field : undefined;
+}
+
+function errorMessage(payload: Json): string | undefined {
+  return stringField(payload["error"], "message");
+}
+
+function firstB64(payload: Json): string | undefined {
+  const data = payload["data"];
+  if (!Array.isArray(data)) return undefined;
+  return stringField(data[0], "b64_json");
 }
 
 /** Reads a photo and returns one record per wearable item it can see. */
-export async function analyzePhoto(
-  run: AiRunContext,
-  image: ImageInput,
-): Promise<DetectedPiece[]> {
-  const items = run.mode === "byok" && run.apiKey
-    ? await analyzeWithOpenAi(run.apiKey, image)
-    : await analyzeWithGateway(image);
+export async function analyzePhoto(run: AiRunContext, image: ImageInput): Promise<DetectedPiece[]> {
+  const items =
+    run.mode === "byok" && run.apiKey
+      ? await analyzeWithOpenAi(run.apiKey, image)
+      : await analyzeWithGateway(image);
   return dedupeDetected(items.map(normalizeDetected));
 }
 
@@ -81,9 +103,12 @@ async function analyzeWithGateway(image: ImageInput): Promise<unknown[]> {
   });
 
   const result = await readJson(response);
-  if (!response.ok) throw new Error(result?.error?.message || `The photo could not be read (${response.status}).`);
+  if (!response.ok)
+    throw new Error(errorMessage(result) || `The photo could not be read (${response.status}).`);
 
-  const text = result?.choices?.[0]?.message?.content;
+  const choices = result["choices"];
+  const message = Array.isArray(choices) ? asJson(asJson(choices[0])?.["message"]) : null;
+  const text = message?.["content"];
   if (typeof text !== "string") throw new Error("The photo could not be read.");
   const parsed = JSON.parse(text);
   if (!Array.isArray(parsed?.items)) throw new Error("The photo could not be read.");
@@ -106,19 +131,34 @@ async function analyzeWithOpenAi(apiKey: string, image: ImageInput): Promise<unk
         },
       ],
       text: {
-        format: { type: "json_schema", name: "wardrobe_items", strict: true, schema: ANALYZE_SCHEMA },
+        format: {
+          type: "json_schema",
+          name: "wardrobe_items",
+          strict: true,
+          schema: ANALYZE_SCHEMA,
+        },
       },
     }),
   });
 
   const result = await readJson(response);
-  if (!response.ok) throw new Error(result?.error?.message || `The photo could not be read (${response.status}).`);
+  if (!response.ok)
+    throw new Error(errorMessage(result) || `The photo could not be read (${response.status}).`);
 
-  const text: string | undefined =
-    result?.output_text ??
-    result?.output
-      ?.flatMap((entry: any) => entry?.content ?? [])
-      ?.find((entry: any) => entry?.type === "output_text")?.text;
+  const direct = result["output_text"];
+  let text = typeof direct === "string" ? direct : "";
+  if (!text && Array.isArray(result["output"])) {
+    for (const entry of result["output"]) {
+      const content = asJson(entry)?.["content"];
+      if (!Array.isArray(content)) continue;
+      const match = content.find((item) => asJson(item)?.["type"] === "output_text");
+      const value = asJson(match)?.["text"];
+      if (typeof value === "string") {
+        text = value;
+        break;
+      }
+    }
+  }
   if (!text) throw new Error("The photo could not be read.");
   const parsed = JSON.parse(text);
   if (!Array.isArray(parsed?.items)) throw new Error("The photo could not be read.");
@@ -138,10 +178,7 @@ export async function editImage(
   return editWithGateway(options);
 }
 
-async function editWithGateway(options: {
-  prompt: string;
-  images: ImageInput[];
-}): Promise<string> {
+async function editWithGateway(options: { prompt: string; images: ImageInput[] }): Promise<string> {
   const response = await fetch(`${GATEWAY}/images/generations`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Lovable-API-Key": gatewayKey() },
@@ -171,11 +208,11 @@ async function editWithGateway(options: {
         ? "The built-in AI is busy right now. Please try again in a moment."
         : status === 402
           ? "The built-in AI is temporarily unavailable. Please try again shortly."
-          : result?.error?.message || `The image could not be generated (${status}).`;
+          : errorMessage(result) || `The image could not be generated (${status}).`;
     throw Object.assign(new Error(message), { status });
   }
 
-  const encoded = result?.data?.[0]?.b64_json;
+  const encoded = firstB64(result);
   if (typeof encoded !== "string") throw new Error("The image could not be generated.");
   return encoded;
 }
@@ -203,9 +240,11 @@ async function editWithOpenAi(
 
   const result = await readJson(response);
   if (!response.ok) {
-    throw new Error(result?.error?.message || `Your OpenAI key could not generate the image (${response.status}).`);
+    throw new Error(
+      errorMessage(result) || `Your OpenAI key could not generate the image (${response.status}).`,
+    );
   }
-  const encoded = result?.data?.[0]?.b64_json;
+  const encoded = firstB64(result);
   if (typeof encoded !== "string") throw new Error("The image could not be generated.");
   return encoded;
 }

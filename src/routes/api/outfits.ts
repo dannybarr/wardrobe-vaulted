@@ -28,7 +28,10 @@ export const Route = createFileRoute("/api/outfits")({
             return json(outfit, 201);
           } catch (caught) {
             const error = caught as Error & { status?: number };
-            return json({ error: error.message || "Could not save the outfit." }, error.status ?? 500);
+            return json(
+              { error: error.message || "Could not save the outfit." },
+              error.status ?? 500,
+            );
           }
         }),
     },

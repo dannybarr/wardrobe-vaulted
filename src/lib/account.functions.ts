@@ -17,7 +17,6 @@ export const ensureAccountReady = createServerFn({ method: "POST" })
     });
     if (error) throw new Error("We couldn't finish setting up your account.");
 
-
     const { data: profile } = await context.supabase
       .from("profiles")
       .select("is_founder, onboarding_step, display_name, email")

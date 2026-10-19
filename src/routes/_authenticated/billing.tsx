@@ -14,7 +14,8 @@ export const Route = createFileRoute("/_authenticated/billing")({
       { title: "Your Vault membership — Wardrobe" },
       {
         name: "description",
-        content: "Manage your Wardrobe Vault membership: £4.99 a month for private, saved storage of your wardrobe.",
+        content:
+          "Manage your Wardrobe Vault membership: £4.99 a month for private, saved storage of your wardrobe.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -97,9 +98,9 @@ function Billing() {
             <>
               <h1>Keep your vault.</h1>
               <p className="auth-lede">
-                Your first four pieces are on us. Vault membership is £4.99 a month and keeps your whole
-                wardrobe — pieces, outfits and wishlist — stored privately and backed up, with the
-                styling tools switched on.
+                Your first four pieces are on us. Vault membership is £4.99 a month and keeps your
+                whole wardrobe — pieces, outfits and wishlist — stored privately and backed up, with
+                the styling tools switched on.
               </p>
               <p className="auth-lede">
                 {data?.freePieceRemaining
@@ -112,11 +113,7 @@ function Billing() {
                   returnUrl={`${window.location.origin}/billing?checkout=complete`}
                 />
               ) : (
-                <button
-                  type="button"
-                  className="auth-submit"
-                  onClick={() => setCheckoutOpen(true)}
-                >
+                <button type="button" className="auth-submit" onClick={() => setCheckoutOpen(true)}>
                   Subscribe — £4.99 / month
                 </button>
               )}

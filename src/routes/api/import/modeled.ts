@@ -28,7 +28,8 @@ export const Route = createFileRoute("/api/import/modeled")({
           if (!reference) {
             return json(
               {
-                error: "Add a photo of yourself in your account settings to create on-model images.",
+                error:
+                  "Add a photo of yourself in your account settings to create on-model images.",
                 code: "model_reference_required",
               },
               409,
@@ -36,11 +37,17 @@ export const Route = createFileRoute("/api/import/modeled")({
           }
 
           const run = await readAiRunContext(user.id);
-          const charge = await chargeForAiRun({ userId: user.id, kinds: ["on_model"], note: "On-model image" });
+          const charge = await chargeForAiRun({
+            userId: user.id,
+            kinds: ["on_model"],
+            note: "On-model image",
+          });
           if (!charge.ok) return insufficientCredit(charge);
 
           const direction = safeDirection(body.direction);
-          const prompt = direction ? `${MODELED_PROMPT}\nUser regeneration direction: ${direction}` : MODELED_PROMPT;
+          const prompt = direction
+            ? `${MODELED_PROMPT}\nUser regeneration direction: ${direction}`
+            : MODELED_PROMPT;
 
           try {
             const imageBase64 = await editImage(run, {

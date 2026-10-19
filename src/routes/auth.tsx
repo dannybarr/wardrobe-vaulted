@@ -60,7 +60,10 @@ function AuthPage() {
   const setMode = (next: "signin" | "signup" | "forgot") => {
     setError("");
     setNotice("");
-    navigate({ to: "/auth", search: { mode: next, ...(search.redirect ? { redirect: search.redirect } : {}) } });
+    navigate({
+      to: "/auth",
+      search: { mode: next, ...(search.redirect ? { redirect: search.redirect } : {}) },
+    });
   };
 
   const onSubmit = async (event: React.FormEvent) => {
@@ -157,7 +160,11 @@ function AuthPage() {
           </div>
         )}
         <p className="auth-kicker">
-          {mode === "signup" ? "Create an account" : mode === "forgot" ? "Password reset" : "Welcome"}
+          {mode === "signup"
+            ? "Create an account"
+            : mode === "forgot"
+              ? "Password reset"
+              : "Welcome"}
         </p>
         <h1>
           {mode === "signup"
@@ -174,7 +181,6 @@ function AuthPage() {
               : "Sign in to your wardrobe. Everything in it stays private to you."}
         </p>
 
-
         <form className="auth-form" onSubmit={onSubmit}>
           {mode === "signup" && (
             <div className="auth-field">
@@ -187,7 +193,6 @@ function AuthPage() {
               />
             </div>
           )}
-
 
           <div className="auth-field">
             <label htmlFor="auth-email">Email</label>
@@ -242,27 +247,37 @@ function AuthPage() {
 
         {mode === "signin" && (
           <p className="auth-alt">
-            New here? <button type="button" onClick={() => setMode("signup")}>Create an account</button>
+            New here?{" "}
+            <button type="button" onClick={() => setMode("signup")}>
+              Create an account
+            </button>
             {" · "}
-            <button type="button" onClick={() => setMode("forgot")}>Forgot password</button>
+            <button type="button" onClick={() => setMode("forgot")}>
+              Forgot password
+            </button>
           </p>
         )}
         {mode === "signup" && (
           <p className="auth-alt">
-            Already have an account? <button type="button" onClick={() => setMode("signin")}>Sign in</button>
+            Already have an account?{" "}
+            <button type="button" onClick={() => setMode("signin")}>
+              Sign in
+            </button>
           </p>
         )}
 
         {mode === "forgot" && (
           <p className="auth-alt">
-            <button type="button" onClick={() => setMode("signin")}>Back to sign in</button>
+            <button type="button" onClick={() => setMode("signin")}>
+              Back to sign in
+            </button>
           </p>
         )}
 
         <p className="auth-note">
           By continuing you agree to our <Link to="/terms">terms</Link> and{" "}
-          <Link to="/privacy">privacy notice</Link>. Your garment photos are stored privately and are
-          never used to train models.
+          <Link to="/privacy">privacy notice</Link>. Your garment photos are stored privately and
+          are never used to train models.
         </p>
       </div>
     </main>

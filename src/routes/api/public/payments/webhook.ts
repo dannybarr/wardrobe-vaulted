@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
+import {
+  type StripeEnv,
+  type StripeWebhookEvent,
+  type StripeWebhookObject,
+  verifyWebhook,
+} from "@/lib/stripe.server";
 import type { Database } from "@/integrations/supabase/types";
 
 let _supabase: ReturnType<typeof createClient<Database>> | null = null;
@@ -14,7 +19,7 @@ function getSupabase() {
   return _supabase;
 }
 
-function planFromPrice(price: any): string {
+function planFromPrice(price: StripeWebhookObject | undefined): string {
   return price?.lookup_key || price?.metadata?.lovable_external_id || price?.id || "vault_monthly";
 }
 
@@ -28,19 +33,20 @@ async function isFounder(userId: string): Promise<boolean> {
   return data?.is_founder === true;
 }
 
-async function upsertSubscription(subscription: any, env: StripeEnv) {
+async function upsertSubscription(subscription: StripeWebhookObject, env: StripeEnv) {
   const userId = subscription.metadata?.userId;
-  if (!userId) {
+  if (!userId || !subscription.id || !subscription.status) {
     console.error("Subscription webhook without userId metadata", subscription.id);
     return;
   }
   if (await isFounder(userId)) return;
 
-
   const item = subscription.items?.data?.[0];
   const priceId = planFromPrice(item?.price);
   const productId =
-    typeof item?.price?.product === "string" ? item.price.product : item?.price?.product?.id ?? null;
+    typeof item?.price?.product === "string"
+      ? item.price.product
+      : (item?.price?.product?.id ?? null);
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
 
@@ -57,7 +63,7 @@ async function upsertSubscription(subscription: any, env: StripeEnv) {
         stripe_customer_id:
           typeof subscription.customer === "string"
             ? subscription.customer
-            : subscription.customer?.id ?? null,
+            : (subscription.customer?.id ?? null),
         current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
         current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
         cancel_at_period_end: subscription.cancel_at_period_end ?? false,
@@ -72,8 +78,9 @@ async function upsertSubscription(subscription: any, env: StripeEnv) {
  * End of the paid period. Access is locked from here on, but the wardrobe and
  * every image are kept intact so the member can pick up where they left off.
  */
-async function markCanceled(subscription: any, env: StripeEnv) {
+async function markCanceled(subscription: StripeWebhookObject, env: StripeEnv) {
   const userId = subscription.metadata?.userId;
+  if (!subscription.id) return;
   if (userId && (await isFounder(userId))) return;
 
   await getSupabase()
@@ -89,7 +96,8 @@ async function markCanceled(subscription: any, env: StripeEnv) {
 }
 
 /** Keeps an audit trail of every payment event, ignoring repeats from retries. */
-async function recordEvent(event: any) {
+async function recordEvent(event: StripeWebhookEvent) {
+  if (!event.id) return;
   await getSupabase()
     .from("billing_events")
     .upsert(
@@ -110,19 +118,20 @@ async function recordEvent(event: any) {
  * database routine records the session id, so a repeated notification from a
  * retry can never credit the same purchase twice.
  */
-async function creditAiPack(session: any, env: StripeEnv) {
+async function creditAiPack(session: StripeWebhookObject, env: StripeEnv) {
   const userId = session.metadata?.userId;
   const pence = session.amount_total;
-  if (!userId || !pence || pence <= 0) {
+  if (!userId || !session.id || !pence || pence <= 0) {
     console.error("AI credit pack without userId or amount", session.id);
     return;
   }
 
+  const priceId = session.metadata?.priceId;
   const { error } = await getSupabase().rpc("credit_ai_wallet", {
     _user_id: userId,
     _pence: pence,
     _session_id: session.id,
-    _price_id: session.metadata?.priceId ?? null,
+    ...(priceId ? { _price_id: priceId } : {}),
     _environment: env,
   });
   if (error) console.error("AI credit pack could not be applied", session.id, error.message);
@@ -161,7 +170,6 @@ async function handleWebhook(req: Request, env: StripeEnv) {
 
   await recordEvent(event);
 }
-
 
 export const Route = createFileRoute("/api/public/payments/webhook")({
   server: {

@@ -1,8 +1,7 @@
-node_modules
 dist
 .output
 .vinxi
-pnpm-lock.yaml
+node_modules
+src/routeTree.gen.ts
 package-lock.json
-bun.lock
-routeTree.gen.ts
+legacy

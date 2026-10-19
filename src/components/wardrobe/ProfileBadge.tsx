@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { cancelVaultMembership, getVaultAccess } from "@/utils/payments.functions";
 import { getAiCreditState } from "@/lib/ai-credits.functions";
+import { deleteMyAccount, exportMyData } from "@/lib/account-data.functions";
 import { isGuestMode } from "@/lib/trial/mode";
 
 function initialsFrom(name: string | null, email: string | null) {
@@ -23,7 +24,11 @@ function money(pence: number) {
 
 function formatDate(value: string | null) {
   if (!value) return null;
-  return new Date(value).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return new Date(value).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 /** Small identity chip for the top-left of the wardrobe: initials, then the details on tap. */
@@ -35,7 +40,8 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
   const fetchAccess = useServerFn(getVaultAccess);
   const fetchCredits = useServerFn(getAiCreditState);
   const cancelMembership = useServerFn(cancelVaultMembership);
-
+  const exportData = useServerFn(exportMyData);
+  const removeAccount = useServerFn(deleteMyAccount);
 
   const { data: profile } = useQuery({
     queryKey: ["profile-badge"],
@@ -77,6 +83,32 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vault-access"] }),
   });
 
+  const download = useMutation({
+    mutationFn: () => exportData(),
+    onSuccess: (payload) => {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "wardrobe-export.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    },
+  });
+
+  const erase = useMutation({
+    mutationFn: async () => {
+      const confirmation = window.prompt(
+        "Type DELETE to permanently remove your account, wardrobe and photos.",
+      );
+      if (confirmation !== "DELETE") throw new Error("Deletion cancelled.");
+      return removeAccount({ data: { confirmation } });
+    },
+    onSuccess: () => {
+      void supabase.auth.signOut();
+    },
+  });
+
   useEffect(() => {
     if (!open) return;
     const onClick = (event: MouseEvent) => {
@@ -99,14 +131,14 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
   const membership = guest
     ? "Guest trial — your first four pieces are free"
     : founder
-    ? "Founder — free for life"
-    : access?.subscribed
-      ? access.cancelAtPeriodEnd
-        ? `Vault ends ${renewal ?? "at period end"}`
-        : renewal
-          ? `Vault · £4.99/mo, renews ${renewal}`
-          : "Vault · £4.99 a month"
-      : "No membership — first four pieces free";
+      ? "Founder — free for life"
+      : access?.subscribed
+        ? access.cancelAtPeriodEnd
+          ? `Vault ends ${renewal ?? "at period end"}`
+          : renewal
+            ? `Vault · £4.99/mo, renews ${renewal}`
+            : "Vault · £4.99 a month"
+        : "No membership — first four pieces free";
 
   return (
     <div className="profile-badge" ref={wrapper}>
@@ -151,10 +183,10 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
                 {guest
                   ? "Free for your first four pieces"
                   : credits?.founder
-                  ? "Unlimited"
-                  : credits?.mode === "byok"
-                    ? "Your own key"
-                    : money(credits?.balancePence ?? 0)}
+                    ? "Unlimited"
+                    : credits?.mode === "byok"
+                      ? "Your own key"
+                      : money(credits?.balancePence ?? 0)}
               </dd>
             </div>
             <div>
@@ -176,8 +208,16 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
           {cancel.isError ? (
             <p className="profile-panel__note">{(cancel.error as Error).message}</p>
           ) : null}
+          {download.isError ? (
+            <p className="profile-panel__note">{(download.error as Error).message}</p>
+          ) : null}
+          {erase.isError ? (
+            <p className="profile-panel__note">{(erase.error as Error).message}</p>
+          ) : null}
           {cancel.isSuccess ? (
-            <p className="profile-panel__note">Cancelled — your pieces stay saved until the period ends.</p>
+            <p className="profile-panel__note">
+              Cancelled — your pieces stay saved until the period ends.
+            </p>
           ) : null}
 
           <p className="profile-panel__links">
@@ -188,6 +228,16 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
             ) : (
               <>
                 <Link to="/billing">Billing &amp; credits</Link>
+                <button
+                  type="button"
+                  onClick={() => download.mutate()}
+                  disabled={download.isPending}
+                >
+                  {download.isPending ? "Preparing export…" : "Download my data"}
+                </button>
+                <button type="button" onClick={() => erase.mutate()} disabled={erase.isPending}>
+                  {erase.isPending ? "Deleting…" : "Delete account"}
+                </button>
                 <button type="button" onClick={() => supabase.auth.signOut()}>
                   Sign out
                 </button>

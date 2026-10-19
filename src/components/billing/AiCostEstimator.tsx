@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  estimateAiCost,
-  formatPence,
-  IMPORT_STAGES,
-  type AiJobKind,
-} from "@/lib/ai/pricing";
+import { estimateAiCost, formatPence, IMPORT_STAGES, type AiJobKind } from "@/lib/ai/pricing";
 
 /**
  * An open cost estimator. Deliberately needs no account, no balance and no

@@ -32,7 +32,9 @@ export function cleanOutfitName(value: unknown): string {
   return typeof value === "string" ? value.trim().replace(/\s+/g, " ").slice(0, 80) : "";
 }
 
-function colorsFor(garments: Array<{ color: string | null; secondary_color: string | null; palette: unknown }>) {
+function colorsFor(
+  garments: Array<{ color: string | null; secondary_color: string | null; palette: unknown }>,
+) {
   const all: string[] = [];
   for (const garment of garments) {
     const palette = Array.isArray(garment.palette) ? (garment.palette as unknown[]) : [];
@@ -131,7 +133,8 @@ export async function createOutfit(
   input: { name: string; garmentIds: string[] },
 ): Promise<OutfitPayload> {
   const garments = await resolveGarments(supabase, input.garmentIds);
-  if (garments.length < 2) throw Object.assign(new Error("Choose at least two pieces you own."), { status: 400 });
+  if (garments.length < 2)
+    throw Object.assign(new Error("Choose at least two pieces you own."), { status: 400 });
 
   const wardrobeId = await outfitWardrobeId(supabase, userId);
   const name =

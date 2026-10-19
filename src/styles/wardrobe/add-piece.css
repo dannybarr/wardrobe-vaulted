@@ -15,14 +15,16 @@
   padding: 10px 18px;
   font-size: 12px;
   font-weight: 500;
-  letter-spacing: .1em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
   transition: opacity 160ms ease;
 }
 
 .add-piece-button:hover,
-.add-piece-button:focus-visible { opacity: .85; }
+.add-piece-button:focus-visible {
+  opacity: 0.85;
+}
 
 .add-piece-button:focus-visible {
   outline: 2px solid var(--accent);
@@ -33,7 +35,7 @@
   margin: 10px 0 0;
   font-size: 12px;
   font-weight: 500;
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -51,7 +53,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(25, 24, 22, .32);
+  background: rgba(25, 24, 22, 0.32);
 }
 
 .addpiece-modal {
@@ -61,7 +63,7 @@
   background: var(--paper);
   border: 1px solid var(--line);
   padding: 26px 28px 28px;
-  box-shadow: 0 24px 70px rgba(25, 24, 22, .18);
+  box-shadow: 0 24px 70px rgba(25, 24, 22, 0.18);
 }
 
 .addpiece-header {
@@ -75,7 +77,7 @@
   margin: 0 0 6px;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -84,7 +86,7 @@
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  letter-spacing: .01em;
+  letter-spacing: 0.01em;
 }
 
 .addpiece-close {
@@ -106,7 +108,7 @@
   margin-top: 20px;
   appearance: none;
   border: 1px dashed var(--line);
-  background: rgba(255, 255, 255, .4);
+  background: rgba(255, 255, 255, 0.4);
   color: var(--muted);
   padding: 0;
   min-height: 180px;
@@ -114,26 +116,34 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
 }
 
 .addpiece-drop.is-over,
 .addpiece-drop:hover,
-.addpiece-drop:focus-visible { border-color: var(--ink); background: rgba(255, 255, 255, .7); }
+.addpiece-drop:focus-visible {
+  border-color: var(--ink);
+  background: rgba(255, 255, 255, 0.7);
+}
 
 .addpiece-drop:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.addpiece-drop.has-preview { min-height: 0; border-style: solid; }
+.addpiece-drop.has-preview {
+  min-height: 0;
+  border-style: solid;
+}
 
 .addpiece-drop img {
   display: block;
   width: 100%;
   max-height: 260px;
   object-fit: contain;
-  background: rgba(255, 255, 255, .6);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .addpiece-drop-copy {
@@ -168,7 +178,9 @@
   cursor: pointer;
 }
 
-.addpiece-toggle input { accent-color: var(--ink); }
+.addpiece-toggle input {
+  accent-color: var(--ink);
+}
 
 .addpiece-note {
   margin: 18px 0 0;
@@ -196,28 +208,52 @@
 }
 
 @media (max-width: 520px) {
-  .addpiece-backdrop { padding: 12px; align-items: flex-end; }
+  .addpiece-backdrop {
+    padding: 12px;
+    align-items: flex-end;
+  }
 
   .addpiece-modal {
     padding: 22px 18px max(24px, env(safe-area-inset-bottom));
     max-height: calc(100dvh - 24px);
   }
 
-  .addpiece-fields { grid-template-columns: 1fr; }
+  .addpiece-fields {
+    grid-template-columns: 1fr;
+  }
 
-  .add-piece-button { min-height: 44px; padding: 9px 14px; font-size: 10px; }
+  .add-piece-button {
+    min-height: 44px;
+    padding: 9px 14px;
+    font-size: 10px;
+  }
 
-  .meta-actions { flex-wrap: wrap; gap: 10px; }
+  .meta-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 
   .addpiece-actions .primary-button,
-  .addpiece-actions .secondary-button { min-height: 44px; }
+  .addpiece-actions .secondary-button {
+    min-height: 44px;
+  }
 }
 
 /* First-run onboarding: the single ask to add a first outfit. */
-.onboard-modal { text-align: left; }
+.onboard-modal {
+  text-align: left;
+}
 
-.onboard-modal .addpiece-drop { margin-top: 16px; }
+.onboard-modal .addpiece-drop {
+  margin-top: 16px;
+}
 
-.onboard-note { margin-top: 14px; font-size: 13px; line-height: 1.55; }
+.onboard-note {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+}
 
-.onboard-modal .addpiece-actions { justify-content: center; }
+.onboard-modal .addpiece-actions {
+  justify-content: center;
+}

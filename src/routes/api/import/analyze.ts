@@ -15,7 +15,11 @@ export const Route = createFileRoute("/api/import/analyze")({
     handlers: {
       POST: async ({ request }) =>
         withUser(request, async ({ supabase, user }) => {
-          const capacity = await requireVaultCapacity(supabase, user.id, environmentFromRequest(request));
+          const capacity = await requireVaultCapacity(
+            supabase,
+            user.id,
+            environmentFromRequest(request),
+          );
           if (!capacity.ok) return capacity.response;
 
           const body = (await request.json().catch(() => ({}))) as {
@@ -25,11 +29,19 @@ export const Route = createFileRoute("/api/import/analyze")({
             byteSize?: number;
           };
           const raw = body.imageDataUrl || body.imageBase64;
-          if (typeof raw !== "string" || !raw.length) return json({ error: "Please choose a photo." }, 400);
+          if (typeof raw !== "string" || !raw.length)
+            return json({ error: "Please choose a photo." }, 400);
 
-          const byteSize = Number.isFinite(body.byteSize) ? Number(body.byteSize) : Math.round(raw.length * 0.75);
+          const byteSize = Number.isFinite(body.byteSize)
+            ? Number(body.byteSize)
+            : Math.round(raw.length * 0.75);
           const run = await readAiRunContext(user.id);
-          const charge = await chargeForAiRun({ userId: user.id, kinds: ["analyze"], byteSize, note: "Photo read" });
+          const charge = await chargeForAiRun({
+            userId: user.id,
+            kinds: ["analyze"],
+            byteSize,
+            note: "Photo read",
+          });
           if (!charge.ok) return insufficientCredit(charge);
 
           const match = raw.match(/^data:([^;]+);base64,(.+)$/s);
