@@ -8,6 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { PRIVATE_BUCKET, signPaths } from "@/lib/api/wardrobe-payload";
 import { decodeBase64Image } from "@/lib/api/pieces.server";
+import { resolvePublicDns, safeFetch } from "@/lib/security/ssrf";
 
 type Client = SupabaseClient<Database>;
 type Row = Database["public"]["Tables"]["wishlist_items"]["Row"];
@@ -19,6 +20,9 @@ export const WISHLIST_PARTS = [
   "lowerbody",
   "accessories_up",
   "shoes",
+  "bags",
+  "watches",
+  "jewellery",
 ] as const;
 
 export type WishlistItem = {
@@ -57,7 +61,8 @@ function toItem(row: Row, images: ImageRow[], signed: Map<string, string>): Wish
     name: row.name || "Wishlist piece",
     brand: row.brand,
     price: row.price,
-    part: row.part && (WISHLIST_PARTS as readonly string[]).includes(row.part) ? row.part : "upperbody",
+    part:
+      row.part && (WISHLIST_PARTS as readonly string[]).includes(row.part) ? row.part : "upperbody",
     url: row.url,
     note: row.note,
     color: row.color,
@@ -69,13 +74,18 @@ function toItem(row: Row, images: ImageRow[], signed: Map<string, string>): Wish
 }
 
 async function hydrate(supabase: Client, rows: Row[]): Promise<WishlistItem[]> {
-  const imageIds = rows.flatMap((row) => [row.image_id, row.modeled_image_id]).filter(Boolean) as string[];
+  const imageIds = rows
+    .flatMap((row) => [row.image_id, row.modeled_image_id])
+    .filter(Boolean) as string[];
   let images: ImageRow[] = [];
   if (imageIds.length) {
     const { data } = await supabase.from("garment_images").select("*").in("id", imageIds);
     images = data ?? [];
   }
-  const signed = await signPaths(supabase, images.map((image) => image.storage_path));
+  const signed = await signPaths(
+    supabase,
+    images.map((image) => image.storage_path),
+  );
   return rows.map((row) => toItem(row, images, signed));
 }
 
@@ -89,9 +99,14 @@ export async function loadWishlist(supabase: Client): Promise<WishlistItem[]> {
 }
 
 export async function readWishlistItem(supabase: Client, id: string): Promise<WishlistItem> {
-  const { data, error } = await supabase.from("wishlist_items").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("wishlist_items")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw error;
-  if (!data) throw Object.assign(new Error("That wishlist item no longer exists."), { status: 404 });
+  if (!data)
+    throw Object.assign(new Error("That wishlist item no longer exists."), { status: 404 });
   const [item] = await hydrate(supabase, [data]);
   return item!;
 }
@@ -105,7 +120,8 @@ export async function attachWishlistImage(
   kind: "cutout" | "modeled",
 ): Promise<WishlistItem> {
   const { bytes, mime } = decodeBase64Image(base64);
-  const extension = mime.includes("jpeg") || mime.includes("jpg") ? "jpg" : mime.includes("webp") ? "webp" : "png";
+  const extension =
+    mime.includes("jpeg") || mime.includes("jpg") ? "jpg" : mime.includes("webp") ? "webp" : "png";
   const path = `${userId}/wishlist/${itemId}/${kind}-${Date.now()}.${extension}`;
   const { error: uploadError } = await supabase.storage.from(PRIVATE_BUCKET).upload(path, bytes, {
     contentType: mime,
@@ -128,8 +144,13 @@ export async function attachWishlistImage(
   if (error) throw error;
 
   const patch =
-    kind === "modeled" ? { modeled_image_id: image.id } : { image_id: image.id, status: "ready" as const };
-  const { error: updateError } = await supabase.from("wishlist_items").update(patch).eq("id", itemId);
+    kind === "modeled"
+      ? { modeled_image_id: image.id }
+      : { image_id: image.id, status: "ready" as const };
+  const { error: updateError } = await supabase
+    .from("wishlist_items")
+    .update(patch)
+    .eq("id", itemId);
   if (updateError) throw updateError;
 
   return readWishlistItem(supabase, itemId);
@@ -159,7 +180,10 @@ export async function createWishlistItem(
       name: draft.name?.slice(0, 120) || "Wishlist piece",
       brand: draft.brand?.slice(0, 80) || null,
       price: draft.price?.slice(0, 40) || null,
-      part: draft.part && (WISHLIST_PARTS as readonly string[]).includes(draft.part) ? draft.part : "upperbody",
+      part:
+        draft.part && (WISHLIST_PARTS as readonly string[]).includes(draft.part)
+          ? draft.part
+          : "upperbody",
       url: draft.url || null,
       note: draft.note || null,
       color: draft.color || null,
@@ -179,11 +203,14 @@ export async function updateWishlistItem(
   draft: WishlistDraft,
 ): Promise<WishlistItem> {
   const patch: Database["public"]["Tables"]["wishlist_items"]["Update"] = {};
-  if (typeof draft.name === "string") patch.name = draft.name.trim().slice(0, 120) || "Wishlist piece";
+  if (typeof draft.name === "string")
+    patch.name = draft.name.trim().slice(0, 120) || "Wishlist piece";
   if (typeof draft.brand === "string") patch.brand = draft.brand.trim().slice(0, 80) || null;
   if (typeof draft.price === "string") patch.price = draft.price.trim().slice(0, 40) || null;
-  if (draft.part && (WISHLIST_PARTS as readonly string[]).includes(draft.part)) patch.part = draft.part;
-  if (typeof draft.url === "string" && /^https?:\/\//i.test(draft.url.trim())) patch.url = draft.url.trim();
+  if (draft.part && (WISHLIST_PARTS as readonly string[]).includes(draft.part))
+    patch.part = draft.part;
+  if (typeof draft.url === "string" && /^https?:\/\//i.test(draft.url.trim()))
+    patch.url = draft.url.trim();
   if (Array.isArray(draft.tags)) patch.tags = draft.tags.slice(0, 12);
 
   const { error } = await supabase.from("wishlist_items").update(patch).eq("id", id);
@@ -244,7 +271,8 @@ function jsonLdProducts(html: string): Record<string, unknown>[] {
       if (!node || typeof node !== "object") continue;
       if (Array.isArray(node["@graph"])) queue.push(...(node["@graph"] as unknown[]));
       const type = node["@type"];
-      if (type === "Product" || (Array.isArray(type) && type.includes("Product"))) products.push(node);
+      if (type === "Product" || (Array.isArray(type) && type.includes("Product")))
+        products.push(node);
     }
   }
   return products;
@@ -271,7 +299,8 @@ export function parseProductPage(html: string, pageUrl: string) {
     name ||
     metaContent(html, "og:title") ||
     decodeEntities((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || "");
-  name = (name || "").replace(/\s*[|–—-]\s*[^|–—-]{0,60}$/, "").trim() || name || "New wishlist piece";
+  name =
+    (name || "").replace(/\s*[|–—-]\s*[^|–—-]{0,60}$/, "").trim() || name || "New wishlist piece";
 
   let brand: string | null = null;
   const rawBrand = product?.["brand"];
@@ -281,12 +310,11 @@ export function parseProductPage(html: string, pageUrl: string) {
   }
   brand = brand
     ? decodeEntities(brand)
-    : (metaContent(html, "og:site_name") || new URL(pageUrl).hostname.replace(/^www\d?\./, ""));
+    : metaContent(html, "og:site_name") || new URL(pageUrl).hostname.replace(/^www\d?\./, "");
 
   const offers = product?.["offers"];
   const offer = (Array.isArray(offers) ? offers[0] : offers) as
-    | { price?: unknown; lowPrice?: unknown; priceCurrency?: unknown }
-    | undefined;
+    { price?: unknown; lowPrice?: unknown; priceCurrency?: unknown } | undefined;
   let price = offer ? formatPrice(offer.price ?? offer.lowPrice, offer.priceCurrency) : null;
   if (!price) {
     price = formatPrice(
@@ -299,7 +327,10 @@ export function parseProductPage(html: string, pageUrl: string) {
   const rawImage = product?.["image"];
   if (typeof rawImage === "string") imageUrl = rawImage;
   else if (Array.isArray(rawImage) && rawImage.length) {
-    imageUrl = typeof rawImage[0] === "string" ? rawImage[0] : ((rawImage[0] as { url?: string })?.url ?? null);
+    imageUrl =
+      typeof rawImage[0] === "string"
+        ? rawImage[0]
+        : ((rawImage[0] as { url?: string })?.url ?? null);
   } else if (rawImage && typeof rawImage === "object" && "url" in rawImage) {
     imageUrl = String((rawImage as { url: unknown }).url);
   }
@@ -315,18 +346,16 @@ export function parseProductPage(html: string, pageUrl: string) {
   return { name: name.slice(0, 120), brand: brand ? brand.slice(0, 80) : null, price, imageUrl };
 }
 
-const BROWSER_UA =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
-
 export async function fetchProductDetails(url: string) {
   try {
-    const response = await fetch(url, {
-      headers: { "User-Agent": BROWSER_UA, Accept: "text/html,application/xhtml+xml" },
-      redirect: "follow",
+    const result = await safeFetch(url, {
+      resolve: resolvePublicDns,
+      maxBytes: 1_500_000,
+      timeoutMs: 8_000,
+      maxRedirects: 2,
     });
-    if (!response.ok) return null;
-    const html = await response.text();
-    return parseProductPage(html, url);
+    const html = new TextDecoder().decode(result.body);
+    return parseProductPage(html, result.url);
   } catch {
     return null;
   }
@@ -335,14 +364,18 @@ export async function fetchProductDetails(url: string) {
 /** Downloads the product photo the page advertised, as base64. */
 export async function fetchRemoteImage(url: string): Promise<string | null> {
   try {
-    const response = await fetch(url, { headers: { "User-Agent": BROWSER_UA }, redirect: "follow" });
-    if (!response.ok) return null;
-    const buffer = new Uint8Array(await response.arrayBuffer());
-    if (!buffer.length || buffer.length > 12_000_000) return null;
+    const result = await safeFetch(url, {
+      resolve: resolvePublicDns,
+      maxBytes: 8_000_000,
+      timeoutMs: 8_000,
+      maxRedirects: 2,
+      accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+    });
+    if (!result.body.length) return null;
     let binary = "";
     const chunk = 0x8000;
-    for (let index = 0; index < buffer.length; index += chunk) {
-      binary += String.fromCharCode(...buffer.subarray(index, index + chunk));
+    for (let index = 0; index < result.body.length; index += chunk) {
+      binary += String.fromCharCode(...result.body.subarray(index, index + chunk));
     }
     return btoa(binary);
   } catch {
@@ -369,7 +402,9 @@ export async function readWishlistImageBase64(
     .maybeSingle();
   if (!image) return null;
 
-  const { data: file, error } = await supabase.storage.from(image.bucket).download(image.storage_path);
+  const { data: file, error } = await supabase.storage
+    .from(image.bucket)
+    .download(image.storage_path);
   if (error || !file) return null;
 
   const buffer = new Uint8Array(await file.arrayBuffer());

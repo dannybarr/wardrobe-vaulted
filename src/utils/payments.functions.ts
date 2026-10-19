@@ -1,11 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { FREE_PIECE_ALLOWANCE } from "@/lib/api/vault-gate";
-import {
-  type StripeEnv,
-  createStripeClient,
-  getStripeErrorMessage,
-} from "@/lib/stripe.server";
+import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
 type CheckoutSessionResult = { clientSecret: string } | { error: string };
 type PortalSessionResult = { url: string } | { error: string };
@@ -49,7 +45,7 @@ async function resolveOrCreateCustomer(
  */
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
+  .validator(
     (data: {
       priceId: string;
       returnUrl: string;
@@ -94,9 +90,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         return_url: data.returnUrl,
         customer: customerId,
         managed_payments: { enabled: true },
-        ...(isRecurring
-          ? {}
-          : { payment_intent_data: { description: productDescription } }),
+        ...(isRecurring ? {} : { payment_intent_data: { description: productDescription } }),
         metadata: { userId, managed_payments: "true", purpose: data.purpose ?? "vault" },
         ...(isRecurring ? { subscription_data: { metadata: { userId } } } : {}),
       } as never);
@@ -110,7 +104,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 /** Opens the Stripe-hosted billing portal so members can cancel or update cards. */
 export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { returnUrl?: string; environment: StripeEnv }) => data)
+  .validator((data: { returnUrl?: string; environment: StripeEnv }) => data)
   .handler(async ({ data, context }): Promise<PortalSessionResult> => {
     const { supabase, userId } = context;
 
@@ -140,42 +134,43 @@ export const createPortalSession = createServerFn({ method: "POST" })
 /** Cancels the Vault membership at period end — pieces stay saved until then. */
 export const cancelVaultMembership = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { environment: StripeEnv }) => data)
-  .handler(async ({ data, context }): Promise<{ ok: true; endsAt: string | null } | { error: string }> => {
-    const { supabase, userId } = context;
+  .validator((data: { environment: StripeEnv }) => data)
+  .handler(
+    async ({ data, context }): Promise<{ ok: true; endsAt: string | null } | { error: string }> => {
+      const { supabase, userId } = context;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_founder")
-      .eq("id", userId)
-      .maybeSingle();
-    if (profile?.is_founder) return { error: "Founder access doesn't need cancelling." };
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_founder")
+        .eq("id", userId)
+        .maybeSingle();
+      if (profile?.is_founder) return { error: "Founder access doesn't need cancelling." };
 
-    const { data: sub } = await supabase
-      .from("subscriptions")
-      .select("stripe_subscription_id")
-      .eq("owner_id", userId)
-      .eq("environment", data.environment)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      const { data: sub } = await supabase
+        .from("subscriptions")
+        .select("stripe_subscription_id")
+        .eq("owner_id", userId)
+        .eq("environment", data.environment)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    if (!sub?.stripe_subscription_id) return { error: "No active membership to cancel." };
+      if (!sub?.stripe_subscription_id) return { error: "No active membership to cancel." };
 
-    try {
-      const stripe = createStripeClient(data.environment);
-      const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
-        cancel_at_period_end: true,
-      });
-      const periodEnd =
-        updated.items?.data?.[0]?.current_period_end ?? (updated as { current_period_end?: number }).current_period_end;
-      return { ok: true, endsAt: periodEnd ? new Date(periodEnd * 1000).toISOString() : null };
-    } catch (error) {
-      return { error: getStripeErrorMessage(error) };
-    }
-  });
-
-
+      try {
+        const stripe = createStripeClient(data.environment);
+        const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
+          cancel_at_period_end: true,
+        });
+        const periodEnd =
+          updated.items?.data?.[0]?.current_period_end ??
+          (updated as { current_period_end?: number }).current_period_end;
+        return { ok: true, endsAt: periodEnd ? new Date(periodEnd * 1000).toISOString() : null };
+      } catch (error) {
+        return { error: getStripeErrorMessage(error) };
+      }
+    },
+  );
 
 /**
  * Whether the member may keep adding pieces: founders and paying members always
@@ -183,7 +178,7 @@ export const cancelVaultMembership = createServerFn({ method: "POST" })
  */
 export const getVaultAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { environment: StripeEnv }) => data)
+  .validator((data: { environment: StripeEnv }) => data)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 

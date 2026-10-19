@@ -14,7 +14,7 @@ const AcceptInviteInput = z.object({
  * here on the server.
  */
 export const acceptInvite = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => AcceptInviteInput.parse(input))
+  .validator((input: unknown) => AcceptInviteInput.parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = data.email.toLowerCase();
@@ -42,10 +42,12 @@ export const acceptInvite = createServerFn({ method: "POST" })
       if (found.expires_at && new Date(found.expires_at) < new Date())
         return { ok: false as const, reason: "That invitation has expired." };
       if (found.email && found.email.toLowerCase() !== email)
-        return { ok: false as const, reason: "That invitation belongs to a different email address." };
+        return {
+          ok: false as const,
+          reason: "That invitation belongs to a different email address.",
+        };
       invite = found;
     }
-
 
     const { error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -67,7 +69,6 @@ export const acceptInvite = createServerFn({ method: "POST" })
         .update({ used_count: invite.used_count + 1, last_used_at: new Date().toISOString() })
         .eq("id", invite.id);
     }
-
 
     return { ok: true as const };
   });

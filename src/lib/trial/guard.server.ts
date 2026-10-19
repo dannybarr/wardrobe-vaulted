@@ -1,27 +1,22 @@
 /**
- * The spend guard on the guest trial.
+ * Spend guard for the guest trial.
  *
- * The free first piece runs on the built-in AI, which costs real money, so every
- * free run is counted: a browser gets enough for one photo, and any single
- * network address is capped for the day. Nothing here identifies a person — only
- * a random browser id and a one-way hash of the address are stored.
+ * The free first pieces run on the built-in AI, which costs real money. A browser
+ * is identified by a server-signed cookie, not by an id it chooses. Each network
+ * address, and the whole product, have a daily ceiling.
  */
-export type TrialKind = "analyze" | "cutout";
+import { estimateStage } from "@/lib/ai/pricing";
+import { mintTrialCookie, readTrialDevice, trialCookieConfigured } from "@/lib/trial/cookie.server";
+import { decideTrialRun, type TrialKind } from "@/lib/trial/policy";
+import { verifyTurnstile } from "@/lib/security/turnstile.server";
 
-const DEVICE_CAP: Record<TrialKind, number> = { analyze: 7, cutout: 11 };
-const ADDRESS_DAILY_CAP: Record<TrialKind, number> = { analyze: 40, cutout: 70 };
-const GLOBAL_DAILY_CAP = 600;
+export type { TrialKind };
 
-function json(body: unknown, status: number) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
-  });
-}
-
-function deviceFrom(request: Request): string | null {
-  const value = request.headers.get("x-wardrobe-device")?.trim() ?? "";
-  return /^[a-z0-9-]{8,64}$/i.test(value) ? value : null;
+function json(body: unknown, status: number, extra?: HeadersInit) {
+  const headers = new Headers(extra);
+  headers.set("Content-Type", "application/json");
+  headers.set("Cache-Control", "no-store");
+  return new Response(JSON.stringify(body), { status, headers });
 }
 
 async function addressHash(request: Request): Promise<string> {
@@ -34,7 +29,7 @@ async function addressHash(request: Request): Promise<string> {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-const tooMany = () =>
+const tooMany = (setCookie?: string) =>
   json(
     {
       error:
@@ -42,58 +37,132 @@ const tooMany = () =>
       code: "signup_required",
     },
     429,
+    setCookie ? { "Set-Cookie": setCookie } : undefined,
   );
+
+const busy = (setCookie?: string) =>
+  json(
+    {
+      error: "The free trial is very busy right now. Create your account to carry on.",
+      code: "signup_required",
+    },
+    429,
+    setCookie ? { "Set-Cookie": setCookie } : undefined,
+  );
+
+export type TrialClaim = { ok: true; setCookie: string | null } | { ok: false; response: Response };
 
 /**
  * Records one free run and returns whether it is allowed. Call it before spending
- * anything on the AI.
+ * anything on the AI. A client-supplied device header is ignored.
  */
-export async function claimTrialRun(
-  request: Request,
-  kind: TrialKind,
-): Promise<{ ok: true } | { ok: false; response: Response }> {
-  const device = deviceFrom(request);
-  if (!device) return { ok: false, response: json({ error: "Please reload the page." }, 400) };
+export async function claimTrialRun(request: Request, kind: TrialKind): Promise<TrialClaim> {
+  if (!trialCookieConfigured()) {
+    return {
+      ok: false,
+      response: json(
+        { error: "The free trial is not available just now.", code: "signup_required" },
+        503,
+      ),
+    };
+  }
+
+  const human = await verifyTurnstile(request);
+  if (!human.ok) return human;
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const hash = await addressHash(request);
+  const existing = await readTrialDevice(request);
+  const nextCost = Math.ceil(estimateStage(kind, 0));
 
-  const [byDevice, byAddress, global] = await Promise.all([
-    supabaseAdmin
-      .from("trial_runs")
-      .select("id", { count: "exact", head: true })
-      .eq("device_id", device)
-      .eq("kind", kind),
+  const [byDevice, byAddress, globalRows, mints] = await Promise.all([
+    existing
+      ? supabaseAdmin
+          .from("trial_runs")
+          .select("id", { count: "exact", head: true })
+          .eq("device_id", existing)
+          .eq("kind", kind)
+      : Promise.resolve({ count: 0 }),
     supabaseAdmin
       .from("trial_runs")
       .select("id", { count: "exact", head: true })
       .eq("address_hash", hash)
       .eq("kind", kind)
       .gte("created_at", since),
-    supabaseAdmin
-      .from("trial_runs")
-      .select("id", { count: "exact", head: true })
-      .gte("created_at", since),
+    supabaseAdmin.from("trial_runs").select("cost_pence").gte("created_at", since).limit(2000),
+    existing
+      ? Promise.resolve({ count: 0 })
+      : supabaseAdmin
+          .from("trial_runs")
+          .select("id", { count: "exact", head: true })
+          .eq("address_hash", hash)
+          .eq("kind", "session")
+          .gte("created_at", since),
   ]);
 
-  if ((byDevice.count ?? 0) >= DEVICE_CAP[kind]) return { ok: false, response: tooMany() };
-  if ((byAddress.count ?? 0) >= ADDRESS_DAILY_CAP[kind]) return { ok: false, response: tooMany() };
-  if ((global.count ?? 0) >= GLOBAL_DAILY_CAP) {
-    return {
-      ok: false,
-      response: json(
-        {
-          error: "The free trial is very busy right now. Create your account to carry on.",
-          code: "signup_required",
-        },
-        429,
-      ),
-    };
+  const globalSpend = (globalRows.data ?? []).reduce(
+    (total, row) => total + (row.cost_pence ?? 0),
+    0,
+  );
+  const decision = decideTrialRun({
+    deviceCount: byDevice.count ?? 0,
+    addressCount: byAddress.count ?? 0,
+    globalCount: globalRows.data?.length ?? 0,
+    globalSpendPence: globalSpend,
+    nextCostPence: nextCost,
+    kind,
+    hasDevice: Boolean(existing),
+    sessionMints: mints.count ?? 0,
+  });
+
+  let device = existing;
+  let setCookie: string | null = null;
+  if (!device) {
+    device = crypto.randomUUID();
+    setCookie = await mintTrialCookie(device);
+    if (!setCookie) {
+      return {
+        ok: false,
+        response: json({ error: "The free trial is not available just now." }, 503),
+      };
+    }
   }
 
-  await supabaseAdmin.from("trial_runs").insert({ device_id: device, address_hash: hash, kind });
-  return { ok: true };
+  if (!decision.ok) {
+    const response =
+      decision.reason === "busy" ? busy(setCookie ?? undefined) : tooMany(setCookie ?? undefined);
+    return { ok: false, response };
+  }
+
+  if (!existing) {
+    await supabaseAdmin.from("trial_runs").insert({
+      device_id: device,
+      address_hash: hash,
+      kind: "session",
+      cost_pence: 0,
+    });
+  }
+
+  await supabaseAdmin.from("trial_runs").insert({
+    device_id: device,
+    address_hash: hash,
+    kind,
+    cost_pence: nextCost,
+  });
+
+  return { ok: true, setCookie };
+}
+
+export function withTrialCookie(response: Response, setCookie: string | null): Response {
+  if (!setCookie) return response;
+  const headers = new Headers(response.headers);
+  headers.append("Set-Cookie", setCookie);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }
 
 /** Guests always run on the built-in AI, with no wallet attached. */

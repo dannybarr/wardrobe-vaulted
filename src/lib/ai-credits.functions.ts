@@ -21,7 +21,11 @@ export const getAiCreditState = createServerFn({ method: "POST" })
         .select("balance_pence, topped_up_pence, spent_pence")
         .eq("owner_id", userId)
         .maybeSingle(),
-      supabase.from("profiles").select("ai_mode, ai_key_hint, is_founder").eq("id", userId).maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("ai_mode, ai_key_hint, is_founder")
+        .eq("id", userId)
+        .maybeSingle(),
       supabase
         .from("ai_usage")
         .select("id, kind, model, charged_pence, created_at")
@@ -47,7 +51,7 @@ export const getAiCreditState = createServerFn({ method: "POST" })
  */
 export const quoteAiRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { kinds?: string[]; byteSize?: number }) => {
+  .validator((data: { kinds?: string[]; byteSize?: number }) => {
     const kinds = (data.kinds ?? IMPORT_STAGES).filter((kind): kind is AiJobKind =>
       JOB_KINDS.has(kind as AiJobKind),
     );
@@ -84,7 +88,7 @@ export const quoteAiRun = createServerFn({ method: "POST" })
 /** Saves a member's own OpenAI key and switches them onto it. */
 export const saveOwnAiKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: string }) => {
+  .validator((data: { key: string }) => {
     const key = (data.key ?? "").trim();
     if (!key.startsWith("sk-") || key.length < 20) {
       throw new Error("That does not look like an OpenAI key — it should begin with “sk-”.");
@@ -92,15 +96,23 @@ export const saveOwnAiKey = createServerFn({ method: "POST" })
     return { key };
   })
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { encryptSecret } = await import("@/lib/ai/key-crypto.server");
     const hint = `sk-…${data.key.slice(-4)}`;
+    let secret: string;
+    try {
+      secret = await encryptSecret(data.key);
+    } catch {
+      throw new Error("Saving your own key is not available until encryption is configured.");
+    }
 
-    const { error: keyError } = await supabase
+    const { error: keyError } = await supabaseAdmin
       .from("ai_credentials")
-      .upsert({ owner_id: userId, provider: "openai", secret: data.key }, { onConflict: "owner_id" });
+      .upsert({ owner_id: userId, provider: "openai", secret }, { onConflict: "owner_id" });
     if (keyError) throw new Error("Your key could not be saved. Please try again.");
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("profiles")
       .update({ ai_mode: "byok", ai_key_hint: hint })
       .eq("id", userId);
@@ -113,16 +125,20 @@ export const saveOwnAiKey = createServerFn({ method: "POST" })
 export const removeOwnAiKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    await supabase.from("ai_credentials").delete().eq("owner_id", userId);
-    await supabase.from("profiles").update({ ai_mode: "builtin", ai_key_hint: null }).eq("id", userId);
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("ai_credentials").delete().eq("owner_id", userId);
+    await supabaseAdmin
+      .from("profiles")
+      .update({ ai_mode: "builtin", ai_key_hint: null })
+      .eq("id", userId);
     return { mode: "builtin" as const };
   });
 
 /** Switches between paths without touching a saved key. */
 export const setAiMode = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { mode: "builtin" | "byok" }) => {
+  .validator((data: { mode: "builtin" | "byok" }) => {
     if (data.mode !== "builtin" && data.mode !== "byok") throw new Error("Unknown AI setting");
     return data;
   })
@@ -140,6 +156,7 @@ export const setAiMode = createServerFn({ method: "POST" })
       if (!profile?.ai_key_hint) throw new Error("Add your OpenAI key first.");
     }
 
-    await supabase.from("profiles").update({ ai_mode: data.mode }).eq("id", userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("profiles").update({ ai_mode: data.mode }).eq("id", userId);
     return { mode: data.mode };
   });

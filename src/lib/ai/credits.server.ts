@@ -10,6 +10,13 @@
  */
 import type { AiJobKind } from "@/lib/ai/pricing";
 import { estimateAiCost } from "@/lib/ai/pricing";
+import { decideAiCharge } from "@/lib/ai/charge-decision";
+import {
+  decryptSecret,
+  encryptSecret,
+  encryptionConfigured,
+  isEncryptedSecret,
+} from "@/lib/ai/key-crypto.server";
 
 export type AiMode = "builtin" | "byok";
 
@@ -46,7 +53,15 @@ export async function readAiRunContext(userId: string): Promise<AiRunContext> {
     .maybeSingle();
 
   if (!credential?.secret) return { mode: "builtin", apiKey: null, founder };
-  return { mode: "byok", apiKey: credential.secret, founder };
+
+  let apiKey = credential.secret;
+  if (isEncryptedSecret(apiKey)) {
+    apiKey = await decryptSecret(apiKey);
+  } else if (encryptionConfigured()) {
+    const encrypted = await encryptSecret(apiKey);
+    await db.from("ai_credentials").update({ secret: encrypted }).eq("owner_id", userId);
+  }
+  return { mode: "byok", apiKey, founder };
 }
 
 export type AiChargeResult =
@@ -65,11 +80,15 @@ export async function chargeForAiRun(options: {
   aiJobId?: string | null;
 }): Promise<AiChargeResult> {
   const context = await readAiRunContext(options.userId);
-  if (context.mode === "byok" || context.founder) {
+  const estimate = estimateAiCost(options.kinds, options.byteSize ?? 0);
+  const decision = decideAiCharge({
+    mode: context.mode,
+    founder: context.founder,
+    chargedPence: estimate.chargedPence,
+  });
+  if (!decision.billable) {
     return { ok: true, mode: context.mode, chargedPence: 0, balancePence: null };
   }
-
-  const estimate = estimateAiCost(options.kinds, options.byteSize ?? 0);
   const db = await admin();
 
   const { data: balance } = await db.rpc("charge_ai_wallet", {
@@ -96,32 +115,21 @@ export async function chargeForAiRun(options: {
     };
   }
 
-  return { ok: true, mode: "builtin", chargedPence: estimate.chargedPence, balancePence: balance };
+  return { ok: true, mode: "builtin", chargedPence: decision.chargedPence, balancePence: balance };
 }
 
-/** Puts credit back when a paid run failed, and records it in the history. */
+/**
+ * Puts credit back when a paid run failed. Balance and history move together
+ * inside `refund_ai_wallet`, so a failed write cannot leave the wallet credited
+ * without a record, or the other way around.
+ */
 export async function refundAiCharge(userId: string, chargedPence: number, note: string) {
   if (chargedPence <= 0) return;
   const db = await admin();
-
-  const { data: wallet } = await db
-    .from("ai_wallets")
-    .select("balance_pence")
-    .eq("owner_id", userId)
-    .maybeSingle();
-
-  await db
-    .from("ai_wallets")
-    .update({ balance_pence: (wallet?.balance_pence ?? 0) + chargedPence })
-    .eq("owner_id", userId);
-
-  await db.from("ai_usage").insert({
-    owner_id: userId,
-    kind: "refund",
-    mode: "builtin",
-    cost_pence: 0,
-    markup_bps: 0,
-    charged_pence: -chargedPence,
-    note,
+  const { error } = await db.rpc("refund_ai_wallet", {
+    _user_id: userId,
+    _charged_pence: chargedPence,
+    _note: note,
   });
+  if (error) throw new Error("The refund could not be recorded.");
 }

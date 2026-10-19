@@ -55,14 +55,18 @@ function open(): Promise<IDBDatabase> {
   });
 }
 
-async function run<T>(mode: IDBTransactionMode, work: (store: IDBObjectStore) => IDBRequest): Promise<T> {
+async function run<T>(
+  mode: IDBTransactionMode,
+  work: (store: IDBObjectStore) => IDBRequest,
+): Promise<T> {
   const db = await open();
   try {
     return await new Promise<T>((resolve, reject) => {
       const transaction = db.transaction(STORE, mode);
       const request = work(transaction.objectStore(STORE));
       request.onsuccess = () => resolve(request.result as T);
-      request.onerror = () => reject(request.error ?? new Error("That piece could not be saved here."));
+      request.onerror = () =>
+        reject(request.error ?? new Error("That piece could not be saved here."));
     });
   } finally {
     db.close();

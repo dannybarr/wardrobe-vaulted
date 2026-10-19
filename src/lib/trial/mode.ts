@@ -11,7 +11,9 @@ const DEVICE_KEY = "wardrobe-trial-device-v1";
 
 export function isGuestMode(): boolean {
   if (typeof window === "undefined") return false;
-  return window.location.pathname === TRIAL_PATH || window.location.pathname.startsWith(`${TRIAL_PATH}/`);
+  return (
+    window.location.pathname === TRIAL_PATH || window.location.pathname.startsWith(`${TRIAL_PATH}/`)
+  );
 }
 
 /** A stable id for this browser, used only to cap free AI runs. */

@@ -1,10 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { WardrobeApp } from "@/components/wardrobe/App.jsx";
+import { WardrobeApp } from "@/components/wardrobe/App";
 import { FirstOutfitPrompt } from "@/components/wardrobe/FirstOutfitPrompt";
 import { countTrialPieces } from "@/lib/trial/store";
 import { TRIAL_PIECE_ALLOWANCE } from "@/lib/trial/transport";
-
 
 export const Route = createFileRoute("/try")({
   // The trial wardrobe lives entirely in this browser, so it is rendered here.
@@ -71,12 +70,10 @@ function TryWardrobe() {
             <strong>You're trying Wardrobe. Add your first item free!</strong> No account, no card —
             you'll be asked to sign up only when your pieces are ready to keep.
           </>
-
         )}
       </div>
       <WardrobeApp />
       {pieces === 0 && <FirstOutfitPrompt />}
-
     </>
   );
 }
