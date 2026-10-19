@@ -1,47 +1,120 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type SetStateAction } from "react";
 import { Check, Plus, Sparkle, Trash, X } from "@phosphor-icons/react";
-import { WardrobeImportFlow } from "./import-flow.jsx";
-import { WishlistPane } from "./wishlist.jsx";
-import { OutfitsPane } from "./outfits.jsx";
-import { AddPieceModal } from "./add-piece.jsx";
-import { OptimizedImage } from "./OptimizedImage.jsx";
+import { WardrobeImportFlow } from "./import-flow";
+import { WishlistPane } from "./wishlist";
+import { OutfitsPane } from "./outfits";
+import { AddPieceModal, type DirectPiece } from "./add-piece";
+import { OptimizedImage } from "./OptimizedImage";
 import { ProfileBadge } from "./ProfileBadge.tsx";
 import { OnboardingChecklist } from "./OnboardingChecklist.tsx";
 import { apiFetch } from "../../lib/api-fetch";
+import { NetWorthHome } from "@/components/worth/NetWorthHome";
+import { ShareCards } from "@/components/worth/ShareCards";
+import { SellSheet } from "@/components/worth/SellSheet";
+import { summariseWardrobe } from "@/lib/worth/summarise";
+import { formatRange } from "@/lib/worth/format";
+import type { Condition, ValueConfidence, WorthPiece } from "@/lib/worth/types";
 
 
-const STORAGE_KEY = "open-wardrobe-edits-v1";
-const DELETED_STORAGE_KEY = "open-wardrobe-deleted-v1";
-
-const TYPES = [
+const TYPES: Array<{ id: string; label: string; singular?: string }> = [
   { id: "all", label: "All" },
   { id: "upperbody", label: "Tops", singular: "Top" },
   { id: "wholebody_up", label: "Jackets", singular: "Jacket" },
   { id: "lowerbody", label: "Bottoms", singular: "Bottom" },
   { id: "accessories_up", label: "Accessories", singular: "Accessory" },
   { id: "shoes", label: "Shoes", singular: "Shoes" },
-  { id: "outfits", label: "Outfits" },
 ];
 
-const TYPE_MAP = Object.fromEntries(TYPES.map((type) => [type.id, type]));
-const TYPE_ORDER = Object.fromEntries(TYPES.slice(1).map((type, index) => [type.id, index]));
+const TYPE_MAP: Record<string, { id: string; label: string; singular?: string } | undefined> = Object.fromEntries(TYPES.map((type) => [type.id, type]));
+const TYPE_ORDER: Record<string, number> = Object.fromEntries(TYPES.slice(1).map((type, index) => [type.id, index]));
 const OCCASIONS = ["Work", "Casual", "Formal", "Night Out"];
 
+type AppView = "worth" | "wardrobe" | "outfits" | "wishlist";
+type ColorField = "primary" | "secondary";
+type Rgb = { red: number; green: number; blue: number };
+type Bucket = Rgb & { count: number };
 
-function parseDraftValue(input) {
+type ItemDraft = {
+  name: string;
+  brand: string;
+  occasion: string;
+  part: string;
+  color: string;
+  secondaryColor: string | null;
+  tags: string[];
+  value: string;
+};
+
+function at(values: ArrayLike<number>, index: number): number {
+  return values[index] ?? 0;
+}
+
+function isPiece(value: unknown): value is DirectPiece {
+  return typeof value === "object" && value !== null && "id" in value && typeof value.id === "string" && "name" in value && typeof value.name === "string" && "part" in value && typeof value.part === "string";
+}
+
+function piecesFrom(value: unknown): DirectPiece[] {
+  return Array.isArray(value) ? value.filter(isPiece) : [];
+}
+
+function messageOf(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
+function isCondition(value: string | null | undefined): value is Condition {
+  return value === "new_with_tags" || value === "like_new" || value === "good" || value === "fair";
+}
+
+function isConfidence(value: string | null | undefined): value is ValueConfidence {
+  return value === "high" || value === "medium" || value === "low" || value === "unknown";
+}
+
+function toWorthPiece(item: DirectPiece): WorthPiece {
+  const low = typeof item.valueLow === "number" && Number.isFinite(item.valueLow) ? item.valueLow : null;
+  const high = typeof item.valueHigh === "number" && Number.isFinite(item.valueHigh) ? item.valueHigh : null;
+  const priced = low !== null && high !== null;
+  const confidence = isConfidence(item.valueConfidence) ? item.valueConfidence : null;
+  return {
+    id: item.id,
+    name: item.name,
+    part: item.part,
+    brand: item.brand ?? "",
+    size: item.size ?? null,
+    condition: isCondition(item.condition) ? item.condition : null,
+    colour: item.color ?? null,
+    purchasePrice: typeof item.purchasePrice === "number" ? item.purchasePrice : null,
+    purchaseDate: item.purchaseDate ?? null,
+    valueLow: priced ? low : null,
+    valueHigh: priced ? high : null,
+    valueSource: item.valueSource ?? null,
+    valueConfidence: priced ? confidence : "unknown",
+    valueOverridden: priced ? Boolean(item.valueOverridden) : false,
+    valuedAt: item.valuedAt ?? null,
+    lastWornAt: item.lastWornAt ?? null,
+    updatedAt: item.updatedAt ?? null,
+    wearCount: typeof item.wearCount === "number" ? item.wearCount : 0,
+    image: item.image ?? item.thumbnail ?? null,
+  };
+}
+
+function moneyLabel(amount: number): string {
+  return `£${amount.toLocaleString("en-GB", { minimumFractionDigits: Number.isInteger(amount) ? 0 : 2, maximumFractionDigits: 2 })}`;
+}
+
+function parseDraftValue(input: string): number | null {
   const numeric = Number((input || "").replace(/[^0-9.]/g, ""));
   return Number.isFinite(numeric) && numeric > 0 ? Math.round(numeric * 100) / 100 : null;
 }
 
-function normalizeBrand(value) {
+function normalizeBrand(value: unknown): string {
   return typeof value === "string" ? value.trim().slice(0, 80) : "";
 }
 
-function normalizeOccasion(value) {
+function normalizeOccasion(value: unknown): string {
   return typeof value === "string" ? value.trim().replace(/\s+/g, " ").slice(0, 80) : "";
 }
 
-async function saveItemToAccount(item) {
+async function saveItemToAccount(item: DirectPiece) {
   const response = await apiFetch(`/api/import/wardrobe/${item.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -53,17 +126,17 @@ async function saveItemToAccount(item) {
       color: item.color || null,
       secondaryColor: item.secondaryColor || null,
       tags: item.tags || [],
-      value: Number.isFinite(item.value) ? item.value : null,
+      value: typeof item.value === "number" && Number.isFinite(item.value) ? item.value : null,
     }),
   });
   if (!response.ok) throw new Error("Those changes could not be saved.");
 }
 
-function rgbToHex(red, green, blue) {
+function rgbToHex(red: number, green: number, blue: number): string {
   return `#${[red, green, blue].map((value) => Math.max(0, Math.min(255, value)).toString(16).padStart(2, "0")).join("")}`;
 }
 
-function colorDistance(first, second) {
+function colorDistance(first: Rgb, second: Rgb): number {
   return Math.sqrt(
     ((first.red - second.red) ** 2)
     + ((first.green - second.green) ** 2)
@@ -71,26 +144,27 @@ function colorDistance(first, second) {
   );
 }
 
-function extractPalette(image) {
+function extractPalette(image: HTMLImageElement): string[] {
   const canvas = document.createElement("canvas");
   canvas.width = 72;
   canvas.height = 72;
   const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return [];
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
   const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-  const buckets = new Map();
+  const buckets = new Map<string, Bucket>();
 
   for (let index = 0; index < pixels.length; index += 4) {
-    const alpha = pixels[index + 3];
+    const alpha = at(pixels, index + 3);
     if (alpha < 72) continue;
 
-    const red = pixels[index];
-    const green = pixels[index + 1];
-    const blue = pixels[index + 2];
+    const red = at(pixels, index);
+    const green = at(pixels, index + 1);
+    const blue = at(pixels, index + 2);
     const key = `${Math.round(red / 28)}-${Math.round(green / 28)}-${Math.round(blue / 28)}`;
-    const current = buckets.get(key) || { red: 0, green: 0, blue: 0, count: 0 };
+    const current = buckets.get(key) ?? { red: 0, green: 0, blue: 0, count: 0 };
     current.red += red;
     current.green += green;
     current.blue += blue;
@@ -107,7 +181,7 @@ function extractPalette(image) {
     }))
     .sort((a, b) => b.count - a.count);
 
-  const selected = [];
+  const selected: Bucket[] = [];
   for (const color of ranked) {
     if (selected.every((existing) => colorDistance(existing, color) > 38)) selected.push(color);
     if (selected.length === 5) break;
@@ -116,15 +190,15 @@ function extractPalette(image) {
   return selected.map((color) => rgbToHex(color.red, color.green, color.blue));
 }
 
-function buildSamplingCanvas(image) {
+function buildSamplingCanvas(image: HTMLImageElement): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.width = image.naturalWidth;
   canvas.height = image.naturalHeight;
-  canvas.getContext("2d", { willReadFrequently: true }).drawImage(image, 0, 0);
+  canvas.getContext("2d", { willReadFrequently: true })?.drawImage(image, 0, 0);
   return canvas;
 }
 
-function sampleImageColor(image, canvas, event) {
+function sampleImageColor(image: HTMLImageElement, canvas: HTMLCanvasElement, event: { clientX: number; clientY: number }): string | null {
   const bounds = image.getBoundingClientRect();
   const scale = Math.min(bounds.width / image.naturalWidth, bounds.height / image.naturalHeight);
   const renderedWidth = image.naturalWidth * scale;
@@ -137,6 +211,7 @@ function sampleImageColor(image, canvas, event) {
   if (imageX < 0 || imageY < 0 || imageX >= canvas.width || imageY >= canvas.height) return null;
 
   const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return null;
   for (let radius = 0; radius <= 18; radius += 2) {
     const startX = Math.max(0, imageX - radius);
     const startY = Math.max(0, imageY - radius);
@@ -144,14 +219,14 @@ function sampleImageColor(image, canvas, event) {
     const height = Math.min(canvas.height - startY, (radius * 2) + 1);
     const data = context.getImageData(startX, startY, width, height).data;
     for (let index = 0; index < data.length; index += 4) {
-      if (data[index + 3] > 96) return rgbToHex(data[index], data[index + 1], data[index + 2]);
+      if (at(data, index + 3) > 96) return rgbToHex(at(data, index), at(data, index + 1), at(data, index + 2));
     }
   }
 
   return null;
 }
 
-function GalleryItem({ item, selected, onOpen }) {
+function GalleryItem({ item, selected, onOpen }: { item: DirectPiece; selected: boolean; onOpen: (id: string) => void }) {
   const type = TYPE_MAP[item.part]?.singular || "wardrobe item";
 
   return (
@@ -173,7 +248,7 @@ function GalleryItem({ item, selected, onOpen }) {
   );
 }
 
-function TagEditor({ tags, onChange }) {
+function TagEditor({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
   const [input, setInput] = useState("");
 
   const addTag = () => {
@@ -216,7 +291,29 @@ function TagEditor({ tags, onChange }) {
   );
 }
 
-function ColorControl({ label, field, value, palette, onChange, sampling, setSampling, optional = false, onClear, onAdd }) {
+function ColorControl({
+  label,
+  field,
+  value,
+  palette,
+  onChange,
+  sampling,
+  setSampling,
+  optional = false,
+  onClear,
+  onAdd,
+}: {
+  label: string;
+  field: ColorField;
+  value: string | null;
+  palette: string[];
+  onChange: (color: string) => void;
+  sampling: ColorField | null;
+  setSampling: Dispatch<SetStateAction<ColorField | null>>;
+  optional?: boolean;
+  onClear?: () => void;
+  onAdd?: () => void;
+}) {
   if (optional && !value) {
     return (
       <div className="color-slot empty-color-slot">
@@ -225,7 +322,7 @@ function ColorControl({ label, field, value, palette, onChange, sampling, setSam
           <small>Optional</small>
         </div>
         <p>No distinct secondary color detected.</p>
-        <button className="add-secondary-button" type="button" onClick={onAdd}>Add secondary color</button>
+        <button className="add-secondary-button" type="button" onClick={() => onAdd?.()}>Add secondary color</button>
       </div>
     );
   }
@@ -234,7 +331,7 @@ function ColorControl({ label, field, value, palette, onChange, sampling, setSam
     <div className="color-slot">
       <div className="color-slot-heading">
         <span>{label}</span>
-        {optional && <button type="button" onClick={onClear}>Remove</button>}
+        {optional && <button type="button" onClick={() => onClear?.()}>Remove</button>}
       </div>
       <label className="selected-color-control">
         <input
@@ -276,8 +373,22 @@ function ColorControl({ label, field, value, palette, onChange, sampling, setSam
   );
 }
 
-function ItemEditor({ draft, setDraft, palette, sampling, setSampling, sampleStatus }) {
-  const suggestedSecondary = palette.find((color) => color.toLowerCase() !== draft.color?.toLowerCase()) || "#9a9286";
+function ItemEditor({
+  draft,
+  setDraft,
+  palette,
+  sampling,
+  setSampling,
+  sampleStatus,
+}: {
+  draft: ItemDraft;
+  setDraft: Dispatch<SetStateAction<ItemDraft>>;
+  palette: string[];
+  sampling: ColorField | null;
+  setSampling: Dispatch<SetStateAction<ColorField | null>>;
+  sampleStatus: string;
+}) {
+  const suggestedSecondary = palette.find((color) => color.toLowerCase() !== draft.color.toLowerCase()) || "#9a9286";
 
   return (
     <div className="item-editor">
@@ -366,15 +477,40 @@ function ItemEditor({ draft, setDraft, palette, sampling, setSampling, sampleSta
   );
 }
 
-function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
-  const closeButtonRef = useRef(null);
-  const imageRef = useRef(null);
-  const samplingCanvasRef = useRef(null);
-  const shakeTimerRef = useRef(null);
-  const [sampling, setSampling] = useState(null);
+function draftFrom(item: DirectPiece): ItemDraft {
+  return {
+    name: item.name || "",
+    brand: item.brand || "",
+    occasion: item.occasion || "",
+    part: item.part,
+    color: item.color || "#9a9286",
+    secondaryColor: item.secondaryColor || null,
+    tags: [...(item.tags || [])],
+    value: item.value != null ? String(item.value) : "",
+  };
+}
+
+function ItemViewer({
+  item,
+  onClose,
+  onSave,
+  onDelete,
+  onGenerateModel,
+}: {
+  item: DirectPiece;
+  onClose: () => void;
+  onSave: (item: DirectPiece) => void;
+  onDelete: (id: string) => void;
+  onGenerateModel?: (item: DirectPiece) => Promise<void>;
+}) {
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const samplingCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [sampling, setSampling] = useState<ColorField | null>(null);
   const [sampleStatus, setSampleStatus] = useState("");
-  const [palette, setPalette] = useState(item.palette || []);
-  const [draft, setDraft] = useState({ name: item.name || "", brand: item.brand || "", occasion: item.occasion || "", part: item.part, color: item.color || "#9a9286", secondaryColor: item.secondaryColor || null, tags: [...(item.tags || [])], value: item.value != null ? String(item.value) : "" });
+  const [palette, setPalette] = useState<string[]>(item.palette || []);
+  const [draft, setDraft] = useState<ItemDraft>(draftFrom(item));
   const [shaking, setShaking] = useState(false);
   const [closeBlocked, setCloseBlocked] = useState(false);
   const [generatingModel, setGeneratingModel] = useState(false);
@@ -388,13 +524,13 @@ function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
   }, [item.id]);
 
   const isDirty = useMemo(() => {
-    const normalizedTags = (tags) => tags.map((tag) => tag.trim()).filter(Boolean);
+    const normalizedTags = (tags: string[]) => tags.map((tag) => tag.trim()).filter(Boolean);
     return JSON.stringify({
       name: draft.name.trim(),
       brand: normalizeBrand(draft.brand),
       occasion: normalizeOccasion(draft.occasion),
       part: draft.part,
-      color: draft.color?.toLowerCase() || null,
+      color: draft.color.toLowerCase() || null,
       secondaryColor: draft.secondaryColor?.toLowerCase() || null,
       tags: normalizedTags(draft.tags),
       value: parseDraftValue(draft.value),
@@ -406,7 +542,7 @@ function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
       color: item.color?.toLowerCase() || null,
       secondaryColor: item.secondaryColor?.toLowerCase() || null,
       tags: normalizedTags(item.tags || []),
-      value: Number.isFinite(item.value) ? item.value : null,
+      value: typeof item.value === "number" && Number.isFinite(item.value) ? item.value : null,
     });
   }, [draft, item]);
 
@@ -416,7 +552,7 @@ function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setShaking(true));
     });
-    clearTimeout(shakeTimerRef.current);
+    if (shakeTimerRef.current !== null) clearTimeout(shakeTimerRef.current);
     shakeTimerRef.current = setTimeout(() => setShaking(false), 420);
   }, []);
 
@@ -426,7 +562,7 @@ function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
   }, [isDirty, nudgeUnsaved, onClose]);
 
   useEffect(() => {
-    const onKeyDown = (event) => {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (sampling) setSampling(null);
         else requestClose();
@@ -439,7 +575,7 @@ function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.classList.remove("viewer-open");
-      clearTimeout(shakeTimerRef.current);
+      if (shakeTimerRef.current !== null) clearTimeout(shakeTimerRef.current);
     };
   }, [requestClose, sampling]);
 
@@ -451,59 +587,67 @@ function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
     setSampling(null);
     setSampleStatus("");
     setPalette(item.palette || []);
-    setDraft({ name: item.name || "", brand: item.brand || "", occasion: item.occasion || "", part: item.part, color: item.color || "#9a9286", secondaryColor: item.secondaryColor || null, tags: [...(item.tags || [])], value: item.value != null ? String(item.value) : "" });
+    setDraft(draftFrom(item));
   }, [item]);
 
   const cancelEditing = () => {
-    setDraft({ name: item.name || "", brand: item.brand || "", occasion: item.occasion || "", part: item.part, color: item.color || "#9a9286", secondaryColor: item.secondaryColor || null, tags: [...(item.tags || [])], value: item.value != null ? String(item.value) : "" });
+    setDraft(draftFrom(item));
     setSampling(null);
     setSampleStatus("");
     onClose();
   };
 
   const saveEditing = () => {
-    onSave({ ...item, ...draft, name: draft.name.trim(), brand: normalizeBrand(draft.brand), occasion: normalizeOccasion(draft.occasion), tags: draft.tags.map((tag) => tag.trim()).filter(Boolean), value: parseDraftValue(draft.value) });
+    onSave({
+      ...item,
+      ...draft,
+      name: draft.name.trim(),
+      brand: normalizeBrand(draft.brand),
+      occasion: normalizeOccasion(draft.occasion),
+      tags: draft.tags.map((tag) => tag.trim()).filter(Boolean),
+      value: parseDraftValue(draft.value),
+    });
     setSampling(null);
     setSampleStatus("Changes saved.");
   };
 
   const generateModel = async () => {
-    if (!canGenerateModel || generatingModel) return;
+    if (!canGenerateModel || generatingModel || !onGenerateModel) return;
     setGeneratingModel(true);
     setModelError("");
     try {
       await onGenerateModel(item);
-    } catch (error) {
-      setModelError(error.message || "The on-model image could not be generated.");
+    } catch (error: unknown) {
+      setModelError(messageOf(error, "The on-model image could not be generated."));
     } finally {
       setGeneratingModel(false);
     }
   };
 
-  const handleImageLoad = (event) => {
+  const handleImageLoad = (event: { currentTarget: HTMLImageElement }) => {
     samplingCanvasRef.current = buildSamplingCanvas(event.currentTarget);
     const extracted = extractPalette(event.currentTarget);
     setPalette([...new Set([...(item.palette || []), ...extracted])].slice(0, 5));
   };
 
-  const handleImageClick = (event) => {
+  const handleImageClick = (event: { currentTarget: HTMLImageElement; clientX: number; clientY: number }) => {
     if (!sampling || !samplingCanvasRef.current) return;
     const color = sampleImageColor(event.currentTarget, samplingCanvasRef.current, event);
     if (!color) {
       setSampleStatus("That spot is transparent—try directly on the garment.");
       return;
     }
-    const targetField = sampling === "secondary" ? "secondaryColor" : "color";
-    setDraft((current) => ({ ...current, [targetField]: color }));
+    setDraft((current) => sampling === "secondary" ? { ...current, secondaryColor: color } : { ...current, color });
     setPalette((current) => [color, ...current.filter((existing) => existing.toLowerCase() !== color.toLowerCase())].slice(0, 5));
     setSampleStatus(`Sampled ${color} as the ${sampling} color.`);
     setSampling(null);
   };
 
+  const rotationStyle = { "--piece-rotation": pieceRotation } as CSSProperties & { "--piece-rotation"?: string };
   const garmentArtwork = (
     <div
       className={`viewer-art${hasModeledImage ? " viewer-art-floating" : ""}${sampling ? " sampling" : ""}`}
-      style={hasModeledImage ? { "--piece-rotation": pieceRotation } : undefined}
+      style={hasModeledImage ? rotationStyle : undefined}
     >
       <OptimizedImage
         ref={imageRef}
@@ -555,7 +699,7 @@ function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
           {garmentArtwork}
           {canGenerateModel && (
             <div className="viewer-model-request">
-              <button className="secondary-button viewer-model-button" type="button" onClick={generateModel} disabled={generatingModel}>
+              <button className="secondary-button viewer-model-button" type="button" onClick={() => { void generateModel(); }} disabled={generatingModel}>
                 <Sparkle size={16} weight="fill" aria-hidden="true" /> {generatingModel ? "Generating on model…" : "Generate on model"}
               </button>
               {modelError && <p className="viewer-model-error" role="alert">{modelError}</p>}
@@ -593,51 +737,71 @@ function ItemViewer({ item, onClose, onSave, onDelete, onGenerateModel }) {
   );
 }
 
-function ViewToggle({ view, onChange }) {
+function ViewToggle({ view, onChange }: { view: AppView; onChange: (next: AppView) => void }) {
   return (
-    <nav className="view-toggle" aria-label="Switch between wardrobe and wishlist">
-      <button type="button" className={view === "wardrobe" ? "active" : ""} aria-pressed={view === "wardrobe"} onClick={() => onChange("wardrobe")}>Wardrobe</button>
-      <button type="button" className={view === "wishlist" ? "active" : ""} aria-pressed={view === "wishlist"} onClick={() => onChange("wishlist")}>Wishlist</button>
-    </nav>
+    <>
+      <nav className="view-toggle" aria-label="Worth and pieces">
+        <button type="button" className={view === "worth" ? "active" : ""} aria-pressed={view === "worth"} onClick={() => onChange("worth")}>Worth</button>
+        <button type="button" className={view === "wardrobe" ? "active" : ""} aria-pressed={view === "wardrobe"} onClick={() => onChange("wardrobe")}>Pieces</button>
+      </nav>
+      <nav className="view-toggle" aria-label="Looks and wishlist">
+        <button type="button" className={view === "outfits" ? "active" : ""} aria-pressed={view === "outfits"} onClick={() => onChange("outfits")}>Looks</button>
+        <button type="button" className={view === "wishlist" ? "active" : ""} aria-pressed={view === "wishlist"} onClick={() => onChange("wishlist")}>Wishlist</button>
+      </nav>
+    </>
   );
 }
 
 export function WardrobeApp() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<DirectPiece[]>([]);
   const [activeType, setActiveType] = useState("all");
   const [activeBrand, setActiveBrand] = useState("");
   const [activeOccasion, setActiveOccasion] = useState("");
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [view, setView] = useState("wardrobe");
+  const [view, setView] = useState<AppView>("worth");
   const [setupReady, setSetupReady] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [sellPieceId, setSellPieceId] = useState<string | null>(null);
 
   useEffect(() => {
     apiFetch("/api/import/config", { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : null)
-      .then((config) => setSetupReady(Boolean(config?.ready)))
+      .then(async (response) => {
+        if (!response.ok) return null;
+        const config: unknown = await response.json();
+        return config;
+      })
+      .then((config) => {
+        const ready = typeof config === "object" && config !== null && "ready" in config && Boolean(config.ready);
+        setSetupReady(ready);
+      })
       .catch(() => {});
   }, []);
 
   useEffect(() => {
     apiFetch("/api/import/wardrobe", { cache: "no-store" })
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) throw new Error("Could not load the wardrobe.");
-        return response.json();
+        const loaded: unknown = await response.json();
+        return piecesFrom(loaded);
       })
       .then((loadedItems) => setItems(loadedItems))
-      .catch((requestError) => setError(requestError.message))
+      .catch((requestError: unknown) => setError(messageOf(requestError, "Could not load the wardrobe.")))
       .finally(() => setLoading(false));
   }, []);
 
   const selectedItem = items.find((item) => item.id === selectedId) || null;
-
-  const netWorth = useMemo(() => items.reduce((total, item) => total + (Number.isFinite(item.value) ? item.value : 0), 0), [items]);
+  const worthPieces = useMemo(() => items.map(toWorthPiece), [items]);
+  const summary = useMemo(() => summariseWardrobe(worthPieces), [worthPieces]);
+  const purchaseTotal = useMemo(() => items.reduce((total, item) => total + (typeof item.value === "number" && Number.isFinite(item.value) ? item.value : 0), 0), [items]);
+  const badgeWorth = summary.pricedCount ? (summary.low + summary.high) / 2 : purchaseTotal;
+  const worthLabel = summary.pricedCount ? formatRange(summary.low, summary.high) : moneyLabel(purchaseTotal);
+  const sellPiece = worthPieces.find((piece) => piece.id === sellPieceId) ?? null;
 
   const brands = useMemo(() => {
-    const uniqueBrands = new Map();
+    const uniqueBrands = new Map<string, string>();
     items.forEach((item) => {
       const brand = normalizeBrand(item.brand);
       if (brand && !uniqueBrands.has(brand.toLocaleLowerCase())) uniqueBrands.set(brand.toLocaleLowerCase(), brand);
@@ -646,7 +810,7 @@ export function WardrobeApp() {
   }, [items]);
 
   const occasions = useMemo(() => {
-    const uniqueOccasions = new Map();
+    const uniqueOccasions = new Map<string, string>();
     items.forEach((item) => {
       const occasion = normalizeOccasion(item.occasion);
       if (occasion && !uniqueOccasions.has(occasion.toLocaleLowerCase())) uniqueOccasions.set(occasion.toLocaleLowerCase(), occasion);
@@ -671,7 +835,8 @@ export function WardrobeApp() {
     });
   }, [activeBrand, activeOccasion, activeType, items]);
 
-  const chooseType = (typeId) => {
+  const chooseType = (typeId: string) => {
+    setView("wardrobe");
     setActiveType(typeId);
     if (typeId !== "all") {
       setActiveBrand("");
@@ -680,37 +845,40 @@ export function WardrobeApp() {
     setSelectedId(null);
   };
 
-  const saveItem = (updatedItem) => {
+  const saveItem = (updatedItem: DirectPiece) => {
     setItems((current) => current.map((item) => item.id === updatedItem.id ? updatedItem : item));
-    saveItemToAccount(updatedItem).catch((saveError) => setError(saveError.message));
+    saveItemToAccount(updatedItem).catch((saveError: unknown) => setError(messageOf(saveError, "Those changes could not be saved.")));
   };
 
-  const deleteItem = async (id) => {
+  const deleteItem = async (id: string) => {
     try {
       const response = await apiFetch(`/api/import/wardrobe/${id}`, { method: "DELETE" });
       if (!response.ok && response.status !== 404) throw new Error("Could not delete that piece.");
-    } catch (requestError) {
-      setError(requestError.message);
+    } catch (requestError: unknown) {
+      setError(messageOf(requestError, "Could not delete that piece."));
       return;
     }
     setItems((current) => current.filter((item) => item.id !== id));
     setSelectedId(null);
   };
 
-  const addImportedItem = useCallback((newItem) => {
+  const addImportedItem = useCallback((newItem: DirectPiece) => {
     setItems((current) => current.some((item) => item.id === newItem.id) ? current : [...current, newItem]);
   }, []);
 
-  const attachImportedModeledImage = useCallback((jobId, modeledImage) => {
+  const attachImportedModeledImage = useCallback((jobId: string, modeledImage: string) => {
     const id = `import-${jobId}`;
     setItems((current) => current.map((item) => item.id === id ? { ...item, modeledImage } : item));
   }, []);
 
-  const generateOnModel = useCallback(async (item) => {
+  const generateOnModel = useCallback(async (item: DirectPiece) => {
     const response = await apiFetch(`/api/import/wardrobe/${item.id}/modeled`, { method: "POST" });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || "The on-model image could not be created.");
-    setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, modeledImage: result.modeledImage } : entry));
+    const result: unknown = await response.json().catch(() => ({}));
+    const failure = typeof result === "object" && result !== null && "error" in result && typeof result.error === "string" ? result.error : "The on-model image could not be created.";
+    if (!response.ok) throw new Error(failure);
+    const modeledImage = typeof result === "object" && result !== null && "modeledImage" in result && typeof result.modeledImage === "string" ? result.modeledImage : null;
+    if (!modeledImage) throw new Error(failure);
+    setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, modeledImage } : entry));
   }, []);
 
   // Shown on every pane so a new member can pick up the next step from wherever
@@ -724,12 +892,17 @@ export function WardrobeApp() {
         chooseType("all");
         setAddOpen(true);
       }}
-      onCraftOutfit={() => {
-        setView("wardrobe");
-        chooseType("outfits");
-      }}
+      onCraftOutfit={() => setView("outfits")}
       onAddWishlist={() => setView("wishlist")}
     />
+  );
+
+  const outfitNavigation = (
+    <nav className="category-nav" aria-label="Switch between wardrobe sections">
+      {TYPES.map((type) => (
+        <button key={type.id} type="button" className={view === "wardrobe" && activeType === type.id ? "active" : ""} onClick={() => chooseType(type.id)} aria-pressed={view === "wardrobe" && activeType === type.id}>{type.label}</button>
+      ))}
+    </nav>
   );
 
   if (view === "wishlist") {
@@ -745,96 +918,116 @@ export function WardrobeApp() {
     );
   }
 
-  if (activeType === "outfits") {
-    const outfitNavigation = (
-      <nav className="category-nav" aria-label="Switch between wardrobe sections">
-        {TYPES.map((type) => (
-          <button key={type.id} type="button" className={activeType === type.id ? "active" : ""} onClick={() => chooseType(type.id)} aria-pressed={activeType === type.id}>{type.label}</button>
-        ))}
-      </nav>
-    );
-    return (
-      <div className="app-shell">
-        <OutfitsPane items={items} setupReady={setupReady} toggle={<ViewToggle view={view} onChange={setView} />} navigation={outfitNavigation} onReturnToWardrobe={() => chooseType("all")} onAddPiece={() => setAddOpen(true)} />
-        <AddPieceModal open={addOpen} setupReady={setupReady} onClose={() => setAddOpen(false)} onDirectAdded={addImportedItem} />
-        <WardrobeImportFlow onGarmentApproved={addImportedItem} onModeledApproved={attachImportedModeledImage} />
-        {checklist}
-      </div>
-    );
-  }
-
   return (
-    <div className={`app-shell${selectedItem ? " has-selection" : ""}`}>
-      <main className="gallery-pane">
-        <header className="gallery-header">
-          <div className="gallery-meta-row">
-            <div className="gallery-identity">
-              <ProfileBadge netWorth={netWorth} pieces={items.length} />
-              <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"}</p>
-              <p className="net-worth">Wardrobe value <strong>£{netWorth.toLocaleString("en-GB", { minimumFractionDigits: Number.isInteger(netWorth) ? 0 : 2, maximumFractionDigits: 2 })}</strong></p>
-            </div>
-
-            <div className="meta-actions">
-              <button className="add-piece-button" type="button" onClick={() => setAddOpen(true)}>
-                <Plus size={14} weight="bold" aria-hidden="true" /> Add piece
-              </button>
-              <ViewToggle view={view} onChange={setView} />
-            </div>
-          </div>
-          <div className="gallery-filters">
-            <nav className="category-nav" aria-label="Filter wardrobe by item type">
-              {TYPES.map((type) => (
-                <button
-                  key={type.id}
-                  type="button"
-                  className={activeType === type.id ? "active" : ""}
-                  onClick={() => chooseType(type.id)}
-                  aria-pressed={activeType === type.id}
-                >
-                  {type.label}
+    <div className={`app-shell${view === "wardrobe" && selectedItem ? " has-selection" : ""}`}>
+      {view === "worth" && (
+        <main className="gallery-pane">
+          <header className="gallery-header">
+            <div className="gallery-meta-row">
+              <div className="gallery-identity">
+                <ProfileBadge netWorth={badgeWorth} pieces={items.length} />
+                <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"}</p>
+                <p className="net-worth">Wardrobe value <strong>{worthLabel}</strong></p>
+              </div>
+              <div className="meta-actions">
+                <button className="add-piece-button" type="button" onClick={() => setAddOpen(true)}>
+                  <Plus size={14} weight="bold" aria-hidden="true" /> Add piece
                 </button>
+                <ViewToggle view={view} onChange={setView} />
+              </div>
+            </div>
+          </header>
+          {error && <p className="status error">{error}</p>}
+          {!error && loading && <p className="status">Loading wardrobe</p>}
+          <NetWorthHome summary={summary} onOpenPiece={setSellPieceId} onShare={() => setShareOpen(true)} />
+        </main>
+      )}
+
+      {view === "outfits" && (
+        <OutfitsPane
+          items={items}
+          setupReady={setupReady}
+          toggle={<ViewToggle view={view} onChange={setView} />}
+          navigation={outfitNavigation}
+          onReturnToWardrobe={() => chooseType("all")}
+          onAddPiece={() => setAddOpen(true)}
+        />
+      )}
+
+      {view === "wardrobe" && (
+        <main className="gallery-pane">
+          <header className="gallery-header">
+            <div className="gallery-meta-row">
+              <div className="gallery-identity">
+                <ProfileBadge netWorth={badgeWorth} pieces={items.length} />
+                <p className="piece-count">{items.length} {items.length === 1 ? "piece" : "pieces"}</p>
+                <p className="net-worth">Wardrobe value <strong>{worthLabel}</strong></p>
+              </div>
+
+              <div className="meta-actions">
+                <button className="add-piece-button" type="button" onClick={() => setAddOpen(true)}>
+                  <Plus size={14} weight="bold" aria-hidden="true" /> Add piece
+                </button>
+                <ViewToggle view={view} onChange={setView} />
+              </div>
+            </div>
+            <div className="gallery-filters">
+              <nav className="category-nav" aria-label="Filter wardrobe by item type">
+                {TYPES.map((type) => (
+                  <button
+                    key={type.id}
+                    type="button"
+                    className={activeType === type.id ? "active" : ""}
+                    onClick={() => chooseType(type.id)}
+                    aria-pressed={activeType === type.id}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </nav>
+              {activeType === "all" && (
+                <>
+                  <label className="brand-filter">
+                    <span>Brand</span>
+                    <select value={activeBrand} onChange={(event) => setActiveBrand(event.target.value)} aria-label="Filter wardrobe by brand">
+                      <option value="">All brands</option>
+                      {brands.map((brand) => <option value={brand} key={brand.toLocaleLowerCase()}>{brand}</option>)}
+                    </select>
+                  </label>
+                  <label className="brand-filter">
+                    <span>Occasion</span>
+                    <select value={activeOccasion} onChange={(event) => setActiveOccasion(event.target.value)} aria-label="Filter wardrobe by occasion">
+                      <option value="">All occasions</option>
+                      {occasions.map((occasion) => <option value={occasion} key={occasion.toLocaleLowerCase()}>{occasion}</option>)}
+                    </select>
+                  </label>
+                </>
+              )}
+            </div>
+          </header>
+
+          {error && <p className="status error">{error}</p>}
+          {!error && loading && <p className="status">Loading wardrobe</p>}
+          {!error && !loading && !items.length && <p className="status empty">Drop, paste, or add a photo to import your first piece.</p>}
+
+          {!!items.length && (
+            <section className="gallery-grid" aria-label={`${TYPE_MAP[activeType]?.label || "All"} wardrobe items`}>
+              {visibleItems.map((item) => (
+                <GalleryItem
+                  key={item.id}
+                  item={item}
+                  selected={selectedId === item.id}
+                  onOpen={setSelectedId}
+                />
               ))}
-            </nav>
-            {activeType === "all" && (
-              <>
-                <label className="brand-filter">
-                  <span>Brand</span>
-                  <select value={activeBrand} onChange={(event) => setActiveBrand(event.target.value)} aria-label="Filter wardrobe by brand">
-                    <option value="">All brands</option>
-                    {brands.map((brand) => <option value={brand} key={brand.toLocaleLowerCase()}>{brand}</option>)}
-                  </select>
-                </label>
-                <label className="brand-filter">
-                  <span>Occasion</span>
-                  <select value={activeOccasion} onChange={(event) => setActiveOccasion(event.target.value)} aria-label="Filter wardrobe by occasion">
-                    <option value="">All occasions</option>
-                    {occasions.map((occasion) => <option value={occasion} key={occasion.toLocaleLowerCase()}>{occasion}</option>)}
-                  </select>
-                </label>
-              </>
-            )}
-          </div>
-        </header>
+            </section>
+          )}
+        </main>
+      )}
 
-        {error && <p className="status error">{error}</p>}
-        {!error && loading && <p className="status">Loading wardrobe</p>}
-        {!error && !loading && !items.length && <p className="status empty">Drop, paste, or add a photo to import your first piece.</p>}
-
-        {!!items.length && (
-          <section className="gallery-grid" aria-label={`${TYPE_MAP[activeType]?.label || "All"} wardrobe items`}>
-            {visibleItems.map((item) => (
-              <GalleryItem
-                key={item.id}
-                item={item}
-                selected={selectedId === item.id}
-                onOpen={setSelectedId}
-              />
-            ))}
-          </section>
-        )}
-      </main>
-
-      {selectedItem && <ItemViewer item={selectedItem} onClose={() => setSelectedId(null)} onSave={saveItem} onDelete={deleteItem} onGenerateModel={generateOnModel} />}
+      {view === "wardrobe" && selectedItem && <ItemViewer item={selectedItem} onClose={() => setSelectedId(null)} onSave={saveItem} onDelete={(id) => { void deleteItem(id); }} onGenerateModel={generateOnModel} />}
+      {view === "worth" && shareOpen && <ShareCards summary={summary} onClose={() => setShareOpen(false)} />}
+      {view === "worth" && sellPiece && <SellSheet piece={sellPiece} onClose={() => setSellPieceId(null)} />}
       <AddPieceModal open={addOpen} setupReady={setupReady} onClose={() => setAddOpen(false)} onDirectAdded={addImportedItem} />
       <WardrobeImportFlow onGarmentApproved={addImportedItem} onModeledApproved={attachImportedModeledImage} />
       {checklist}

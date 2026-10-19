@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { quoteAiRun } from "@/lib/ai-credits.functions";
-import { formatPence, type AiJobKind } from "@/lib/ai/pricing";
+import { formatPence, type AiCostEstimate, type AiJobKind } from "@/lib/ai/pricing";
 
 const LABELS: Record<string, string> = {
   analyze: "Reading the photo",
@@ -64,7 +64,7 @@ export function AiCostConfirm({ kinds, byteSize = 0, onConfirm, onCancel }: Prop
         from your credit balance of {formatPence(data.balancePence)} when you start.
       </p>
       <ul className="ai-confirm__stages">
-        {data.stages.map((stage) => (
+        {data.stages.map((stage: AiCostEstimate["stages"][number]) => (
           <li key={stage.kind}>
             <span>{LABELS[stage.kind] ?? stage.kind}</span>
             <span>{formatPence(stage.chargedPence)}</span>

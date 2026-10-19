@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Plus, UploadSimple, X } from "@phosphor-icons/react";
 import { apiFetch } from "../../lib/api-fetch";
 import { fileToUploadDataUrl } from "../../lib/image/pixels";
 
 
-const PARTS = [
+const PARTS: ReadonlyArray<readonly [string, string]> = [
   ["upperbody", "Tops"],
   ["wholebody_up", "Jackets"],
   ["lowerbody", "Bottoms"],
@@ -14,21 +14,82 @@ const PARTS = [
 
 // Resized and re-encoded first: a raw camera photo is many times larger than the
 // upload endpoints accept.
-const fileToDataUrl = (file) => fileToUploadDataUrl(file);
+const fileToDataUrl = (file: File) => fileToUploadDataUrl(file);
 
+type Draft = { name: string; part: string; value: string; tags: string };
 
-const EMPTY_DRAFT = { name: "", part: "upperbody", value: "", tags: "" };
+/** Shape returned when a photo is stored without the import pipeline. */
+export type DirectPiece = {
+  id: string;
+  name: string;
+  part: string;
+  brand?: string;
+  occasion?: string;
+  value?: number | null;
+  color?: string | null;
+  secondaryColor?: string | null;
+  palette?: string[];
+  tags?: string[];
+  image?: string | null;
+  thumbnail?: string | null;
+  modeledImage?: string | null;
+  canGenerateModeled?: boolean;
+  size?: string | null;
+  condition?: string | null;
+  purchasePrice?: number | null;
+  purchaseDate?: string | null;
+  valueLow?: number | null;
+  valueHigh?: number | null;
+  valueSource?: string | null;
+  valuedAt?: string | null;
+  valueConfidence?: string | null;
+  valueOverridden?: boolean;
+  lastWornAt?: string | null;
+  wearCount?: number;
+  updatedAt?: string | null;
+};
 
-export function AddPieceModal({ open, setupReady, onClose, onDirectAdded }) {
-  const fileInputRef = useRef(null);
-  const closeButtonRef = useRef(null);
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [draft, setDraft] = useState(EMPTY_DRAFT);
+const EMPTY_DRAFT: Draft = { name: "", part: "upperbody", value: "", tags: "" };
+
+function isDirectPiece(value: unknown): value is DirectPiece {
+  return typeof value === "object" && value !== null && "id" in value && typeof value.id === "string" && "name" in value && typeof value.name === "string" && "part" in value && typeof value.part === "string";
+}
+
+function errorText(value: unknown, fallback: string): string {
+  if (typeof value === "object" && value !== null && "error" in value && typeof value.error === "string" && value.error) return value.error;
+  return fallback;
+}
+
+export function AddPieceModal({
+  open,
+  setupReady,
+  onClose,
+  onDirectAdded,
+}: {
+  open: boolean;
+  setupReady: boolean;
+  onClose: () => void;
+  onDirectAdded: (record: DirectPiece) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [skipExtraction, setSkipExtraction] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  const choose = useCallback((nextFile: File | null | undefined) => {
+    if (!nextFile || !nextFile.type.startsWith("image/")) return;
+    setFile(nextFile);
+    setPreview((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return URL.createObjectURL(nextFile);
+    });
+    setError("");
+  }, []);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -37,7 +98,9 @@ export function AddPieceModal({ open, setupReady, onClose, onDirectAdded }) {
     setDraft(EMPTY_DRAFT);
     setSkipExtraction(false);
     setError("");
-    const onKeyDown = (event) => event.key === "Escape" && onClose();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", onKeyDown);
     closeButtonRef.current?.focus({ preventScroll: true });
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -47,25 +110,15 @@ export function AddPieceModal({ open, setupReady, onClose, onDirectAdded }) {
 
   useEffect(() => {
     if (!open) return undefined;
-    const onPaste = (event) => {
-      const pasted = [...event.clipboardData.files].find((candidate) => candidate.type.startsWith("image/"));
+    const onPaste = (event: ClipboardEvent) => {
+      const pasted = [...(event.clipboardData?.files ?? [])].find((candidate) => candidate.type.startsWith("image/"));
       if (pasted) { event.preventDefault(); choose(pasted); }
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [open]);
+  }, [open, choose]);
 
   if (!open) return null;
-
-  const choose = (nextFile) => {
-    if (!nextFile || !nextFile.type.startsWith("image/")) return;
-    setFile(nextFile);
-    setPreview((current) => {
-      if (current) URL.revokeObjectURL(current);
-      return URL.createObjectURL(nextFile);
-    });
-    setError("");
-  };
 
   const useAI = setupReady && !skipExtraction;
 
@@ -90,13 +143,13 @@ export function AddPieceModal({ open, setupReady, onClose, onDirectAdded }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ imageDataUrl, metadata }),
         });
-        const record = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(record.error || "The piece could not be added.");
+        const record: unknown = await response.json().catch(() => ({}));
+        if (!response.ok || !isDirectPiece(record)) throw new Error(errorText(record, "The piece could not be added."));
         onDirectAdded(record);
         onClose();
       }
-    } catch (requestError) {
-      setError(requestError.message);
+    } catch (requestError: unknown) {
+      setError(requestError instanceof Error ? requestError.message : "The piece could not be added.");
     } finally {
       setBusy(false);
     }
@@ -134,7 +187,7 @@ export function AddPieceModal({ open, setupReady, onClose, onDirectAdded }) {
               </span>
             )}
         </button>
-        <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={(event) => { choose(event.target.files[0]); event.target.value = ""; }} />
+        <input ref={fileInputRef} type="file" accept="image/*" capture="environment" hidden onChange={(event) => { choose(event.target.files?.[0]); event.target.value = ""; }} />
 
         <div className="addpiece-fields">
           <label className="field"><span>Name</span><input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} placeholder="Navy overshirt" /></label>
