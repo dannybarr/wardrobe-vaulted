@@ -445,6 +445,9 @@ export function OutfitsPane({
   navigation,
   onReturnToWardrobe,
   onAddPiece,
+  readOnly = false,
+  onReadOnlyAction,
+  savedOutfits,
 }: {
   items: OutfitPiece[];
   setupReady: boolean;
@@ -452,9 +455,12 @@ export function OutfitsPane({
   navigation: ReactNode;
   onReturnToWardrobe: () => void;
   onAddPiece?: () => void;
+  readOnly?: boolean;
+  onReadOnlyAction?: (() => void) | undefined;
+  savedOutfits?: Outfit[] | undefined;
 }) {
-  const [outfits, setOutfits] = useState<Outfit[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [outfits, setOutfits] = useState<Outfit[]>(savedOutfits ?? []);
+  const [loading, setLoading] = useState(!readOnly);
   const [error, setError] = useState("");
   const [retrying, setRetrying] = useState(false);
   const [building, setBuilding] = useState(false);
@@ -477,20 +483,26 @@ export function OutfitsPane({
     setError("");
   };
   useEffect(() => {
+    if (readOnly) return;
     refresh()
       .catch((requestError: unknown) =>
         setError(messageOf(requestError, "Could not load outfits.")),
       )
       .finally(() => setLoading(false));
-  }, []);
+  }, [readOnly]);
   useEffect(() => {
+    if (readOnly) return undefined;
     if (!outfits.some((outfit) => outfit.generation?.status === "processing")) return undefined;
     const timer = window.setInterval(() => {
       refresh().catch(() => {});
     }, 2400);
     return () => window.clearInterval(timer);
-  }, [outfits]);
+  }, [outfits, readOnly]);
   const useRecommendation = (ids: string[]) => {
+    if (readOnly) {
+      onReadOnlyAction?.();
+      return;
+    }
     setDraftIds(ids);
     setBuilding(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -506,6 +518,10 @@ export function OutfitsPane({
     }
   };
   const generate = async (id: string) => {
+    if (readOnly) {
+      onReadOnlyAction?.();
+      return;
+    }
     setError("");
     try {
       const response = await apiFetch(`/api/outfits/${id}/modeled`, { method: "POST" });
@@ -518,6 +534,10 @@ export function OutfitsPane({
     }
   };
   const remove = async (id: string) => {
+    if (readOnly) {
+      onReadOnlyAction?.();
+      return;
+    }
     setError("");
     try {
       const response = await apiFetch(`/api/outfits/${id}`, { method: "DELETE" });
@@ -529,6 +549,10 @@ export function OutfitsPane({
     }
   };
   const rebuild = (ids: string[]) => {
+    if (readOnly) {
+      onReadOnlyAction?.();
+      return;
+    }
     setDraftIds(ids.filter((id) => pieceMap.has(id)));
     setBuilding(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -548,9 +572,17 @@ export function OutfitsPane({
             <button
               className="add-piece-button"
               type="button"
-              onClick={() =>
-                items.length < 2 ? onAddPiece?.() : (setDraftIds([]), setBuilding(true))
-              }
+              onClick={() => {
+                if (readOnly) {
+                  onReadOnlyAction?.();
+                  return;
+                }
+                if (items.length < 2) onAddPiece?.();
+                else {
+                  setDraftIds([]);
+                  setBuilding(true);
+                }
+              }}
             >
               <Plus size={14} weight="bold" />{" "}
               {items.length < 2 ? "Add a piece" : "Build an outfit"}
@@ -655,7 +687,14 @@ export function OutfitsPane({
           ) : (
             <div className="outfits-empty">
               <p>No saved outfits yet.</p>
-              <button className="primary-button" type="button" onClick={() => setBuilding(true)}>
+              <button
+                className="primary-button"
+                type="button"
+                onClick={() => {
+                  if (readOnly) onReadOnlyAction?.();
+                  else setBuilding(true);
+                }}
+              >
                 <Plus size={15} weight="bold" /> Build your first outfit
               </button>
             </div>

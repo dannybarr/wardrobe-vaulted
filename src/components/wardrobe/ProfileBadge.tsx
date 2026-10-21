@@ -32,11 +32,20 @@ function formatDate(value: string | null) {
 }
 
 /** Small identity chip for the top-left of the wardrobe: initials, then the details on tap. */
-export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; pieces?: number }) {
+export function ProfileBadge({
+  netWorth = 0,
+  pieces,
+  readOnly = false,
+}: {
+  netWorth?: number;
+  pieces?: number;
+  readOnly?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement | null>(null);
   const queryClient = useQueryClient();
   const guest = isGuestMode();
+  const quiet = guest || readOnly;
   const fetchAccess = useServerFn(getVaultAccess);
   const fetchCredits = useServerFn(getAiCreditState);
   const cancelMembership = useServerFn(cancelVaultMembership);
@@ -59,19 +68,19 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
       };
     },
     staleTime: 5 * 60 * 1000,
-    enabled: !guest,
+    enabled: !quiet,
   });
 
   const { data: access } = useQuery({
     queryKey: ["vault-access"],
     queryFn: () => fetchAccess({ data: { environment: getStripeEnvironment() } }),
-    enabled: !guest,
+    enabled: !quiet,
   });
 
   const { data: credits } = useQuery({
     queryKey: ["ai-credit-state"],
     queryFn: () => fetchCredits(),
-    enabled: !guest,
+    enabled: !quiet,
   });
 
   const cancel = useMutation({
@@ -128,17 +137,19 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
   const renewal = formatDate(access?.currentPeriodEnd ?? null);
   const founder = access?.plan === "founder" || credits?.founder;
 
-  const membership = guest
-    ? "Guest trial — your first four pieces are free"
-    : founder
-      ? "Founder — free for life"
-      : access?.subscribed
-        ? access.cancelAtPeriodEnd
-          ? `Vault ends ${renewal ?? "at period end"}`
-          : renewal
-            ? `Vault · £4.99/mo, renews ${renewal}`
-            : "Vault · £4.99 a month"
-        : "No membership — first four pieces free";
+  const membership = readOnly
+    ? "Read-only preview"
+    : guest
+      ? "Guest trial — your first four pieces are free"
+      : founder
+        ? "Founder — free for life"
+        : access?.subscribed
+          ? access.cancelAtPeriodEnd
+            ? `Vault ends ${renewal ?? "at period end"}`
+            : renewal
+              ? `Vault · £4.99/mo, renews ${renewal}`
+              : "Vault · £4.99 a month"
+          : "No membership — first four pieces free";
 
   return (
     <div className="profile-badge" ref={wrapper}>
@@ -148,15 +159,29 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen((value) => !value)}
-        title={guest ? "Guest wardrobe" : (profile?.name ?? profile?.email ?? "Your profile")}
+        title={
+          readOnly
+            ? "Read-only wardrobe"
+            : guest
+              ? "Guest wardrobe"
+              : (profile?.name ?? profile?.email ?? "Your profile")
+        }
       >
-        {guest ? "GT" : initialsFrom(profile?.name ?? null, profile?.email ?? null)}
+        {readOnly
+          ? "RO"
+          : guest
+            ? "GT"
+            : initialsFrom(profile?.name ?? null, profile?.email ?? null)}
       </button>
 
       {open && (
         <div className="profile-panel" role="dialog" aria-label="Your profile">
           <p className="profile-panel__name">
-            {guest ? "Guest wardrobe" : (profile?.name ?? profile?.email ?? "Your wardrobe")}
+            {readOnly
+              ? "Read-only wardrobe"
+              : guest
+                ? "Guest wardrobe"
+                : (profile?.name ?? profile?.email ?? "Your wardrobe")}
           </p>
           {profile?.name && profile?.email ? (
             <p className="profile-panel__email">{profile.email}</p>
@@ -180,13 +205,15 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
             <div>
               <dt>AI credit</dt>
               <dd>
-                {guest
-                  ? "Free for your first four pieces"
-                  : credits?.founder
-                    ? "Unlimited"
-                    : credits?.mode === "byok"
-                      ? "Your own key"
-                      : money(credits?.balancePence ?? 0)}
+                {readOnly
+                  ? "Sign up to use your own"
+                  : guest
+                    ? "Free for your first four pieces"
+                    : credits?.founder
+                      ? "Unlimited"
+                      : credits?.mode === "byok"
+                        ? "Your own key"
+                        : money(credits?.balancePence ?? 0)}
               </dd>
             </div>
             <div>
@@ -221,7 +248,11 @@ export function ProfileBadge({ netWorth = 0, pieces }: { netWorth?: number; piec
           ) : null}
 
           <p className="profile-panel__links">
-            {guest ? (
+            {readOnly ? (
+              <Link to="/auth" search={{ mode: "signup", redirect: "/demo" }}>
+                Create your account
+              </Link>
+            ) : guest ? (
               <Link to="/auth" search={{ mode: "signup", redirect: "/wardrobe" }}>
                 Create your account
               </Link>

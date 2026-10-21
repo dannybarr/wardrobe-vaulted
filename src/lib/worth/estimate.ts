@@ -1,86 +1,30 @@
-import { findMarketBand } from "@/lib/worth/bands";
+import { needsDetails, quoteCuratedBand, rangeFromPrices } from "./quote.ts";
 import {
   ESTIMATE_DISCLAIMER,
   type ComparableListing,
-  type Condition,
   type ResaleEvidenceSource,
   type ResaleQuery,
   type Valuation,
-} from "@/lib/worth/types";
+} from "./types.ts";
 
-const CONDITION_SCALE: Record<Condition, [number, number]> = {
-  new_with_tags: [1.05, 1.2],
-  like_new: [1, 1],
-  good: [0.7, 0.85],
-  fair: [0.4, 0.62],
-};
-
-function roundToFive(value: number): number {
-  return Math.max(5, Math.round(value / 5) * 5);
-}
-
-function needsDetails(evidence: string[]): Valuation {
-  return {
-    status: "needs_details",
-    lowGbp: null,
-    highGbp: null,
-    confidence: "unknown",
-    source: null,
-    evidence,
-    disclaimer: ESTIMATE_DISCLAIMER,
-  };
-}
-
-function rangeFromPrices(prices: number[]): { low: number; high: number } | null {
-  const sorted = prices
-    .filter((price) => Number.isFinite(price) && price > 0)
-    .sort((a, b) => a - b);
-  if (sorted.length < 2) return null;
-  const lowIndex = Math.max(0, Math.floor((sorted.length - 1) * 0.25));
-  const highIndex = Math.min(sorted.length - 1, Math.ceil((sorted.length - 1) * 0.75));
-  const low = roundToFive(sorted[lowIndex] ?? sorted[0]!);
-  let high = roundToFive(sorted[highIndex] ?? sorted[sorted.length - 1]!);
-  if (high <= low) high = low + 10;
-  return { low, high };
-}
-
-function scaleBand(
-  low: number,
-  high: number,
-  condition: Condition | null,
-): { low: number; high: number; confidence: "medium" | "low" } {
-  if (!condition) {
-    const fair = CONDITION_SCALE.fair;
-    const tagged = CONDITION_SCALE.new_with_tags;
-    return {
-      low: roundToFive(low * fair[0]),
-      high: roundToFive(high * tagged[1]),
-      confidence: "low",
-    };
-  }
-  const [lowScale, highScale] = CONDITION_SCALE[condition];
-  const scaledLow = roundToFive(low * lowScale);
-  let scaledHigh = roundToFive(high * highScale);
-  if (scaledHigh <= scaledLow) scaledHigh = scaledLow + 10;
-  return { low: scaledLow, high: scaledHigh, confidence: "medium" };
-}
+export { quoteCuratedBand } from "./quote.ts";
 
 export class CuratedBandSource implements ResaleEvidenceSource {
   readonly id = "market_band";
 
   async findComparables(query: ResaleQuery): Promise<ComparableListing[]> {
-    const band = findMarketBand(query.brand, query.category);
-    if (!band) return [];
-    const scaled = scaleBand(band.low, band.high, query.condition);
+    const quoted = quoteCuratedBand(query);
+    if (quoted.lowGbp === null || quoted.highGbp === null) return [];
+    const brand = query.brand.trim();
     return [
       {
-        title: `${band.brand} resale band, lower end`,
-        priceGbp: scaled.low,
+        title: `${brand} resale band, lower end`,
+        priceGbp: quoted.lowGbp,
         source: "UK resale band",
       },
       {
-        title: `${band.brand} resale band, upper end`,
-        priceGbp: scaled.high,
+        title: `${brand} resale band, upper end`,
+        priceGbp: quoted.highGbp,
         source: "UK resale band",
       },
     ];

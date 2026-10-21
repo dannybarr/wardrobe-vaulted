@@ -186,6 +186,8 @@ function WishlistViewer({
   onChange,
   onDelete,
   onPurchased,
+  readOnly = false,
+  onReadOnlyAction,
 }: {
   item: WishlistPiece;
   setupReady: boolean;
@@ -193,6 +195,8 @@ function WishlistViewer({
   onChange: (updated: WishlistPiece) => void;
   onDelete: (id: string) => void;
   onPurchased: (id: string, record: DirectPiece) => void;
+  readOnly?: boolean;
+  onReadOnlyAction?: (() => void) | undefined;
 }) {
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -240,8 +244,16 @@ function WishlistViewer({
     }
   };
 
-  const save = () =>
-    run("save", async () => {
+  const blocked = () => {
+    onReadOnlyAction?.();
+  };
+
+  const save = () => {
+    if (readOnly) {
+      blocked();
+      return;
+    }
+    return run("save", async () => {
       const updated = await api(`${API}/${item.id}`, {
         method: "PATCH",
         body: JSON.stringify({
@@ -254,8 +266,13 @@ function WishlistViewer({
       if (!isWishlistPiece(updated)) throw new Error("The wishlist request failed.");
       onChange(updated);
     });
+  };
 
   const attachImage = (file: File | null | undefined) => {
+    if (readOnly) {
+      blocked();
+      return;
+    }
     if (!file || !file.type.startsWith("image/")) return;
     void run("image", async () => {
       const imageDataUrl = await fileToDataUrl(file);
@@ -269,6 +286,7 @@ function WishlistViewer({
   };
 
   useEffect(() => {
+    if (readOnly) return;
     const onPaste = (event: ClipboardEvent) => {
       const file = [...(event.clipboardData?.files ?? [])].find((candidate) =>
         candidate.type.startsWith("image/"),
@@ -280,17 +298,26 @@ function WishlistViewer({
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [item.id]);
+  }, [item.id, readOnly]);
 
-  const tryOn = () =>
-    run("tryon", async () => {
+  const tryOn = () => {
+    if (readOnly) {
+      blocked();
+      return;
+    }
+    return run("tryon", async () => {
       const updated = await api(`${API}/${item.id}/tryon`, { method: "POST" });
       if (!isWishlistPiece(updated)) throw new Error("The wishlist request failed.");
       onChange(updated);
     });
+  };
 
-  const purchase = () =>
-    run("purchase", async () => {
+  const purchase = () => {
+    if (readOnly) {
+      blocked();
+      return;
+    }
+    return run("purchase", async () => {
       const result = await api(`${API}/${item.id}/purchase`, { method: "POST" });
       if (
         typeof result !== "object" ||
@@ -301,6 +328,7 @@ function WishlistViewer({
         throw new Error("The wishlist request failed.");
       onPurchased(item.id, result.record);
     });
+  };
 
   const isDirty =
     draft.name !== item.name ||
@@ -469,12 +497,16 @@ function WishlistViewer({
                 className="delete-button"
                 type="button"
                 disabled={busy === "delete"}
-                onClick={() =>
-                  run("delete", async () => {
+                onClick={() => {
+                  if (readOnly) {
+                    blocked();
+                    return;
+                  }
+                  void run("delete", async () => {
                     await api(`${API}/${item.id}`, { method: "DELETE" });
                     onDelete(item.id);
-                  })
-                }
+                  });
+                }}
               >
                 <Trash size={15} aria-hidden="true" /> Remove
               </button>
@@ -525,13 +557,19 @@ export function WishlistPane({
   toggle,
   setupReady,
   onPurchased,
+  readOnly = false,
+  onReadOnlyAction,
+  savedItems,
 }: {
   toggle: ReactNode;
   setupReady: boolean;
   onPurchased: (record: DirectPiece) => void;
+  readOnly?: boolean;
+  onReadOnlyAction?: (() => void) | undefined;
+  savedItems?: WishlistPiece[] | undefined;
 }) {
-  const [items, setItems] = useState<WishlistPiece[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<WishlistPiece[]>(savedItems ?? []);
+  const [loading, setLoading] = useState(!readOnly);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [adding, setAdding] = useState(false);
@@ -539,74 +577,89 @@ export function WishlistPane({
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (readOnly) return;
     api(API)
       .then((loaded) => setItems(Array.isArray(loaded) ? loaded.filter(isWishlistPiece) : []))
       .catch((requestError: unknown) =>
         setError(messageOf(requestError, "The wishlist request failed.")),
       )
       .finally(() => setLoading(false));
-  }, []);
+  }, [readOnly]);
 
-  const addLink = useCallback(async (url: string) => {
-    setAdding(true);
-    setError("");
-    setNotice("");
-    try {
-      const payload = await api(`${API}/resolve`, {
-        method: "POST",
-        body: JSON.stringify({ url }),
-      });
-      if (
-        typeof payload !== "object" ||
-        payload === null ||
-        !("item" in payload) ||
-        !isWishlistPiece(payload.item)
-      )
-        throw new Error("The wishlist request failed.");
-      const item = payload.item;
-      if ("duplicate" in payload && payload.duplicate) {
-        setNotice("That link is already on your wishlist.");
-        setSelectedId(item.id);
-        return true;
+  const addLink = useCallback(
+    async (url: string) => {
+      if (readOnly) {
+        onReadOnlyAction?.();
+        return false;
       }
-      setItems((current) => [...current, item]);
-      if (item.status === "needs-image") setSelectedId(item.id);
-      return true;
-    } catch (requestError: unknown) {
-      setError(messageOf(requestError, "The wishlist request failed."));
-      return false;
-    } finally {
-      setAdding(false);
-    }
-  }, []);
+      setAdding(true);
+      setError("");
+      setNotice("");
+      try {
+        const payload = await api(`${API}/resolve`, {
+          method: "POST",
+          body: JSON.stringify({ url }),
+        });
+        if (
+          typeof payload !== "object" ||
+          payload === null ||
+          !("item" in payload) ||
+          !isWishlistPiece(payload.item)
+        )
+          throw new Error("The wishlist request failed.");
+        const item = payload.item;
+        if ("duplicate" in payload && payload.duplicate) {
+          setNotice("That link is already on your wishlist.");
+          setSelectedId(item.id);
+          return true;
+        }
+        setItems((current) => [...current, item]);
+        if (item.status === "needs-image") setSelectedId(item.id);
+        return true;
+      } catch (requestError: unknown) {
+        setError(messageOf(requestError, "The wishlist request failed."));
+        return false;
+      } finally {
+        setAdding(false);
+      }
+    },
+    [onReadOnlyAction, readOnly],
+  );
 
   // A photo goes through exactly the same extraction the wardrobe uses, and each
   // piece it finds lands on the wishlist ready to edit.
-  const addPhoto = useCallback(async (file: File) => {
-    if (!file.type.startsWith("image/")) return;
-    setAddingPhoto(true);
-    setError("");
-    setNotice("");
-    try {
-      const { items: added, noClothingDetected } = await importPhotoToWishlist(file);
-      const first = added[0];
-      if (noClothingDetected || !added.length || !first) {
-        setNotice("No clothing was found in that photo. Try a clearer one.");
+  const addPhoto = useCallback(
+    async (file: File) => {
+      if (readOnly) {
+        onReadOnlyAction?.();
         return;
       }
-      setItems((current) => [...current, ...added]);
-      setNotice(
-        added.length === 1
-          ? "Added from your photo."
-          : `Added ${added.length} pieces from your photo.`,
-      );
-      setSelectedId(first.id);
-    } catch (requestError: unknown) {
-      setError(messageOf(requestError, "The wishlist request failed."));
-    } finally {
-      setAddingPhoto(false);
-    }
-  }, []);
+      if (!file.type.startsWith("image/")) return;
+      setAddingPhoto(true);
+      setError("");
+      setNotice("");
+      try {
+        const { items: added, noClothingDetected } = await importPhotoToWishlist(file);
+        const first = added[0];
+        if (noClothingDetected || !added.length || !first) {
+          setNotice("No clothing was found in that photo. Try a clearer one.");
+          return;
+        }
+        setItems((current) => [...current, ...added]);
+        setNotice(
+          added.length === 1
+            ? "Added from your photo."
+            : `Added ${added.length} pieces from your photo.`,
+        );
+        setSelectedId(first.id);
+      } catch (requestError: unknown) {
+        setError(messageOf(requestError, "The wishlist request failed."));
+      } finally {
+        setAddingPhoto(false);
+      }
+    },
+    [onReadOnlyAction, readOnly],
+  );
 
   const changeItem = useCallback((updated: WishlistPiece) => {
     setItems((current) => current.map((item) => (item.id === updated.id ? updated : item)));
@@ -668,6 +721,8 @@ export function WishlistPane({
           onChange={changeItem}
           onDelete={removeItem}
           onPurchased={purchasedItem}
+          readOnly={readOnly}
+          onReadOnlyAction={onReadOnlyAction}
         />
       )}
     </main>

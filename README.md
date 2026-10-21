@@ -4,11 +4,11 @@ Wardrobe is a private wardrobe for people who buy and resell clothes. Photograph
 
 The home screen is built for a phone: a large net-worth range, how that range has moved since last month, breakdowns by category and brand, the five most valuable pieces, value that has not been worn or edited in six months, and cost per wear when a purchase price is set. From there you can save a 9:16 card for TikTok and Stories, a square card for X, or a ready-to-paste “Sell this” listing. Outfits, the wishlist and try-on stay in the app, one step off the main navigation.
 
-A demo with clearly fictional pieces runs at `/demo` with no account and no production keys.
+A read-only wardrobe runs at `/demo` with no account and no writes to Supabase. It shows the founder catalogue: every piece, outfit and wishlist item, with resale ranges where the brand is recognised. Original cut-out photographs were never committed, so each image is a public colour stand-in.
 
 ## Screenshots
 
-Captured from the local demo wardrobe (every figure is made up):
+Captured from the read-only wardrobe at `/demo`:
 
 ![Net worth home](docs/screenshots/net-worth-home.png)
 
@@ -36,7 +36,7 @@ npm ci
 npm run dev
 ```
 
-Open the app, or go straight to [http://127.0.0.1:5173/demo](http://127.0.0.1:5173/demo) for the fictional wardrobe. The demo does not call Supabase, Stripe or an AI provider.
+Open the app, or go straight to [http://127.0.0.1:5173/demo](http://127.0.0.1:5173/demo) for the read-only wardrobe. The demo does not call Supabase, Stripe or an AI provider. Editing, deleting or adding a piece sends you to sign-up.
 
 ```bash
 npm run typecheck
@@ -46,7 +46,7 @@ npm run build
 npm run test:e2e
 ```
 
-End-to-end tests drive `/demo`: sign-up in the browser, the net-worth range, both share cards, a listing, and adding a Nike trainer so the total changes.
+End-to-end tests drive `/demo`: the founder pieces, a non-zero net-worth range, both share cards, a listing, the saved outfits and the wishlist. They also check that delete leaves the page for sign-up and that the demo makes no API call.
 
 ## Environment variables
 
@@ -56,7 +56,8 @@ Names only. Put secrets in the host’s secret store, never in git. The committe
 | --------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `SUPABASE_URL`                    | Server Supabase URL                                                                                    |
 | `SUPABASE_PUBLISHABLE_KEY`        | Server anon/publishable key                                                                            |
-| `SUPABASE_SERVICE_ROLE_KEY`       | Server-only admin key. Never expose it to the browser.                                                 |
+| `SUPABASE_SERVICE_ROLE_KEY`       | Server-only admin key. Never expose it to the browser. Also used by `npm run seed:founder`.            |
+| `FOUNDER_EMAIL`                   | Account that receives the founder catalogue when you run `npm run seed:founder`. Not stored in git.    |
 | `VITE_SUPABASE_URL`               | Browser Supabase URL                                                                                   |
 | `VITE_SUPABASE_PUBLISHABLE_KEY`   | Browser publishable key                                                                                |
 | `SUPABASE_PROJECT_ID`             | Project reference used by tooling                                                                      |
@@ -87,7 +88,22 @@ or paste `supabase/migrations/20261019120000_lock_profiles_wallet_and_valuation.
 - adds garment valuation columns, daily trial cost, and `value_snapshots`
 - expires the founder invite that was seeded in an earlier migration
 
+That migration does not delete or orphan wardrobe, outfit, wishlist or profile rows. The only change to an existing row is the invite expiry above. New garment columns are nullable, so pieces already in the database stay as they are.
+
 Set `AI_KEY_ENCRYPTION_SECRET` and `TRIAL_COOKIE_SECRET` before the new app serves traffic. Existing plaintext API keys are rewritten in encrypted form the next time they are read, once the encryption secret is set. Do not rotate that secret without a planned re-encryption; old ciphertext will not decrypt.
+
+## Import the founder wardrobe into an account
+
+`/demo` does not write the catalogue into anyone's account. To copy the same pieces, outfits and wishlist into a real, editable wardrobe, point the script at that project and that account, then run it once:
+
+```bash
+SUPABASE_URL="https://<project-ref>.supabase.co" \
+SUPABASE_SERVICE_ROLE_KEY="<service-role key>" \
+FOUNDER_EMAIL="<account email>" \
+npm run seed:founder
+```
+
+Apply the valuation migration first, so the new garment columns exist. The account must already exist. The script looks the user up from `FOUNDER_EMAIL`, inserts only rows that are not already there (matched by legacy id or by name), and leaves every existing row in place. Running it again does not create a second copy and does not delete anything. It does not set `is_founder` or any other privilege, and the wardrobe it uses stays private (`is_demo` stays false). The email is read from the environment only. Do not put it in the repo.
 
 This repository does not deploy from CI, and this change set was not applied to the production Supabase project or Stripe account.
 

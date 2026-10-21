@@ -17,6 +17,8 @@ import { OptimizedImage } from "./OptimizedImage";
 import { ProfileBadge } from "./ProfileBadge.tsx";
 import { OnboardingChecklist } from "./OnboardingChecklist.tsx";
 import { apiFetch } from "../../lib/api-fetch";
+import { askToSignUp } from "../../lib/demo/signup";
+import type { WishlistPiece } from "../../lib/import/engine";
 import { NetWorthHome } from "@/components/worth/NetWorthHome";
 import { ShareCards } from "@/components/worth/ShareCards";
 import { SellSheet } from "@/components/worth/SellSheet";
@@ -899,13 +901,25 @@ function ViewToggle({ view, onChange }: { view: AppView; onChange: (next: AppVie
   );
 }
 
-export function WardrobeApp() {
-  const [items, setItems] = useState<DirectPiece[]>([]);
+export type WardrobePreview = {
+  pieces: DirectPiece[];
+  outfits: Array<{
+    id: string;
+    name: string;
+    garmentIds: string[];
+    modeledImage?: string | null;
+  }>;
+  wishlist: WishlistPiece[];
+};
+
+export function WardrobeApp({ preview }: { preview?: WardrobePreview } = {}) {
+  const readOnly = preview !== undefined;
+  const [items, setItems] = useState<DirectPiece[]>(preview?.pieces ?? []);
   const [activeType, setActiveType] = useState("all");
   const [activeBrand, setActiveBrand] = useState("");
   const [activeOccasion, setActiveOccasion] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!readOnly);
   const [error, setError] = useState("");
   const [view, setView] = useState<AppView>("worth");
   const [setupReady, setSetupReady] = useState(false);
@@ -914,6 +928,7 @@ export function WardrobeApp() {
   const [sellPieceId, setSellPieceId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (readOnly) return;
     apiFetch("/api/import/config", { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) return null;
@@ -929,9 +944,10 @@ export function WardrobeApp() {
         setSetupReady(ready);
       })
       .catch(() => {});
-  }, []);
+  }, [readOnly]);
 
   useEffect(() => {
+    if (readOnly) return;
     apiFetch("/api/import/wardrobe", { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error("Could not load the wardrobe.");
@@ -943,7 +959,7 @@ export function WardrobeApp() {
         setError(messageOf(requestError, "Could not load the wardrobe.")),
       )
       .finally(() => setLoading(false));
-  }, []);
+  }, [readOnly]);
 
   const selectedItem = items.find((item) => item.id === selectedId) || null;
   const worthPieces = useMemo(() => items.map(toWorthPiece), [items]);
@@ -1018,6 +1034,10 @@ export function WardrobeApp() {
   };
 
   const saveItem = (updatedItem: DirectPiece) => {
+    if (readOnly) {
+      askToSignUp();
+      return;
+    }
     setItems((current) => current.map((item) => (item.id === updatedItem.id ? updatedItem : item)));
     saveItemToAccount(updatedItem).catch((saveError: unknown) =>
       setError(messageOf(saveError, "Those changes could not be saved.")),
@@ -1025,6 +1045,10 @@ export function WardrobeApp() {
   };
 
   const deleteItem = async (id: string) => {
+    if (readOnly) {
+      askToSignUp();
+      return;
+    }
     try {
       const response = await apiFetch(`/api/import/wardrobe/${id}`, { method: "DELETE" });
       if (!response.ok && response.status !== 404) throw new Error("Could not delete that piece.");
@@ -1049,29 +1073,38 @@ export function WardrobeApp() {
     );
   }, []);
 
-  const generateOnModel = useCallback(async (item: DirectPiece) => {
-    const response = await apiFetch(`/api/import/wardrobe/${item.id}/modeled`, { method: "POST" });
-    const result: unknown = await response.json().catch(() => ({}));
-    const failure =
-      typeof result === "object" &&
-      result !== null &&
-      "error" in result &&
-      typeof result.error === "string"
-        ? result.error
-        : "The on-model image could not be created.";
-    if (!response.ok) throw new Error(failure);
-    const modeledImage =
-      typeof result === "object" &&
-      result !== null &&
-      "modeledImage" in result &&
-      typeof result.modeledImage === "string"
-        ? result.modeledImage
-        : null;
-    if (!modeledImage) throw new Error(failure);
-    setItems((current) =>
-      current.map((entry) => (entry.id === item.id ? { ...entry, modeledImage } : entry)),
-    );
-  }, []);
+  const generateOnModel = useCallback(
+    async (item: DirectPiece) => {
+      if (readOnly) {
+        askToSignUp();
+        return;
+      }
+      const response = await apiFetch(`/api/import/wardrobe/${item.id}/modeled`, {
+        method: "POST",
+      });
+      const result: unknown = await response.json().catch(() => ({}));
+      const failure =
+        typeof result === "object" &&
+        result !== null &&
+        "error" in result &&
+        typeof result.error === "string"
+          ? result.error
+          : "The on-model image could not be created.";
+      if (!response.ok) throw new Error(failure);
+      const modeledImage =
+        typeof result === "object" &&
+        result !== null &&
+        "modeledImage" in result &&
+        typeof result.modeledImage === "string"
+          ? result.modeledImage
+          : null;
+      if (!modeledImage) throw new Error(failure);
+      setItems((current) =>
+        current.map((entry) => (entry.id === item.id ? { ...entry, modeledImage } : entry)),
+      );
+    },
+    [readOnly],
+  );
 
   // Shown on every pane so a new member can pick up the next step from wherever
   // they are. It takes itself off screen once all three are done.
@@ -1112,8 +1145,11 @@ export function WardrobeApp() {
           toggle={<ViewToggle view={view} onChange={setView} />}
           setupReady={setupReady}
           onPurchased={addImportedItem}
+          readOnly={readOnly}
+          onReadOnlyAction={askToSignUp}
+          savedItems={preview?.wishlist}
         />
-        {checklist}
+        {readOnly ? null : checklist}
       </div>
     );
   }
@@ -1125,7 +1161,7 @@ export function WardrobeApp() {
           <header className="gallery-header">
             <div className="gallery-meta-row">
               <div className="gallery-identity">
-                <ProfileBadge netWorth={badgeWorth} pieces={items.length} />
+                <ProfileBadge netWorth={badgeWorth} pieces={items.length} readOnly={readOnly} />
                 <p className="piece-count">
                   {items.length} {items.length === 1 ? "piece" : "pieces"}
                 </p>
@@ -1134,7 +1170,11 @@ export function WardrobeApp() {
                 </p>
               </div>
               <div className="meta-actions">
-                <button className="add-piece-button" type="button" onClick={() => setAddOpen(true)}>
+                <button
+                  className="add-piece-button"
+                  type="button"
+                  onClick={() => (readOnly ? askToSignUp() : setAddOpen(true))}
+                >
                   <Plus size={14} weight="bold" aria-hidden="true" /> Add piece
                 </button>
                 <ViewToggle view={view} onChange={setView} />
@@ -1158,7 +1198,10 @@ export function WardrobeApp() {
           toggle={<ViewToggle view={view} onChange={setView} />}
           navigation={outfitNavigation}
           onReturnToWardrobe={() => chooseType("all")}
-          onAddPiece={() => setAddOpen(true)}
+          onAddPiece={() => (readOnly ? askToSignUp() : setAddOpen(true))}
+          readOnly={readOnly}
+          onReadOnlyAction={askToSignUp}
+          savedOutfits={preview?.outfits}
         />
       )}
 
@@ -1167,7 +1210,7 @@ export function WardrobeApp() {
           <header className="gallery-header">
             <div className="gallery-meta-row">
               <div className="gallery-identity">
-                <ProfileBadge netWorth={badgeWorth} pieces={items.length} />
+                <ProfileBadge netWorth={badgeWorth} pieces={items.length} readOnly={readOnly} />
                 <p className="piece-count">
                   {items.length} {items.length === 1 ? "piece" : "pieces"}
                 </p>
@@ -1177,7 +1220,11 @@ export function WardrobeApp() {
               </div>
 
               <div className="meta-actions">
-                <button className="add-piece-button" type="button" onClick={() => setAddOpen(true)}>
+                <button
+                  className="add-piece-button"
+                  type="button"
+                  onClick={() => (readOnly ? askToSignUp() : setAddOpen(true))}
+                >
                   <Plus size={14} weight="bold" aria-hidden="true" /> Add piece
                 </button>
                 <ViewToggle view={view} onChange={setView} />
@@ -1275,17 +1322,21 @@ export function WardrobeApp() {
       {view === "worth" && sellPiece && (
         <SellSheet piece={sellPiece} onClose={() => setSellPieceId(null)} />
       )}
-      <AddPieceModal
-        open={addOpen}
-        setupReady={setupReady}
-        onClose={() => setAddOpen(false)}
-        onDirectAdded={addImportedItem}
-      />
-      <WardrobeImportFlow
-        onGarmentApproved={addImportedItem}
-        onModeledApproved={attachImportedModeledImage}
-      />
-      {checklist}
+      {readOnly ? null : (
+        <>
+          <AddPieceModal
+            open={addOpen}
+            setupReady={setupReady}
+            onClose={() => setAddOpen(false)}
+            onDirectAdded={addImportedItem}
+          />
+          <WardrobeImportFlow
+            onGarmentApproved={addImportedItem}
+            onModeledApproved={attachImportedModeledImage}
+          />
+          {checklist}
+        </>
+      )}
     </div>
   );
 }
