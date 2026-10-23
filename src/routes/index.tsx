@@ -5,18 +5,20 @@ import { setPendingOutfitPhoto } from "@/lib/trial/handoff";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Wardrobe — know what your wardrobe is worth" },
+      { title: "Wardrobe — the quiet wealth inside your wardrobe" },
       {
         name: "description",
         content:
-          "See the live resale value of every piece you own, in GBP, with share cards for what your wardrobe is worth.",
+          "Snap a photo to instantly digitise any piece. Watch your wardrobe’s live market value grow, plan your rotation, and share your personal vault.",
       },
-      { property: "og:title", content: "Wardrobe — know what your wardrobe is worth" },
+      { property: "og:title", content: "Wardrobe — the quiet wealth inside your wardrobe" },
       {
         property: "og:description",
         content:
-          "See the live resale value of every piece you own, in GBP, with share cards for what your wardrobe is worth.",
+          "Snap a photo to instantly digitise any piece. Watch your wardrobe’s live market value grow, plan your rotation, and share your personal vault.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
