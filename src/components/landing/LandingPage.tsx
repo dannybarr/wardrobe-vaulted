@@ -73,8 +73,8 @@ export function LandingPage({ onPhotoChosen }: { onPhotoChosen?: (file: File) =>
           </p>
           <h1 id="landing-title">
             Know what your
-            <br />
-            wardrobe is <span>worth</span>.
+            <br /> wardrobe
+            <br /> is <span>worth</span>.
           </h1>
           <p className="landing-description">
             See the live resale value of every piece you own, in GBP, with share cards.
