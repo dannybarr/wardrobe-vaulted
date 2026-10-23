@@ -54,7 +54,7 @@ test("founder wardrobe is read-only and priced", async ({ page }) => {
   await expect(page.getByTestId("top-pieces")).toBeVisible();
 
   const thumb = page.locator(".worth-thumb").first();
-  await expect(thumb).toHaveAttribute("src", /\/demo\/library\/.+\.svg$/);
+  await expect(thumb).toHaveAttribute("src", /\/demo\/library\/.+\.png$/);
   const src = await thumb.getAttribute("src");
   expect(src).toBeTruthy();
   const image = await page.request.get(src!);
