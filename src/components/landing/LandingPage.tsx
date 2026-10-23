@@ -69,16 +69,15 @@ export function LandingPage({
       <section className="landing-hero" id="top" aria-labelledby="landing-title">
         <div className="landing-copy">
           <p className="landing-kicker">
-            <i /> YOUR CLOTHES, MADE USEFUL
+            <i /> NET WORTH FOR YOUR CLOTHES
           </p>
           <h1 id="landing-title">
-            Your wardrobe.
+            Know what your
             <br />
-            <span>Finally</span> in one place.
+            wardrobe is <span>worth</span>.
           </h1>
           <p className="landing-description">
-            Drop in a photo of an outfit. AI separates the pieces, builds your digital wardrobe and
-            keeps every look ready to wear.
+            See the live resale value of every piece you own, in GBP, with share cards.
           </p>
           <button className="landing-cta" type="button" onClick={onEnter}>
             Craft your vault <ArrowRight size={18} weight="bold" aria-hidden="true" />
