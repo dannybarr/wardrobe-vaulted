@@ -433,62 +433,101 @@ export type Database = {
         Row: {
           brand: string | null
           color: string | null
+          condition: string | null
           created_at: string
           currency: string
           deleted_at: string | null
+          estimated_resale_value: number | null
           id: string
+          last_worn_at: string | null
           legacy_id: string | null
           name: string
           occasion: string | null
           owner_id: string
           palette: Json
           part: string
+          purchase_date: string | null
+          purchase_price: number | null
           secondary_color: string | null
+          size_label: string | null
           source: string
           tags: string[]
           updated_at: string
           value_amount: number | null
+          value_confidence: string | null
+          value_high: number | null
+          value_low: number | null
+          value_overridden: boolean
+          value_source: string | null
+          valued_at: string | null
           wardrobe_id: string
+          wear_count: number
         }
         Insert: {
           brand?: string | null
           color?: string | null
+          condition?: string | null
           created_at?: string
           currency?: string
           deleted_at?: string | null
+          estimated_resale_value?: number | null
           id?: string
+          last_worn_at?: string | null
           legacy_id?: string | null
           name?: string
           occasion?: string | null
           owner_id: string
           palette?: Json
           part?: string
+          purchase_date?: string | null
+          purchase_price?: number | null
           secondary_color?: string | null
+          size_label?: string | null
           source?: string
           tags?: string[]
           updated_at?: string
           value_amount?: number | null
+          value_confidence?: string | null
+          value_high?: number | null
+          value_low?: number | null
+          value_overridden?: boolean
+          value_source?: string | null
+          valued_at?: string | null
           wardrobe_id: string
+          wear_count?: number
         }
         Update: {
           brand?: string | null
           color?: string | null
+          condition?: string | null
           created_at?: string
           currency?: string
           deleted_at?: string | null
+          estimated_resale_value?: number | null
           id?: string
+          last_worn_at?: string | null
           legacy_id?: string | null
           name?: string
           occasion?: string | null
           owner_id?: string
           palette?: Json
           part?: string
+          purchase_date?: string | null
+          purchase_price?: number | null
           secondary_color?: string | null
+          size_label?: string | null
           source?: string
           tags?: string[]
           updated_at?: string
           value_amount?: number | null
+          value_confidence?: string | null
+          value_high?: number | null
+          value_low?: number | null
+          value_overridden?: boolean
+          value_source?: string | null
+          valued_at?: string | null
           wardrobe_id?: string
+          wear_count?: number
         }
         Relationships: [
           {
@@ -755,6 +794,7 @@ export type Database = {
       trial_runs: {
         Row: {
           address_hash: string
+          cost_pence: number
           created_at: string
           device_id: string
           id: string
@@ -762,6 +802,7 @@ export type Database = {
         }
         Insert: {
           address_hash: string
+          cost_pence?: number
           created_at?: string
           device_id: string
           id?: string
@@ -769,6 +810,7 @@ export type Database = {
         }
         Update: {
           address_hash?: string
+          cost_pence?: number
           created_at?: string
           device_id?: string
           id?: string
@@ -796,6 +838,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      value_snapshots: {
+        Row: {
+          created_at: string
+          garment_id: string
+          id: string
+          owner_id: string
+          recorded_on: string
+          value_high: number | null
+          value_low: number | null
+        }
+        Insert: {
+          created_at?: string
+          garment_id: string
+          id?: string
+          owner_id: string
+          recorded_on?: string
+          value_high?: number | null
+          value_low?: number | null
+        }
+        Update: {
+          created_at?: string
+          garment_id?: string
+          id?: string
+          owner_id?: string
+          recorded_on?: string
+          value_high?: number | null
+          value_low?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "value_snapshots_garment_id_fkey"
+            columns: ["garment_id"]
+            isOneToOne: false
+            referencedRelation: "garments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wardrobes: {
         Row: {
@@ -951,6 +1031,10 @@ export type Database = {
       provision_account: {
         Args: { _display_name?: string; _email: string; _user_id: string }
         Returns: undefined
+      }
+      refund_ai_wallet: {
+        Args: { _charged_pence: number; _note: string; _user_id: string }
+        Returns: number
       }
     }
     Enums: {

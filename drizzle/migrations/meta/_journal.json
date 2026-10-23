@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792771000475,
+      "tag": "0000_lock_profiles_wallet_and_valuation",
+      "breakpoints": true
+    }
+  ]
+}
