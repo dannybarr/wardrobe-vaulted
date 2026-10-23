@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { WardrobeApp } from "@/components/wardrobe/App";
 import { founderPreview } from "@/lib/demo/founder";
 
@@ -22,6 +22,9 @@ function DemoPage() {
   return (
     <>
       <p className="demo-banner" data-testid="demo-banner">
+        <Link to="/" className="demo-back">
+          ← Back
+        </Link>
         A read-only look at a full wardrobe. Sign up to start your own. Nothing on this page is
         saved.
       </p>

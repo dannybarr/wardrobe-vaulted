@@ -8,7 +8,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { Check, Plus, Sparkle, Trash, X } from "@phosphor-icons/react";
+import { ArrowLeft, Check, Plus, Sparkle, Trash, X } from "@phosphor-icons/react";
 import { WardrobeImportFlow } from "./import-flow";
 import { WishlistPane } from "./wishlist";
 import { OutfitsPane } from "./outfits";
@@ -772,6 +772,9 @@ function ItemViewer({
             ref={closeButtonRef}
           >
             <X size={24} weight="light" aria-hidden="true" />
+          </button>
+          <button className="viewer-back" type="button" onClick={requestClose}>
+            <ArrowLeft size={16} weight="bold" aria-hidden="true" /> Back to wardrobe
           </button>
 
           {hasModeledImage ? (
