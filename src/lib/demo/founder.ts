@@ -6,10 +6,10 @@ import outfitsJson from "../../data/founder-seed/outfits.json" with { type: "jso
 import wishlistJson from "../../data/founder-seed/wishlist.json" with { type: "json" };
 
 /**
- * Public catalogue behind /demo. Brands are read out of the piece name so the
- * existing resale bands can price what they recognise. Unknown names stay
- * unpriced. This module does not grant founder access and does not talk to
- * Supabase.
+ * Public catalogue behind /demo. A researched figure on the seed is used as
+ * the resale value. Pieces without one still fall through to a brand read
+ * out of the name and the curated bands. This module does not grant founder
+ * access and does not talk to Supabase.
  */
 
 const BRAND_RULES: ReadonlyArray<readonly [RegExp, string]> = [
@@ -33,15 +33,33 @@ export function brandFromName(name: string): string {
 
 type LibraryRecord = (typeof libraryJson)[number];
 
+function confidenceOf(value: string): "high" | "medium" | "low" | null {
+  if (value === "high" || value === "medium" || value === "low") return value;
+  return null;
+}
+
 function pieceFrom(record: LibraryRecord): DirectPiece {
   const brand = brandFromName(record.name);
-  const quote = quoteCuratedBand({
-    brand,
-    category: record.part,
-    condition: null,
-    name: record.name,
-  });
-  const priced = quote.status === "estimated" && quote.lowGbp !== null && quote.highGbp !== null;
+  const seeded =
+    Number.isFinite(record.valueLow) && Number.isFinite(record.valueHigh)
+      ? { low: record.valueLow, high: record.valueHigh }
+      : null;
+  const quote = seeded
+    ? null
+    : quoteCuratedBand({
+        brand,
+        category: record.part,
+        condition: null,
+        name: record.name,
+      });
+  const priced =
+    seeded !== null ||
+    (quote?.status === "estimated" && quote.lowGbp !== null && quote.highGbp !== null);
+  const confidence = seeded
+    ? (confidenceOf(record.valueConfidence) ?? "low")
+    : quote && priced
+      ? quote.confidence
+      : "unknown";
   return {
     id: record.id,
     name: record.name,
@@ -54,10 +72,10 @@ function pieceFrom(record: LibraryRecord): DirectPiece {
     image: record.image,
     thumbnail: record.thumbnail,
     modeledImage: record.modeledImage,
-    valueLow: priced ? quote.lowGbp : null,
-    valueHigh: priced ? quote.highGbp : null,
-    valueSource: priced ? quote.source : null,
-    valueConfidence: priced ? quote.confidence : "unknown",
+    valueLow: seeded ? seeded.low : priced && quote ? quote.lowGbp : null,
+    valueHigh: seeded ? seeded.high : priced && quote ? quote.highGbp : null,
+    valueSource: seeded ? record.valueSource : priced && quote ? quote.source : null,
+    valueConfidence: confidence,
     valueOverridden: false,
   };
 }
