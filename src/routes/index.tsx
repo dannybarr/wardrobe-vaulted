@@ -5,17 +5,17 @@ import { setPendingOutfitPhoto } from "@/lib/trial/handoff";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Wardrobe — your clothes, finally in one place" },
+      { title: "Wardrobe — know what your wardrobe is worth" },
       {
         name: "description",
         content:
-          "Photograph an outfit and Wardrobe separates the pieces, builds your private digital wardrobe and keeps every look ready to wear.",
+          "See the live resale value of every piece you own, in GBP, with share cards for what your wardrobe is worth.",
       },
-      { property: "og:title", content: "Wardrobe — your clothes, finally in one place" },
+      { property: "og:title", content: "Wardrobe — know what your wardrobe is worth" },
       {
         property: "og:description",
         content:
-          "Photograph an outfit and Wardrobe separates the pieces, builds your private digital wardrobe and keeps every look ready to wear.",
+          "See the live resale value of every piece you own, in GBP, with share cards for what your wardrobe is worth.",
       },
     ],
   }),
@@ -26,7 +26,6 @@ function Index() {
   const navigate = useNavigate();
   return (
     <LandingPage
-      onEnter={() => navigate({ to: "/try" })}
       onPhotoChosen={(file) => {
         setPendingOutfitPhoto(file);
         navigate({ to: "/try" });

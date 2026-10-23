@@ -85,23 +85,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "Wardrobe" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Wardrobe — your clothes, finally in one place" },
-      { property: "og:title", content: "Wardrobe — your clothes, finally in one place" },
-      { name: "twitter:title", content: "Wardrobe — your clothes, finally in one place" },
+      { title: "Wardrobe — know what your wardrobe is worth" },
+      { property: "og:title", content: "Wardrobe — know what your wardrobe is worth" },
+      { name: "twitter:title", content: "Wardrobe — know what your wardrobe is worth" },
       {
         name: "description",
         content:
-          "Photograph an outfit and Wardrobe separates the pieces, builds your private digital wardrobe and keeps every look ready to wear.",
+          "See the live resale value of every piece you own, in GBP, with share cards for what your wardrobe is worth.",
       },
       {
         property: "og:description",
         content:
-          "Photograph an outfit and Wardrobe separates the pieces, builds your private digital wardrobe and keeps every look ready to wear.",
+          "See the live resale value of every piece you own, in GBP, with share cards for what your wardrobe is worth.",
       },
       {
         name: "twitter:description",
         content:
-          "Photograph an outfit and Wardrobe separates the pieces, builds your private digital wardrobe and keeps every look ready to wear.",
+          "See the live resale value of every piece you own, in GBP, with share cards for what your wardrobe is worth.",
       },
       {
         property: "og:image",

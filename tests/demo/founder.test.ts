@@ -41,6 +41,54 @@ describe("founder catalogue", () => {
     expect(founderPieces.every((piece) => piece.image?.startsWith("/demo/library/"))).toBe(true);
   });
 
+  it("keeps the four market bands and adds a seed estimate for every other piece", () => {
+    const byName = (name: string) => founderPieces.find((piece) => piece.name === name);
+    expect(byName("Brown & Cream Nike Sneakers")).toMatchObject({
+      valueLow: 10,
+      valueHigh: 130,
+      valueSource: "market_band",
+      valueConfidence: "low",
+    });
+    expect(byName("Black Nike Sneakers")).toMatchObject({
+      valueLow: 10,
+      valueHigh: 130,
+      valueSource: "market_band",
+      valueConfidence: "low",
+    });
+    expect(byName("Forest Green AP Monogram T-Shirt")).toMatchObject({
+      valueLow: 10,
+      valueHigh: 110,
+      valueSource: "market_band",
+      valueConfidence: "low",
+    });
+    expect(byName("Two-Tone Air Jordan T-Shirt")).toMatchObject({
+      valueLow: 5,
+      valueHigh: 65,
+      valueSource: "market_band",
+      valueConfidence: "low",
+    });
+    expect(founderWishlist[0]?.price).toBe("95");
+    expect(
+      founderPieces.every((piece) => piece.valueLow !== null && piece.valueHigh !== null),
+    ).toBe(true);
+
+    const summary = summariseWardrobe(
+      founderPieces.map((piece) => ({
+        ...worth(piece),
+        valueConfidence:
+          piece.valueConfidence === "high" ||
+          piece.valueConfidence === "medium" ||
+          piece.valueConfidence === "low"
+            ? piece.valueConfidence
+            : "unknown",
+      })),
+    );
+    expect(summary.pricedCount).toBe(32);
+    expect(summary.needsDetailsCount).toBe(0);
+    expect(summary.low).toBe(795);
+    expect(summary.high).toBe(1195);
+  });
+
   it("keeps personal fields out of the public files", () => {
     const blob = ["library.json", "outfits.json", "wishlist.json"]
       .map((name) => readFileSync(`src/data/founder-seed/${name}`, "utf8"))
