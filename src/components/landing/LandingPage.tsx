@@ -72,12 +72,13 @@ export function LandingPage({ onPhotoChosen }: { onPhotoChosen?: (file: File) =>
             <i /> NET WORTH FOR YOUR CLOTHES
           </p>
           <h1 id="landing-title">
-            Know what your
-            <br /> wardrobe
-            <br /> is <span>worth</span>.
+            The quiet wealth
+            <br /> inside your
+            <br /> <span>wardrobe</span>.
           </h1>
           <p className="landing-description">
-            See the live resale value of every piece you own, in GBP, with share cards.
+            Snap a photo to instantly digitise any piece. Watch your wardrobe’s live market value
+            grow, plan your rotation, and share your personal vault.
           </p>
           <div className="landing-actions">
             <Link to="/auth" search={{ mode: "signup" }} className="landing-cta">
