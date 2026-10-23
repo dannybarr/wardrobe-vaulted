@@ -26,7 +26,6 @@ function Index() {
   const navigate = useNavigate();
   return (
     <LandingPage
-      onEnter={() => navigate({ to: "/try" })}
       onPhotoChosen={(file) => {
         setPendingOutfitPhoto(file);
         navigate({ to: "/try" });

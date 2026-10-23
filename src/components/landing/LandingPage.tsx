@@ -1,4 +1,5 @@
 import { ArrowRight, CheckCircle, Sparkle, UploadSimple } from "@phosphor-icons/react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 const DEMO_PIECES = [
@@ -8,16 +9,10 @@ const DEMO_PIECES = [
 ];
 
 /**
- * The original one-screen landing experience, preserved. The only change is that
- * "Craft your vault" now starts real account onboarding via `onEnter`.
+ * Public home. Account creation, the read-only demo, and sign-in are the ways in.
+ * "Craft your vault" stays as the no-account trial. A dropped photo still opens that trial.
  */
-export function LandingPage({
-  onEnter,
-  onPhotoChosen,
-}: {
-  onEnter: () => void;
-  onPhotoChosen?: (file: File) => void;
-}) {
+export function LandingPage({ onPhotoChosen }: { onPhotoChosen?: (file: File) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<number | null>(null);
   const [preview, setPreview] = useState("");
@@ -63,7 +58,12 @@ export function LandingPage({
         <a className="landing-wordmark" href="#top" aria-label="Wardrobe home">
           WARDROBE<span>®</span>
         </a>
-        <span className="landing-nav__note">PRIVATE BETA · LONDON</span>
+        <div className="landing-nav__links">
+          <Link to="/auth" search={{ mode: "signin" }} className="landing-nav__signin">
+            Sign in
+          </Link>
+          <span className="landing-nav__note">PRIVATE BETA · LONDON</span>
+        </div>
       </header>
 
       <section className="landing-hero" id="top" aria-labelledby="landing-title">
@@ -79,9 +79,18 @@ export function LandingPage({
           <p className="landing-description">
             See the live resale value of every piece you own, in GBP, with share cards.
           </p>
-          <button className="landing-cta" type="button" onClick={onEnter}>
-            Craft your vault <ArrowRight size={18} weight="bold" aria-hidden="true" />
-          </button>
+          <div className="landing-actions">
+            <Link to="/auth" search={{ mode: "signup" }} className="landing-cta">
+              Start your vault <ArrowRight size={18} weight="bold" aria-hidden="true" />
+            </Link>
+            <Link to="/demo" className="landing-cta landing-cta--secondary">
+              See a demo wardrobe
+            </Link>
+          </div>
+          <p className="landing-trial">
+            <Link to="/try">Craft your vault</Link>
+            <span>No account. Try it with one photo.</span>
+          </p>
           <p className="landing-footnote">Built for the clothes you already own.</p>
         </div>
 

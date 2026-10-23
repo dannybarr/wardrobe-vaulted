@@ -35,6 +35,29 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+}
+.landing-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.landing-nav__signin {
+  color: inherit;
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.landing-nav__signin:hover,
+.landing-nav__signin:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  outline: none;
 }
 .landing-wordmark {
   color: inherit;
@@ -103,6 +126,12 @@
   font-size: 16px;
   line-height: 1.5;
 }
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+}
 .landing-cta {
   min-height: 51px;
   display: inline-flex;
@@ -116,6 +145,7 @@
     500 13px "DM Mono",
     monospace;
   letter-spacing: -0.02em;
+  text-decoration: none;
   cursor: pointer;
   box-shadow: 5px 5px 0 var(--vault-clay);
   transition:
@@ -130,8 +160,34 @@
   background: #4b392a;
   outline: none;
 }
+.landing-cta--secondary {
+  background: transparent;
+  color: var(--vault-ink);
+  box-shadow: none;
+}
+.landing-cta--secondary:hover,
+.landing-cta--secondary:focus-visible {
+  background: rgba(255, 252, 247, 0.7);
+  color: var(--vault-ink);
+  box-shadow: none;
+}
+.landing-trial {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 18px 0 0;
+  color: rgba(58, 44, 32, 0.68);
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.landing-trial a {
+  color: inherit;
+  font-weight: 500;
+}
 .landing-footnote {
-  margin: 24px 0 0;
+  margin: 14px 0 0;
   color: rgba(58, 44, 32, 0.6);
 }
 
@@ -431,8 +487,18 @@
     min-height: 100dvh;
     padding: 18px 16px 24px;
   }
+  .landing-nav__links {
+    gap: 10px;
+  }
   .landing-nav__note {
     font-size: 8px;
+  }
+  .landing-nav__signin {
+    font-size: 10px;
+  }
+  .landing-actions {
+    flex-direction: column;
+    align-items: flex-start;
   }
   .landing-hero {
     gap: 34px;
