@@ -1,6 +1,33 @@
 import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 
+test("home page shows net worth and links to the demo and sign-in", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveTitle(/know what your wardrobe is worth/i);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(/know what your/i);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(/wardrobe is worth/i);
+  await expect(
+    page.getByText("See the live resale value of every piece you own, in GBP, with share cards."),
+  ).toBeVisible();
+
+  await page.getByRole("link", { name: "See a demo wardrobe" }).click();
+  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page.getByTestId("demo-banner")).toContainText("read-only");
+
+  await page.goto("/");
+  await page.getByRole("link", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/auth/);
+  await expect(page.getByRole("heading", { name: "Welcome back." })).toBeVisible();
+
+  await page.goto("/signup");
+  await expect(page).toHaveURL(/\/auth\?mode=signup/);
+  await expect(page.getByRole("tab", { name: "Sign up" })).toHaveAttribute("aria-selected", "true");
+
+  await page.goto("/login");
+  await expect(page).toHaveURL(/\/auth\?mode=signin/);
+  await expect(page.getByRole("tab", { name: "Sign in" })).toHaveAttribute("aria-selected", "true");
+});
+
 test("founder wardrobe is read-only and priced", async ({ page }) => {
   await mkdir("/opt/cursor/artifacts", { recursive: true });
   const writes: string[] = [];
