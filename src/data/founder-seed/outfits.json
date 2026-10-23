@@ -16,9 +16,7 @@
       "#101a35",
       "#a8adb8"
     ],
-    "createdAt": "2026-07-20T17:44:03.847Z",
-    "modeledImage": null,
-    "generation": null
+    "modeledImage": null
   },
   {
     "id": "outfit-f771bae6-a5b5-456a-9b26-041880f7473e",
@@ -36,8 +34,6 @@
       "#b7d3e3",
       "#e5eef2"
     ],
-    "createdAt": "2026-07-20T20:23:18.928Z",
-    "modeledImage": null,
-    "generation": null
+    "modeledImage": null
   }
 ]

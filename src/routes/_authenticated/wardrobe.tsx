@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { WardrobeApp } from "@/components/wardrobe/App.jsx";
+import { WardrobeApp } from "@/components/wardrobe/App";
 import { ensureAccountReady } from "@/lib/account.functions";
 import { getVaultAccess } from "@/utils/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
@@ -36,7 +36,6 @@ function WardrobeRoute() {
     staleTime: Infinity,
     retry: 1,
   });
-
 
   const { data: access } = useQuery({
     queryKey: ["vault-access"],

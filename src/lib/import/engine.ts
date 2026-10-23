@@ -20,7 +20,6 @@ import {
   rasterToBlob,
 } from "@/lib/image/pixels";
 
-
 export type StageStatus = "processing" | "review" | "approved" | "rejected" | "failed";
 
 export type ImportStage = {
@@ -39,6 +38,8 @@ export type ImportMetadata = {
   color: string;
   secondaryColor: string | null;
   tags: string[];
+  brand?: string | null;
+  condition?: "new_with_tags" | "like_new" | "good" | "fair" | null;
 };
 
 export type ImportJob = {
@@ -53,7 +54,12 @@ export type ImportJob = {
 };
 
 /** Image data lives outside React state; only display URLs go into the jobs. */
-type JobAssets = { source: Blob; crop: Blob; generated?: Blob | undefined; cutout?: Blob | undefined };
+type JobAssets = {
+  source: Blob;
+  crop: Blob;
+  generated?: Blob | undefined;
+  cutout?: Blob | undefined;
+};
 const assets = new Map<string, JobAssets>();
 
 const objectUrls = new Set<string>();
@@ -117,6 +123,8 @@ type AnalyzeResponse = {
     color: string;
     secondaryColor: string | null;
     tags: string[];
+    brand?: string | null;
+    condition?: ImportMetadata["condition"];
     boundingBox: { x: number; y: number; width: number; height: number };
   }>;
   noClothingDetected: boolean;
@@ -156,7 +164,6 @@ export async function startImport(
     byteSize: forReading.size,
   });
 
-
   if (!result.items.length) return { jobs: [], noClothingDetected: true };
 
   const fallbackName = extra.name || file.name.replace(/\.[^.]+$/, "");
@@ -177,6 +184,8 @@ export async function startImport(
         color: detected.color,
         secondaryColor: detected.secondaryColor,
         tags: detected.tags,
+        brand: detected.brand ?? null,
+        condition: detected.condition ?? null,
       },
       originalAssetUrl: trackUrl(normalized),
       chromaKey: chooseChromaKey(detected.color),
@@ -246,7 +255,11 @@ export async function generateGarment(
     stages: {
       ...job.stages,
       crop: { status: "approved", assetUrl: job.stages.crop.assetUrl },
-      garment: { status: "review", assetUrl: trackUrl(cutout), cleanupTolerance: cleaned.tolerance },
+      garment: {
+        status: "review",
+        assetUrl: trackUrl(cutout),
+        cleanupTolerance: cleaned.tolerance,
+      },
     },
   };
 }
@@ -327,6 +340,8 @@ export async function savePiece(
     secondaryColor: metadata.secondaryColor || null,
     tags: metadata.tags,
     value: metadata.value,
+    brand: metadata.brand ?? null,
+    condition: metadata.condition ?? null,
     cutout: await blobToBase64(cutout),
     importJobId: job.id,
   });

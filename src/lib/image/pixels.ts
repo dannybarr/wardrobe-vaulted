@@ -31,7 +31,10 @@ function canvasOf(width: number, height: number) {
 
 /** Decode honouring EXIF orientation, the equivalent of sharp's `.rotate()`. */
 async function decode(blob: Blob): Promise<ImageBitmap> {
-  return createImageBitmap(blob, { imageOrientation: "from-image", colorSpaceConversion: "default" });
+  return createImageBitmap(blob, {
+    imageOrientation: "from-image",
+    colorSpaceConversion: "default",
+  });
 }
 
 /**
@@ -47,7 +50,10 @@ function fit(width: number, height: number, maxEdge: number) {
   const longest = Math.max(width, height);
   if (!maxEdge || longest <= maxEdge) return { width, height };
   const scale = maxEdge / longest;
-  return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) };
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+  };
 }
 
 export async function readRaster(blob: Blob, maxEdge = 0): Promise<Raster> {
@@ -67,7 +73,10 @@ export function rasterToBlob(raster: Raster): Promise<Blob> {
   const { canvas, context } = canvasOf(raster.width, raster.height);
   context.putImageData(new ImageData(raster.data, raster.width, raster.height), 0, 0);
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Could not encode image"))), "image/png");
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Could not encode image"))),
+      "image/png",
+    );
   });
 }
 
@@ -119,7 +128,6 @@ export async function fileToUploadDataUrl(
   });
 }
 
-
 function normalizeBoundingBox(box: Partial<BoundingBox> = {}): BoundingBox {
   const number = (value: unknown, fallback: number) =>
     Number.isFinite(Number(value)) ? Math.round(Number(value)) : fallback;
@@ -134,7 +142,10 @@ function normalizeBoundingBox(box: Partial<BoundingBox> = {}): BoundingBox {
 }
 
 /** Crop to a detected piece, with the original's 8% padding (minimum 12px). */
-export async function cropDetectedItem(file: Blob, boundingBox: Partial<BoundingBox>): Promise<Blob> {
+export async function cropDetectedItem(
+  file: Blob,
+  boundingBox: Partial<BoundingBox>,
+): Promise<Blob> {
   const bitmap = await decode(file);
   try {
     const box = normalizeBoundingBox(boundingBox);
@@ -153,7 +164,10 @@ export async function cropDetectedItem(file: Blob, boundingBox: Partial<Bounding
     const { canvas, context } = canvasOf(width, height);
     context.drawImage(bitmap, left, top, width, height, 0, 0, width, height);
     return await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Could not crop image"))), "image/png");
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("Could not crop image"))),
+        "image/png",
+      );
     });
   } finally {
     bitmap.close();
@@ -187,8 +201,12 @@ function keyChannels(key: string) {
   const target = [1, 3, 5].map((offset) => Number.parseInt(key.slice(offset, offset + 2), 16));
   return {
     target,
-    keyed: target.map((channel, index) => (channel > 200 ? index : -1)).filter((index) => index >= 0),
-    neutral: target.map((channel, index) => (channel < 55 ? index : -1)).filter((index) => index >= 0),
+    keyed: target
+      .map((channel, index) => (channel > 200 ? index : -1))
+      .filter((index) => index >= 0),
+    neutral: target
+      .map((channel, index) => (channel < 55 ? index : -1))
+      .filter((index) => index >= 0),
   };
 }
 
@@ -205,7 +223,8 @@ function removeKeyedSpill(
   neutralLevel: number,
 ): void {
   let remaining = Math.ceil(
-    keyed.reduce((total, channel) => total + data[index + channel]!, 0) - neutralLevel * keyed.length,
+    keyed.reduce((total, channel) => total + data[index + channel]!, 0) -
+      neutralLevel * keyed.length,
   );
   let active = keyed.filter((channel) => data[index + channel]! > 0);
   while (remaining > 0 && active.length) {
@@ -231,7 +250,11 @@ function stripSpill(raster: Raster, keyed: number[], neutral: number[]): void {
 }
 
 /** Trim to the visible piece, then centre it on a square transparent canvas. */
-export function frameTransparentGarment(raster: Raster, canvasSize = 1024, occupancy = 0.88): Raster {
+export function frameTransparentGarment(
+  raster: Raster,
+  canvasSize = 1024,
+  occupancy = 0.88,
+): Raster {
   const { data, width, height } = raster;
   let minX = width;
   let minY = height;
@@ -246,7 +269,8 @@ export function frameTransparentGarment(raster: Raster, canvasSize = 1024, occup
     if (x > maxX) maxX = x;
     if (y > maxY) maxY = y;
   }
-  if (maxX < minX || maxY < minY) throw new Error("Background removal did not leave a visible garment");
+  if (maxX < minX || maxY < minY)
+    throw new Error("Background removal did not leave a visible garment");
 
   const trimWidth = maxX - minX + 1;
   const trimHeight = maxY - minY + 1;
@@ -278,7 +302,11 @@ export function frameTransparentGarment(raster: Raster, canvasSize = 1024, occup
 
 export type ChromaDiagnostics = { contaminatedPixels: number; maxSpill: number };
 
-function verifyNoChromaSpill(raster: Raster, keyed: number[], neutral: number[]): ChromaDiagnostics {
+function verifyNoChromaSpill(
+  raster: Raster,
+  keyed: number[],
+  neutral: number[],
+): ChromaDiagnostics {
   const { data } = raster;
   let contaminatedPixels = 0;
   let maxSpill = 0;

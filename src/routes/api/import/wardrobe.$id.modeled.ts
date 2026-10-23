@@ -41,7 +41,8 @@ export const Route = createFileRoute("/api/import/wardrobe/$id/modeled")({
           if (!reference) {
             return json(
               {
-                error: "Add a photo of yourself in your account settings to create on-model images.",
+                error:
+                  "Add a photo of yourself in your account settings to create on-model images.",
                 code: "model_reference_required",
               },
               409,
@@ -58,7 +59,9 @@ export const Route = createFileRoute("/api/import/wardrobe/$id/modeled")({
 
           const body = (await request.json().catch(() => ({}))) as { direction?: string };
           const direction = safeDirection(body.direction);
-          const prompt = direction ? `${MODELED_PROMPT}\nUser regeneration direction: ${direction}` : MODELED_PROMPT;
+          const prompt = direction
+            ? `${MODELED_PROMPT}\nUser regeneration direction: ${direction}`
+            : MODELED_PROMPT;
 
           try {
             const imageBase64 = await editImage(run, {
@@ -69,7 +72,12 @@ export const Route = createFileRoute("/api/import/wardrobe/$id/modeled")({
               ],
               size: "1536x1024",
             });
-            const modeledImage = await attachModeledImage(supabase, user.id, garment.id, imageBase64);
+            const modeledImage = await attachModeledImage(
+              supabase,
+              user.id,
+              garment.id,
+              imageBase64,
+            );
             return json({
               modeledImage,
               mode: charge.mode,

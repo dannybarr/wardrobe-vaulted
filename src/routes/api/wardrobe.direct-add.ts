@@ -4,15 +4,20 @@ import { json, withUser } from "@/lib/api/request-context";
 import { requireVaultCapacity } from "@/lib/api/vault-gate";
 import { persistPiece } from "@/lib/api/pieces.server";
 import { environmentFromRequest } from "@/lib/api/import-support";
+import { CONDITIONS, GARMENT_PARTS } from "@/lib/worth/types";
 
 const DirectAddSchema = z.object({
   imageDataUrl: z.string().min(32),
   metadata: z
     .object({
       name: z.string().trim().max(160).optional().default(""),
-      part: z.enum(["upperbody", "wholebody_up", "lowerbody", "accessories_up", "shoes"]),
+      part: z.enum(GARMENT_PARTS),
       value: z.union([z.string(), z.number()]).optional(),
       tags: z.array(z.string().trim().max(40)).max(24).optional().default([]),
+      brand: z.string().trim().max(80).optional().default(""),
+      condition: z.enum(CONDITIONS).nullable().optional(),
+      size: z.string().trim().max(40).optional().default(""),
+      purchasePrice: z.union([z.string(), z.number()]).optional(),
     })
     .default({ part: "upperbody" }),
 });
@@ -50,6 +55,10 @@ export const Route = createFileRoute("/api/wardrobe/direct-add")({
             secondaryColor: null,
             tags: metadata.tags ?? [],
             value: parseValue(metadata.value),
+            brand: metadata.brand || null,
+            condition: metadata.condition ?? null,
+            size: metadata.size || null,
+            purchasePrice: parseValue(metadata.purchasePrice),
             cutout: imageDataUrl,
             modeled: null,
             importJobId: null,

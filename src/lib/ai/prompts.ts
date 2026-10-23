@@ -7,12 +7,16 @@
  * settled unless a member's own regeneration direction is appended.
  */
 
+import { CONDITIONS, GARMENT_PARTS, type Condition } from "@/lib/worth/types";
+
 export type PieceMetadata = {
   name?: string;
   part?: string;
   color?: string | null;
   secondaryColor?: string | null;
   tags?: string[];
+  brand?: string | null;
+  condition?: Condition | null;
 };
 
 export function buildGarmentPrompt(metadata: PieceMetadata = {}, chromaKey = "#00ff00"): string {
@@ -50,7 +54,7 @@ export const MODELED_PROMPT =
   "Create a professional horizontal 3:2 editorial fashion photograph of the person in Image 1 wearing the exact garment from Image 2. Preserve the person's recognizable identity, face, hair, age and proportions. Preserve every garment color, material, fit, construction, graphic, logo and distinctive detail. Keep the complete featured item clearly visible and unobstructed, use understated neutral supporting clothes, realistic anatomy, natural light, authentic fabric, a tasteful real-world setting, and leave environmental space around the model. No text, watermark, product mockup, or synthetic appearance.";
 
 export const ANALYZE_INSTRUCTION =
-  "Identify every distinct wearable clothing item visible in this image. Each physical item must appear exactly once in the result: never repeat the same garment under different names, and never return several boxes for different parts, halves or details of one garment. A photo may show one isolated garment or a person wearing several items. Return one record per actual item that should enter a wardrobe. Ignore the person's body and non-wearable background objects. For each item, include a tight bounding box around only that item using integer coordinates normalized to a 1000 by 1000 image: x and y are the top-left corner, followed by width and height. Boxes may overlap when garments overlap, but each box must focus on one distinct item. Use only these category ids: upperbody, wholebody_up, lowerbody, accessories_up, shoes. Suggest a concise specific name, primary hex color, optional genuinely distinct secondary hex color, and 1-4 useful lowercase detail tags.";
+  "Identify every distinct wearable item visible in this image: clothes, shoes, bags, watches and jewellery. Each physical item must appear exactly once in the result: never repeat the same item under different names, and never return several boxes for different parts, halves or details of one item. A photo may show one isolated item or a person wearing several. Return one record per actual item that should enter a wardrobe. Ignore the person's body and non-wearable background objects. For each item, include a tight bounding box around only that item using integer coordinates normalized to a 1000 by 1000 image: x and y are the top-left corner, followed by width and height. Boxes may overlap when items overlap, but each box must focus on one distinct item. Use only these category ids: upperbody, wholebody_up, lowerbody, accessories_up, shoes, bags, watches, jewellery. Suggest a concise specific name, the brand only when a logo or label makes it legible (otherwise null — never guess a brand), a condition of new_with_tags, like_new, good or fair only when the photo supports it (otherwise null), primary hex color, optional genuinely distinct secondary hex color, and 1-4 useful lowercase detail tags.";
 
 export const ANALYZE_SCHEMA = {
   type: "object",
@@ -67,7 +71,11 @@ export const ANALYZE_SCHEMA = {
           name: { type: "string" },
           part: {
             type: "string",
-            enum: ["upperbody", "wholebody_up", "lowerbody", "accessories_up", "shoes"],
+            enum: [...GARMENT_PARTS],
+          },
+          brand: { anyOf: [{ type: "string" }, { type: "null" }] },
+          condition: {
+            anyOf: [{ type: "string", enum: [...CONDITIONS] }, { type: "null" }],
           },
           color: { type: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
           secondaryColor: {
@@ -86,20 +94,32 @@ export const ANALYZE_SCHEMA = {
             required: ["x", "y", "width", "height"],
           },
         },
-        required: ["name", "part", "color", "secondaryColor", "tags", "boundingBox"],
+        required: [
+          "name",
+          "part",
+          "brand",
+          "condition",
+          "color",
+          "secondaryColor",
+          "tags",
+          "boundingBox",
+        ],
       },
     },
   },
   required: ["items"],
 } as const;
 
-const PARTS = new Set(["upperbody", "wholebody_up", "lowerbody", "accessories_up", "shoes"]);
+const PARTS = new Set<string>(GARMENT_PARTS);
+const CONDITION_SET = new Set<string>(CONDITIONS);
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
 export type DetectedPiece = Required<Pick<PieceMetadata, "name" | "part">> & {
   color: string;
   secondaryColor: string | null;
   tags: string[];
+  brand: string | null;
+  condition: Condition | null;
   boundingBox: { x: number; y: number; width: number; height: number };
 };
 
@@ -117,13 +137,24 @@ export function normalizeDetected(value: unknown): DetectedPiece {
   const rawName = item["name"];
   const rawPart = item["part"];
   const rawTags = item["tags"];
+  const rawBrand = item["brand"];
+  const rawCondition = item["condition"];
 
   return {
-    name: typeof rawName === "string" && rawName.trim() ? rawName.trim().slice(0, 120) : "New piece",
+    name:
+      typeof rawName === "string" && rawName.trim() ? rawName.trim().slice(0, 120) : "New piece",
     part: typeof rawPart === "string" && PARTS.has(rawPart) ? rawPart : "upperbody",
-    color: typeof rawColor === "string" && HEX_COLOR.test(rawColor) ? rawColor.toLowerCase() : "#d8d0c2",
+    brand: typeof rawBrand === "string" && rawBrand.trim() ? rawBrand.trim().slice(0, 80) : null,
+    condition:
+      typeof rawCondition === "string" && CONDITION_SET.has(rawCondition)
+        ? (rawCondition as Condition)
+        : null,
+    color:
+      typeof rawColor === "string" && HEX_COLOR.test(rawColor) ? rawColor.toLowerCase() : "#d8d0c2",
     secondaryColor:
-      typeof rawSecondary === "string" && HEX_COLOR.test(rawSecondary) ? rawSecondary.toLowerCase() : null,
+      typeof rawSecondary === "string" && HEX_COLOR.test(rawSecondary)
+        ? rawSecondary.toLowerCase()
+        : null,
     tags: Array.isArray(rawTags)
       ? rawTags
           .filter((tag): tag is string => typeof tag === "string")
@@ -138,7 +169,6 @@ export function normalizeDetected(value: unknown): DetectedPiece {
       height: Math.max(1, Math.min(1000 - y, number("height", 1000 - y))),
     },
   };
-
 }
 
 /** Normalised name used to spot the same garment returned twice. */
@@ -196,7 +226,5 @@ export function dedupeDetected(items: DetectedPiece[]): DetectedPiece[] {
     kept.push(item);
   }
 
-  return kept.sort(
-    (a, b) => items.indexOf(a) - items.indexOf(b),
-  );
+  return kept.sort((a, b) => items.indexOf(a) - items.indexOf(b));
 }

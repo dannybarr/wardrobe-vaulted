@@ -65,8 +65,8 @@ export function FirstOutfitPrompt() {
         </header>
 
         <p className="addpiece-note onboard-note">
-          Upload one photo — a full outfit or a single item. Wardrobe reads the photo, pulls out each
-          piece and files it for you.
+          Upload one photo — a full outfit or a single item. Wardrobe reads the photo, pulls out
+          each piece and files it for you.
         </p>
 
         <button

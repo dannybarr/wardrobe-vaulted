@@ -7,7 +7,7 @@
  * trial wardrobe, and forwards only the two steps that genuinely need a server —
  * the AI photo read and the AI garment image — to capped public endpoints.
  */
-import { trialDeviceId } from "@/lib/trial/mode";
+import { trialTurnstileToken } from "@/lib/trial/turnstile-client";
 import {
   countTrialPieces,
   deleteTrialPiece,
@@ -37,8 +37,9 @@ function signupRequired() {
 
 async function forward(path: string, init: RequestInit) {
   const headers = new Headers(init.headers);
-  headers.set("x-wardrobe-device", trialDeviceId());
-  return fetch(path, { ...init, headers, cache: "no-store" });
+  const token = trialTurnstileToken();
+  if (token) headers.set("x-turnstile-token", token);
+  return fetch(path, { ...init, headers, cache: "no-store", credentials: "include" });
 }
 
 function asString(value: unknown, fallback = ""): string {
@@ -137,7 +138,9 @@ export async function handleTrialRequest(
         color: typeof body["color"] === "string" ? (body["color"] as string) : null,
         secondaryColor:
           typeof body["secondaryColor"] === "string" ? (body["secondaryColor"] as string) : null,
-        tags: Array.isArray(body["tags"]) ? (body["tags"] as string[]).map(String).slice(0, 24) : [],
+        tags: Array.isArray(body["tags"])
+          ? (body["tags"] as string[]).map(String).slice(0, 24)
+          : [],
         value: typeof body["value"] === "number" ? (body["value"] as number) : null,
       });
       if (!updated) return json({ error: "That piece is no longer here." }, 404);

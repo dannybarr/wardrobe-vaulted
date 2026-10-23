@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LandingPage } from "@/components/landing/LandingPage";
 import { setPendingOutfitPhoto } from "@/lib/trial/handoff";
 
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -35,4 +34,3 @@ function Index() {
     />
   );
 }
-

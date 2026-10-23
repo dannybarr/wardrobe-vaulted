@@ -34,7 +34,8 @@ export const Route = createFileRoute("/api/outfits/$id/modeled")({
           if (!reference) {
             return json(
               {
-                error: "Add a photo of yourself in your account settings to create on-model images.",
+                error:
+                  "Add a photo of yourself in your account settings to create on-model images.",
                 code: "model_reference_required",
               },
               409,

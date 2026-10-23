@@ -15,10 +15,9 @@
       "long sleeve",
       "grey"
     ],
-    "image": "/api/import/library/import-95542a86-9fc6-4d53-b71d-6358027d8317-garment.png",
-    "thumbnail": "/api/import/library/import-95542a86-9fc6-4d53-b71d-6358027d8317-garment.png",
-    "modeledImage": "/api/import/library/import-95542a86-9fc6-4d53-b71d-6358027d8317-modeled.png",
-    "importJobId": "95542a86-9fc6-4d53-b71d-6358027d8317"
+    "image": "/demo/library/import-95542a86-9fc6-4d53-b71d-6358027d8317.svg",
+    "thumbnail": "/demo/library/import-95542a86-9fc6-4d53-b71d-6358027d8317.svg",
+    "modeledImage": "/demo/library/import-95542a86-9fc6-4d53-b71d-6358027d8317-modeled.svg"
   },
   {
     "id": "import-d50b0c02-c356-4327-9e96-055bcf5b254f",
@@ -37,10 +36,9 @@
       "short sleeve",
       "black"
     ],
-    "image": "/api/import/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f-garment.png",
-    "thumbnail": "/api/import/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f-garment.png",
-    "modeledImage": "/api/import/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f-modeled.png",
-    "importJobId": "d50b0c02-c356-4327-9e96-055bcf5b254f"
+    "image": "/demo/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f.svg",
+    "thumbnail": "/demo/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f.svg",
+    "modeledImage": "/demo/library/import-d50b0c02-c356-4327-9e96-055bcf5b254f-modeled.svg"
   },
   {
     "id": "import-0846af59-5ad3-45c7-af36-bbc1ec095dcb",
@@ -60,10 +58,9 @@
       "long sleeve",
       "blue"
     ],
-    "image": "/api/import/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb-garment.png",
-    "thumbnail": "/api/import/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb-garment.png",
-    "modeledImage": "/api/import/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb-modeled.png",
-    "importJobId": "0846af59-5ad3-45c7-af36-bbc1ec095dcb"
+    "image": "/demo/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb.svg",
+    "thumbnail": "/demo/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb.svg",
+    "modeledImage": "/demo/library/import-0846af59-5ad3-45c7-af36-bbc1ec095dcb-modeled.svg"
   },
   {
     "id": "import-1a2e565b-0cca-47df-886f-73bd4527b276",
@@ -83,10 +80,9 @@
       "short sleeve",
       "blue"
     ],
-    "image": "/api/import/library/import-1a2e565b-0cca-47df-886f-73bd4527b276-garment.png",
-    "thumbnail": "/api/import/library/import-1a2e565b-0cca-47df-886f-73bd4527b276-garment.png",
-    "modeledImage": "/api/import/library/import-1a2e565b-0cca-47df-886f-73bd4527b276-modeled.png",
-    "importJobId": "1a2e565b-0cca-47df-886f-73bd4527b276"
+    "image": "/demo/library/import-1a2e565b-0cca-47df-886f-73bd4527b276.svg",
+    "thumbnail": "/demo/library/import-1a2e565b-0cca-47df-886f-73bd4527b276.svg",
+    "modeledImage": "/demo/library/import-1a2e565b-0cca-47df-886f-73bd4527b276-modeled.svg"
   },
   {
     "id": "import-cbafc865-d89d-49b2-9230-00eecb1f3fba",
@@ -106,10 +102,9 @@
       "brown",
       "red laces"
     ],
-    "image": "/api/import/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba-garment.png",
-    "thumbnail": "/api/import/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba-garment.png",
-    "modeledImage": "/api/import/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba-modeled.png",
-    "importJobId": "cbafc865-d89d-49b2-9230-00eecb1f3fba"
+    "image": "/demo/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba.svg",
+    "thumbnail": "/demo/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba.svg",
+    "modeledImage": "/demo/library/import-cbafc865-d89d-49b2-9230-00eecb1f3fba-modeled.svg"
   },
   {
     "id": "import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf",
@@ -129,10 +124,9 @@
       "suede",
       "brown laces"
     ],
-    "image": "/api/import/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf-garment.png",
-    "thumbnail": "/api/import/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf-garment.png",
-    "modeledImage": "/api/import/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf-modeled.png",
-    "importJobId": "d35c2d8f-e38b-4957-9bbe-cab0da0068bf"
+    "image": "/demo/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf.svg",
+    "thumbnail": "/demo/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf.svg",
+    "modeledImage": "/demo/library/import-d35c2d8f-e38b-4957-9bbe-cab0da0068bf-modeled.svg"
   },
   {
     "id": "import-2a517855-af58-4d4f-9753-6fa6ae0dd2a6",
@@ -150,10 +144,9 @@
       "long sleeve",
       "collar"
     ],
-    "image": "/api/import/library/import-2a517855-af58-4d4f-9753-6fa6ae0dd2a6-garment.png",
-    "thumbnail": "/api/import/library/import-2a517855-af58-4d4f-9753-6fa6ae0dd2a6-garment.png",
-    "modeledImage": null,
-    "importJobId": "2a517855-af58-4d4f-9753-6fa6ae0dd2a6"
+    "image": "/demo/library/import-2a517855-af58-4d4f-9753-6fa6ae0dd2a6.svg",
+    "thumbnail": "/demo/library/import-2a517855-af58-4d4f-9753-6fa6ae0dd2a6.svg",
+    "modeledImage": null
   },
   {
     "id": "import-09ddf49a-4d66-4c4b-8120-5bed453b3d5e",
@@ -173,10 +166,9 @@
       "long sleeve",
       "collar"
     ],
-    "image": "/api/import/library/import-09ddf49a-4d66-4c4b-8120-5bed453b3d5e-garment.png",
-    "thumbnail": "/api/import/library/import-09ddf49a-4d66-4c4b-8120-5bed453b3d5e-garment.png",
-    "modeledImage": null,
-    "importJobId": "09ddf49a-4d66-4c4b-8120-5bed453b3d5e"
+    "image": "/demo/library/import-09ddf49a-4d66-4c4b-8120-5bed453b3d5e.svg",
+    "thumbnail": "/demo/library/import-09ddf49a-4d66-4c4b-8120-5bed453b3d5e.svg",
+    "modeledImage": null
   },
   {
     "id": "import-d151d2ea-b687-4ff3-9588-4192385090ba",
@@ -194,10 +186,9 @@
       "sleeveless",
       "panelled"
     ],
-    "image": "/api/import/library/import-d151d2ea-b687-4ff3-9588-4192385090ba-garment.png",
-    "thumbnail": "/api/import/library/import-d151d2ea-b687-4ff3-9588-4192385090ba-garment.png",
-    "modeledImage": null,
-    "importJobId": "d151d2ea-b687-4ff3-9588-4192385090ba"
+    "image": "/demo/library/import-d151d2ea-b687-4ff3-9588-4192385090ba.svg",
+    "thumbnail": "/demo/library/import-d151d2ea-b687-4ff3-9588-4192385090ba.svg",
+    "modeledImage": null
   },
   {
     "id": "import-96040c8b-44d9-46f3-8c8e-b0d6fceef7c3",
@@ -218,10 +209,9 @@
       "crewneck",
       "button shoulder"
     ],
-    "image": "/api/import/library/import-96040c8b-44d9-46f3-8c8e-b0d6fceef7c3-garment.png",
-    "thumbnail": "/api/import/library/import-96040c8b-44d9-46f3-8c8e-b0d6fceef7c3-garment.png",
-    "modeledImage": null,
-    "importJobId": "96040c8b-44d9-46f3-8c8e-b0d6fceef7c3"
+    "image": "/demo/library/import-96040c8b-44d9-46f3-8c8e-b0d6fceef7c3.svg",
+    "thumbnail": "/demo/library/import-96040c8b-44d9-46f3-8c8e-b0d6fceef7c3.svg",
+    "modeledImage": null
   },
   {
     "id": "import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932",
@@ -242,10 +232,9 @@
       "stand collar",
       "pockets"
     ],
-    "image": "/api/import/library/import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932-garment.png",
-    "thumbnail": "/api/import/library/import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932-garment.png",
-    "modeledImage": null,
-    "importJobId": "f05bbb20-d276-4ca6-b8d1-b3bffca0c932"
+    "image": "/demo/library/import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932.svg",
+    "thumbnail": "/demo/library/import-f05bbb20-d276-4ca6-b8d1-b3bffca0c932.svg",
+    "modeledImage": null
   },
   {
     "id": "import-82157e04-a2d7-4064-9f44-7479fd632b5c",
@@ -266,10 +255,9 @@
       "zip",
       "striped"
     ],
-    "image": "/api/import/library/import-82157e04-a2d7-4064-9f44-7479fd632b5c-garment.png",
-    "thumbnail": "/api/import/library/import-82157e04-a2d7-4064-9f44-7479fd632b5c-garment.png",
-    "modeledImage": null,
-    "importJobId": "82157e04-a2d7-4064-9f44-7479fd632b5c"
+    "image": "/demo/library/import-82157e04-a2d7-4064-9f44-7479fd632b5c.svg",
+    "thumbnail": "/demo/library/import-82157e04-a2d7-4064-9f44-7479fd632b5c.svg",
+    "modeledImage": null
   },
   {
     "id": "import-aacba142-35c4-4864-84d6-e23f5ceb4009",
@@ -289,10 +277,9 @@
       "cocktail motif",
       "straight leg"
     ],
-    "image": "/api/import/library/import-aacba142-35c4-4864-84d6-e23f5ceb4009-garment.png",
-    "thumbnail": "/api/import/library/import-aacba142-35c4-4864-84d6-e23f5ceb4009-garment.png",
-    "modeledImage": null,
-    "importJobId": "aacba142-35c4-4864-84d6-e23f5ceb4009"
+    "image": "/demo/library/import-aacba142-35c4-4864-84d6-e23f5ceb4009.svg",
+    "thumbnail": "/demo/library/import-aacba142-35c4-4864-84d6-e23f5ceb4009.svg",
+    "modeledImage": null
   },
   {
     "id": "import-12112246-ee62-4f4c-ac22-f5e6a19de51d",
@@ -312,10 +299,9 @@
       "straight leg",
       "five pocket"
     ],
-    "image": "/api/import/library/import-12112246-ee62-4f4c-ac22-f5e6a19de51d-garment.png",
-    "thumbnail": "/api/import/library/import-12112246-ee62-4f4c-ac22-f5e6a19de51d-garment.png",
-    "modeledImage": null,
-    "importJobId": "12112246-ee62-4f4c-ac22-f5e6a19de51d"
+    "image": "/demo/library/import-12112246-ee62-4f4c-ac22-f5e6a19de51d.svg",
+    "thumbnail": "/demo/library/import-12112246-ee62-4f4c-ac22-f5e6a19de51d.svg",
+    "modeledImage": null
   },
   {
     "id": "import-62fa7f1f-6a9e-457f-bc6f-96b528579fc8",
@@ -335,10 +321,9 @@
       "straight-leg",
       "five-pocket"
     ],
-    "image": "/api/import/library/import-62fa7f1f-6a9e-457f-bc6f-96b528579fc8-garment.png",
-    "thumbnail": "/api/import/library/import-62fa7f1f-6a9e-457f-bc6f-96b528579fc8-garment.png",
-    "modeledImage": null,
-    "importJobId": "62fa7f1f-6a9e-457f-bc6f-96b528579fc8"
+    "image": "/demo/library/import-62fa7f1f-6a9e-457f-bc6f-96b528579fc8.svg",
+    "thumbnail": "/demo/library/import-62fa7f1f-6a9e-457f-bc6f-96b528579fc8.svg",
+    "modeledImage": null
   },
   {
     "id": "import-4de4243b-d528-40f8-9745-1da3547e49a9",
@@ -357,10 +342,9 @@
       "straight-leg",
       "five-pocket"
     ],
-    "image": "/api/import/library/import-4de4243b-d528-40f8-9745-1da3547e49a9-garment.png",
-    "thumbnail": "/api/import/library/import-4de4243b-d528-40f8-9745-1da3547e49a9-garment.png",
-    "modeledImage": null,
-    "importJobId": "4de4243b-d528-40f8-9745-1da3547e49a9"
+    "image": "/demo/library/import-4de4243b-d528-40f8-9745-1da3547e49a9.svg",
+    "thumbnail": "/demo/library/import-4de4243b-d528-40f8-9745-1da3547e49a9.svg",
+    "modeledImage": null
   },
   {
     "id": "import-4a068179-ca23-4444-922d-84b236eb764b",
@@ -379,10 +363,9 @@
       "straight-leg",
       "five-pocket"
     ],
-    "image": "/api/import/library/import-4a068179-ca23-4444-922d-84b236eb764b-garment.png",
-    "thumbnail": "/api/import/library/import-4a068179-ca23-4444-922d-84b236eb764b-garment.png",
-    "modeledImage": null,
-    "importJobId": "4a068179-ca23-4444-922d-84b236eb764b"
+    "image": "/demo/library/import-4a068179-ca23-4444-922d-84b236eb764b.svg",
+    "thumbnail": "/demo/library/import-4a068179-ca23-4444-922d-84b236eb764b.svg",
+    "modeledImage": null
   },
   {
     "id": "import-fc17e362-e053-4c9e-ac08-49abf8817421",
@@ -401,10 +384,9 @@
       "long-sleeve",
       "plain"
     ],
-    "image": "/api/import/library/import-fc17e362-e053-4c9e-ac08-49abf8817421-garment.png",
-    "thumbnail": "/api/import/library/import-fc17e362-e053-4c9e-ac08-49abf8817421-garment.png",
-    "modeledImage": null,
-    "importJobId": "fc17e362-e053-4c9e-ac08-49abf8817421"
+    "image": "/demo/library/import-fc17e362-e053-4c9e-ac08-49abf8817421.svg",
+    "thumbnail": "/demo/library/import-fc17e362-e053-4c9e-ac08-49abf8817421.svg",
+    "modeledImage": null
   },
   {
     "id": "import-d3dc01b5-1c01-4e7b-9057-535e706279bc",
@@ -423,10 +405,9 @@
       "long-sleeve",
       "heathered"
     ],
-    "image": "/api/import/library/import-d3dc01b5-1c01-4e7b-9057-535e706279bc-garment.png",
-    "thumbnail": "/api/import/library/import-d3dc01b5-1c01-4e7b-9057-535e706279bc-garment.png",
-    "modeledImage": null,
-    "importJobId": "d3dc01b5-1c01-4e7b-9057-535e706279bc"
+    "image": "/demo/library/import-d3dc01b5-1c01-4e7b-9057-535e706279bc.svg",
+    "thumbnail": "/demo/library/import-d3dc01b5-1c01-4e7b-9057-535e706279bc.svg",
+    "modeledImage": null
   },
   {
     "id": "import-200953a9-828b-4ce7-8086-42fdcad5143a",
@@ -446,10 +427,9 @@
       "central-cee",
       "baby-milo"
     ],
-    "image": "/api/import/library/import-200953a9-828b-4ce7-8086-42fdcad5143a-garment.png",
-    "thumbnail": "/api/import/library/import-200953a9-828b-4ce7-8086-42fdcad5143a-garment.png",
-    "modeledImage": null,
-    "importJobId": "200953a9-828b-4ce7-8086-42fdcad5143a"
+    "image": "/demo/library/import-200953a9-828b-4ce7-8086-42fdcad5143a.svg",
+    "thumbnail": "/demo/library/import-200953a9-828b-4ce7-8086-42fdcad5143a.svg",
+    "modeledImage": null
   },
   {
     "id": "import-a0fa5832-8c41-470b-87ba-1416779f878a",
@@ -470,10 +450,9 @@
       "long-sleeve",
       "pockets"
     ],
-    "image": "/api/import/library/import-a0fa5832-8c41-470b-87ba-1416779f878a-garment.png",
-    "thumbnail": "/api/import/library/import-a0fa5832-8c41-470b-87ba-1416779f878a-garment.png",
-    "modeledImage": null,
-    "importJobId": "a0fa5832-8c41-470b-87ba-1416779f878a"
+    "image": "/demo/library/import-a0fa5832-8c41-470b-87ba-1416779f878a.svg",
+    "thumbnail": "/demo/library/import-a0fa5832-8c41-470b-87ba-1416779f878a.svg",
+    "modeledImage": null
   },
   {
     "id": "import-80b1c477-2c01-4f81-882f-00f01d263f3d",
@@ -493,10 +472,9 @@
       "loewe",
       "logo"
     ],
-    "image": "/api/import/library/import-80b1c477-2c01-4f81-882f-00f01d263f3d-garment.png",
-    "thumbnail": "/api/import/library/import-80b1c477-2c01-4f81-882f-00f01d263f3d-garment.png",
-    "modeledImage": null,
-    "importJobId": "80b1c477-2c01-4f81-882f-00f01d263f3d"
+    "image": "/demo/library/import-80b1c477-2c01-4f81-882f-00f01d263f3d.svg",
+    "thumbnail": "/demo/library/import-80b1c477-2c01-4f81-882f-00f01d263f3d.svg",
+    "modeledImage": null
   },
   {
     "id": "import-e2480a17-94a8-42db-ac33-a6829e6e6631",
@@ -516,10 +494,9 @@
       "ap",
       "logo"
     ],
-    "image": "/api/import/library/import-e2480a17-94a8-42db-ac33-a6829e6e6631-garment.png",
-    "thumbnail": "/api/import/library/import-e2480a17-94a8-42db-ac33-a6829e6e6631-garment.png",
-    "modeledImage": null,
-    "importJobId": "e2480a17-94a8-42db-ac33-a6829e6e6631"
+    "image": "/demo/library/import-e2480a17-94a8-42db-ac33-a6829e6e6631.svg",
+    "thumbnail": "/demo/library/import-e2480a17-94a8-42db-ac33-a6829e6e6631.svg",
+    "modeledImage": null
   },
   {
     "id": "import-ff2c43c3-6056-4a79-b127-4a16573e751b",
@@ -539,10 +516,9 @@
       "air jordan",
       "graphic"
     ],
-    "image": "/api/import/library/import-ff2c43c3-6056-4a79-b127-4a16573e751b-garment.png",
-    "thumbnail": "/api/import/library/import-ff2c43c3-6056-4a79-b127-4a16573e751b-garment.png",
-    "modeledImage": null,
-    "importJobId": "ff2c43c3-6056-4a79-b127-4a16573e751b"
+    "image": "/demo/library/import-ff2c43c3-6056-4a79-b127-4a16573e751b.svg",
+    "thumbnail": "/demo/library/import-ff2c43c3-6056-4a79-b127-4a16573e751b.svg",
+    "modeledImage": null
   },
   {
     "id": "import-db7d1ff0-a12d-4cad-9ed8-b974d3270eba",
@@ -562,10 +538,9 @@
       "palace",
       "embroidered"
     ],
-    "image": "/api/import/library/import-db7d1ff0-a12d-4cad-9ed8-b974d3270eba-garment.png",
-    "thumbnail": "/api/import/library/import-db7d1ff0-a12d-4cad-9ed8-b974d3270eba-garment.png",
-    "modeledImage": null,
-    "importJobId": "db7d1ff0-a12d-4cad-9ed8-b974d3270eba"
+    "image": "/demo/library/import-db7d1ff0-a12d-4cad-9ed8-b974d3270eba.svg",
+    "thumbnail": "/demo/library/import-db7d1ff0-a12d-4cad-9ed8-b974d3270eba.svg",
+    "modeledImage": null
   },
   {
     "id": "import-0940e8cf-f9e1-46c7-85a7-3f8eff6769f5",
@@ -584,10 +559,9 @@
       "mock neck",
       "raglan"
     ],
-    "image": "/api/import/library/import-0940e8cf-f9e1-46c7-85a7-3f8eff6769f5-garment.png",
-    "thumbnail": "/api/import/library/import-0940e8cf-f9e1-46c7-85a7-3f8eff6769f5-garment.png",
-    "modeledImage": null,
-    "importJobId": "0940e8cf-f9e1-46c7-85a7-3f8eff6769f5"
+    "image": "/demo/library/import-0940e8cf-f9e1-46c7-85a7-3f8eff6769f5.svg",
+    "thumbnail": "/demo/library/import-0940e8cf-f9e1-46c7-85a7-3f8eff6769f5.svg",
+    "modeledImage": null
   },
   {
     "id": "import-0ed9d113-ec9d-4c16-88e5-877f5835bc50",
@@ -607,10 +581,9 @@
       "laurel wreath",
       "pockets"
     ],
-    "image": "/api/import/library/import-0ed9d113-ec9d-4c16-88e5-877f5835bc50-garment.png",
-    "thumbnail": "/api/import/library/import-0ed9d113-ec9d-4c16-88e5-877f5835bc50-garment.png",
-    "modeledImage": null,
-    "importJobId": "0ed9d113-ec9d-4c16-88e5-877f5835bc50"
+    "image": "/demo/library/import-0ed9d113-ec9d-4c16-88e5-877f5835bc50.svg",
+    "thumbnail": "/demo/library/import-0ed9d113-ec9d-4c16-88e5-877f5835bc50.svg",
+    "modeledImage": null
   },
   {
     "id": "import-39000255-7405-42d4-8a3b-76024ba0b159",
@@ -628,10 +601,9 @@
       "cream",
       "long sleeve"
     ],
-    "image": "/api/import/library/import-39000255-7405-42d4-8a3b-76024ba0b159-garment.png",
-    "thumbnail": "/api/import/library/import-39000255-7405-42d4-8a3b-76024ba0b159-garment.png",
-    "modeledImage": null,
-    "importJobId": "39000255-7405-42d4-8a3b-76024ba0b159"
+    "image": "/demo/library/import-39000255-7405-42d4-8a3b-76024ba0b159.svg",
+    "thumbnail": "/demo/library/import-39000255-7405-42d4-8a3b-76024ba0b159.svg",
+    "modeledImage": null
   },
   {
     "id": "import-c91a6938-14f3-47dc-b410-994abc1de490",
@@ -650,10 +622,9 @@
       "gap",
       "pockets"
     ],
-    "image": "/api/import/library/import-c91a6938-14f3-47dc-b410-994abc1de490-garment.png",
-    "thumbnail": "/api/import/library/import-c91a6938-14f3-47dc-b410-994abc1de490-garment.png",
-    "modeledImage": null,
-    "importJobId": "c91a6938-14f3-47dc-b410-994abc1de490"
+    "image": "/demo/library/import-c91a6938-14f3-47dc-b410-994abc1de490.svg",
+    "thumbnail": "/demo/library/import-c91a6938-14f3-47dc-b410-994abc1de490.svg",
+    "modeledImage": null
   },
   {
     "id": "import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f",
@@ -673,10 +644,9 @@
       "light wash",
       "five pocket"
     ],
-    "image": "/api/import/library/import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f-garment.png",
-    "thumbnail": "/api/import/library/import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f-garment.png",
-    "modeledImage": null,
-    "importJobId": "6d0e2e80-5aa4-469a-928d-6e7646a92e7f"
+    "image": "/demo/library/import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f.svg",
+    "thumbnail": "/demo/library/import-6d0e2e80-5aa4-469a-928d-6e7646a92e7f.svg",
+    "modeledImage": null
   },
   {
     "id": "import-7619a9a4-2b2d-4a76-9491-ccf014cfc45f",
@@ -696,10 +666,9 @@
       "woven",
       "pockets"
     ],
-    "image": "/api/import/library/import-7619a9a4-2b2d-4a76-9491-ccf014cfc45f-garment.png",
-    "thumbnail": "/api/import/library/import-7619a9a4-2b2d-4a76-9491-ccf014cfc45f-garment.png",
-    "modeledImage": null,
-    "importJobId": "7619a9a4-2b2d-4a76-9491-ccf014cfc45f"
+    "image": "/demo/library/import-7619a9a4-2b2d-4a76-9491-ccf014cfc45f.svg",
+    "thumbnail": "/demo/library/import-7619a9a4-2b2d-4a76-9491-ccf014cfc45f.svg",
+    "modeledImage": null
   },
   {
     "id": "import-33a752bc-d229-4fae-9b18-14bcf11c5611",
@@ -719,9 +688,8 @@
       "lace up",
       "yellow welt stitch"
     ],
-    "image": "/api/import/library/import-33a752bc-d229-4fae-9b18-14bcf11c5611-garment.png",
-    "thumbnail": "/api/import/library/import-33a752bc-d229-4fae-9b18-14bcf11c5611-garment.png",
-    "modeledImage": null,
-    "importJobId": "33a752bc-d229-4fae-9b18-14bcf11c5611"
+    "image": "/demo/library/import-33a752bc-d229-4fae-9b18-14bcf11c5611.svg",
+    "thumbnail": "/demo/library/import-33a752bc-d229-4fae-9b18-14bcf11c5611.svg",
+    "modeledImage": null
   }
 ]

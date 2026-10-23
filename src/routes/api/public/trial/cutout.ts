@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { editImage } from "@/lib/ai/provider.server";
 import { buildGarmentPrompt } from "@/lib/ai/prompts";
 import { safeChromaKey, safeDirection } from "@/lib/api/import-support";
-import { claimTrialRun, TRIAL_RUN_CONTEXT } from "@/lib/trial/guard.server";
+import { claimTrialRun, TRIAL_RUN_CONTEXT, withTrialCookie } from "@/lib/trial/guard.server";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -46,7 +46,9 @@ export const Route = createFileRoute("/api/public/trial/cutout")({
         };
 
         const basePrompt = buildGarmentPrompt(metadata, chromaKey);
-        const prompt = direction ? `${basePrompt}\nUser regeneration direction: ${direction}` : basePrompt;
+        const prompt = direction
+          ? `${basePrompt}\nUser regeneration direction: ${direction}`
+          : basePrompt;
 
         try {
           const imageBase64 = await editImage(TRIAL_RUN_CONTEXT, {
@@ -60,9 +62,12 @@ export const Route = createFileRoute("/api/public/trial/cutout")({
             ],
             size: "1024x1024",
           });
-          return json({ imageBase64, chromaKey, mode: "trial", chargedPence: 0, balancePence: null });
+          return withTrialCookie(
+            json({ imageBase64, chromaKey, mode: "trial", chargedPence: 0, balancePence: null }),
+            claim.setCookie,
+          );
         } catch (caught) {
-          return json({ error: (caught as Error).message }, 502);
+          return withTrialCookie(json({ error: (caught as Error).message }, 502), claim.setCookie);
         }
       },
     },

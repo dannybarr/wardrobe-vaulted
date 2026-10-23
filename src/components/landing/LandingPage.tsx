@@ -52,8 +52,6 @@ export function LandingPage({
     timerRef.current = window.setTimeout(() => setStage("complete"), 1250);
   };
 
-
-
   const onDrop = (event: React.DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     processPhoto(event.dataTransfer.files?.[0]);

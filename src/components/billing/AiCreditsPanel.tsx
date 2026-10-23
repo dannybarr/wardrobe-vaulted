@@ -160,8 +160,8 @@ export function AiCreditsPanel() {
             </form>
           )}
           <p className="ai-credits__fine">
-            Bring your own key and OpenAI bills you directly — no service charge from us. Your key is
-            stored encrypted at rest and is never sent to your browser again.
+            Bring your own key and OpenAI bills you directly — no service charge from us. Your key
+            is stored encrypted at rest and is never sent to your browser again.
           </p>
         </>
       )}
